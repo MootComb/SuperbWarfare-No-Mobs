@@ -1,0 +1,63 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release tag (optional)'
+        required: false
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Setup JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v3
+      with:
+        gradle-version: wrapper
+    
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    
+    - name: Build mod
+      run: ./gradlew build --no-daemon
+    
+    - name: Find built JAR files
+      id: find_jars
+      run: |
+        JAR_FILES=$(find build/libs -name "*.jar" ! -name "*-sources.jar" ! -name "*-dev.jar" ! -name "*-shadow.jar" -type f)
+        echo "jar_files=$JAR_FILES" >> $GITHUB_OUTPUT
+        echo "Found JAR files:"
+        echo "$JAR_FILES"
+    
+    - name: Upload artifacts to release
+      uses: softprops/action-gh-release@v1
+      if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+      with:
+        files: ${{ steps.find_jars.outputs.jar_files }}
+        tag_name: ${{ github.event.inputs.release_tag || github.event.release.tag_name }}
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Upload artifacts (for testing)
+      uses: actions/upload-artifact@v4
+      if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
+      with:
+        name: mod-build
+        path: build/libs/*.jar
