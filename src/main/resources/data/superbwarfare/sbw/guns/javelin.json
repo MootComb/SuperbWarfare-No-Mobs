@@ -18,6 +18,7 @@
   "SeekType": "HoldFire",
   "GunType": "DirectLauncher",
   "Projectile": "superbwarfare:javelin_missile",
+  "ProjectileLife": 300,
   "AvailableFireModes": [
     "Dir",
     "Top"

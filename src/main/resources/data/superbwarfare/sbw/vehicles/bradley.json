@@ -261,6 +261,7 @@
       "Name": "weapon.superbwarfare.tow_missile",
       "AmmoType": "superbwarfare:medium_anti_ground_missile",
       "Projectile": "superbwarfare:wire_guide_missile",
+      "ProjectileLife": 400,
       "Magazine": 2,
       "EmptyReloadTime": 200,
       "Damage": 600,

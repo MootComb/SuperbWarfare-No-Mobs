@@ -20,8 +20,4 @@ class Ztz99aEntity(type: EntityType<Ztz99aEntity>, world: Level) : VehicleEntity
         }
         super.vehicleShoot(living, uuid, targetPos)
     }
-
-    override fun getTurretMaxHealth() = 100f
-    override fun getWheelMaxHealth() = 100f
-    override fun getEngineMaxHealth() = 150f
 }

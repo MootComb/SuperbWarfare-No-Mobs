@@ -297,6 +297,7 @@
       "Name": "weapon.superbwarfare.9m113_missile",
       "AmmoType": "superbwarfare:medium_anti_ground_missile",
       "Projectile": "superbwarfare:wire_guide_missile",
+      "ProjectileLife": 400,
       "Magazine": 1,
       "EmptyReloadTime": 120,
       "Damage": 600,

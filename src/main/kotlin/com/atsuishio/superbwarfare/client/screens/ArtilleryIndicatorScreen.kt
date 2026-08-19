@@ -58,6 +58,7 @@ open class ArtilleryIndicatorScreen(private val stack: ItemStack, private val ha
     }
 
     override fun render(pGuiGraphics: GuiGraphics, pMouseX: Int, pMouseY: Int, pPartialTick: Float) {
+        this.renderBlurredBackground(pPartialTick)
         this.renderBg(pGuiGraphics, pMouseX, pMouseY)
         this.renderPositions(pGuiGraphics, pMouseX, pMouseY, pPartialTick)
         super.render(pGuiGraphics, pMouseX, pMouseY, pPartialTick)

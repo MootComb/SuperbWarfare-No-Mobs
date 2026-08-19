@@ -308,6 +308,9 @@ class DefaultVehicleData : IDBasedData<DefaultVehicleData> {
     @SerialName("InertiaRotateRate")
     var inertiaRotateRate: Float = 0f
 
+    @SerialName("PartHealth")
+    var partHealth: PartHealth = PartHealth()
+
     override fun limit() {
         this.maxHealth = max(this.maxHealth, 0f)
         this.repairCooldown = max(this.repairCooldown, 0)

@@ -41,7 +41,7 @@ open class MissilePosInputScreen : Screen(Component.translatable("container.supe
     }
 
     override fun render(pGuiGraphics: GuiGraphics, pMouseX: Int, pMouseY: Int, pPartialTick: Float) {
-        this.renderBackground(pGuiGraphics, pMouseX, pMouseY, pPartialTick)
+        this.renderBlurredBackground(pPartialTick)
 
         val i = (this.width - this.imageWidth) / 2
         val j = (this.height - this.imageHeight) / 2
@@ -50,6 +50,14 @@ open class MissilePosInputScreen : Screen(Component.translatable("container.supe
 
         super.render(pGuiGraphics, pMouseX, pMouseY, pPartialTick)
         this.renderPositions(pGuiGraphics, pMouseX, pMouseY, pPartialTick)
+    }
+
+    override fun renderBackground(
+        guiGraphics: GuiGraphics,
+        mouseX: Int,
+        mouseY: Int,
+        partialTick: Float
+    ) {
     }
 
     protected fun renderPositions(pGuiGraphics: GuiGraphics, pMouseX: Int, pMouseY: Int, pPartialTick: Float) {

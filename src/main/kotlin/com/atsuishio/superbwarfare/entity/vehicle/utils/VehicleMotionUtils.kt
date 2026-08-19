@@ -845,17 +845,20 @@ object VehicleMotionUtils {
                         val speed = Math.min(vehicle.deltaMovement.length(), 0.5).toFloat()
 
                         val particleOption = CustomCloudOption(
-                            color, 70, 1f + 7f * speed + Math.random().toFloat() * 2, Math.random().toFloat() * -0.12f,
-                            cooldown = false,
+                            color,
+                            70,
+                            1f + 7f * speed + Math.random().toFloat() * 2,
+                            Math.random().toFloat() * -0.12f,
+                            false,
                             light = false
                         )
                         vehicle.addRandomParticle(
                             particleOption,
                             p.add(0.0, 0.2, 0.0).subtract(vehicle.deltaMovement.scale(1.5)),
                             speed,
-                            vehicle.level(),
+                            level,
                             1,
-                            vehicle.deltaMovement.scale(60.0)
+                            vehicle.deltaMovement.scale(1.0)
                         )
                     } else {
                         val particleData = BlockParticleOption(ParticleTypes.BLOCK, state)

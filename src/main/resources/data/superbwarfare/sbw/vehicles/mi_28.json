@@ -194,6 +194,7 @@
       "EmptyReloadTime": 240,
       "AmmoType": "superbwarfare:medium_anti_ground_missile",
       "Projectile": "superbwarfare:wire_guide_missile",
+      "ProjectileLife": 400,
       "Name": "weapon.superbwarfare.9m_120_missile",
       "Damage": 650,
       "ExplosionDamage": 80,

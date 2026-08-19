@@ -308,6 +308,7 @@
       "DefaultZoom": 2,
       "CrosshairColor": "0x00ff66",
       "Projectile": "superbwarfare:swarm_drone",
+      "ProjectileLife": 600,
       "RPM": 600,
       "ExplosionDamage": 150,
       "ExplosionRadius": 5,
@@ -474,5 +475,12 @@
     [-2.5, 0.0, -2.266],
     [2.5, 0.0, -3.516],
     [-2.5, 0.0, -3.516]
-  ]
+  ],
+  "PartHealth": {
+    "Turret": 200,
+    "LeftWheel": 200,
+    "RightWheel": 200,
+    "MainEngine": 300,
+    "SubEngine": 300
+  }
 }

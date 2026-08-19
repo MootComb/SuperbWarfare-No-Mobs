@@ -20,7 +20,6 @@ object SBWPonderPlugin : PonderPlugin {
         DpsGeneratorDeployerPonderScene.register(helper)
         DronePonderScene.register(helper)
         JumpPadPonderScene.register(helper)
-        PondererExamplePonderScene.register(helper)
         TargetDeployerPonderScene.register(helper)
         VehicleAssemblingTablePonderScene.register(helper)
     }

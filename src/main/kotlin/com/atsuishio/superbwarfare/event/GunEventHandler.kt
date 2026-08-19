@@ -224,7 +224,12 @@ object GunEventHandler {
     fun handleCooldown(shooter: Entity?, data: GunData, environmentRate: Double? = null) {
         val rate = environmentRate ?: computeEnvironmentRate(shooter, data)
 
-        data.heat.set(max(data.heat.get() - data.get(GunProp.NATURAL_COOLDOWN) * rate, 0.0))
+        val heatO = data.heat.get()
+        val heat = max(heatO - data.get(GunProp.NATURAL_COOLDOWN) * rate, 0.0)
+        if (heat != heatO) {
+            data.nbtVersion.invalidateStructural()
+            data.heat.set(heat)
+        }
 
         if (data.heat.get() < 80 && data.overHeat.get()) {
             data.overHeat.set(false)

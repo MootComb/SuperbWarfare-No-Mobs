@@ -97,7 +97,7 @@ class LoiterConfigScreen(private val vehicle: VehicleEntity) :
     }
 
     override fun render(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
-        this.renderBackground(guiGraphics, mouseX, mouseY, partialTick)
+        this.renderBlurredBackground(partialTick)
 
         val i = (this.width - imageWidth) / 2
         val j = (this.height - imageHeight) / 2
@@ -123,7 +123,7 @@ class LoiterConfigScreen(private val vehicle: VehicleEntity) :
             guiGraphics.blit(TEXTURE, toggleButton.x, toggleButton.y, 177f, 100f, 51, 24, 256, 256)
             guiGraphics.renderTooltip(
                 this.font,
-                Component.translatable(if (active) "screen.superbwarfare.loiter_config.loiter_on" else "screen.superbwarfare.loiter_config.loiter_off"),
+                Component.translatable(if (active) "container.superbwarfare.loiter_config.loiter_on" else "container.superbwarfare.loiter_config.loiter_off"),
                 mouseX, mouseY
             )
         }
@@ -137,6 +137,14 @@ class LoiterConfigScreen(private val vehicle: VehicleEntity) :
                 mouseX, mouseY
             )
         }
+    }
+
+    override fun renderBackground(
+        guiGraphics: GuiGraphics,
+        mouseX: Int,
+        mouseY: Int,
+        partialTick: Float
+    ) {
     }
 
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {

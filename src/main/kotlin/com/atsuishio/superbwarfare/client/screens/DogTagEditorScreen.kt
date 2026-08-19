@@ -70,6 +70,7 @@ open class DogTagEditorScreen(var stack: ItemStack, private val hand: Interactio
     }
 
     override fun render(pGuiGraphics: GuiGraphics, pMouseX: Int, pMouseY: Int, pPartialTick: Float) {
+        this.renderBlurredBackground(pPartialTick)
         this.renderBg(pGuiGraphics)
         super.render(pGuiGraphics, pMouseX, pMouseY, pPartialTick)
         this.name.render(pGuiGraphics, pMouseX, pMouseY, pPartialTick)

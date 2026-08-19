@@ -1417,7 +1417,7 @@
   "superbwarfare.ponder.container_intro.text_4": "If there are obstacles around it, the container cannot open",
   "superbwarfare.ponder.container_intro.text_5": "Sneak + right-click a vehicle with a crowbar to return it to its container",
   "superbwarfare.ponder.container_type63.header": "Type-63 107mm MLRS Introduction",
-  "superbwarfare.ponder.container_type63.text_1": "This is the Type-63 107mm multiple rocket launcher",
+  "superbwarfare.ponder.container_type63.text_1": "This is the Type-63 107mm multiple rocket launcher. There may be a conflict between certain mod and Ponder if you can't see it",
   "superbwarfare.ponder.container_type63.text_2": "There is an adjustment dial on top of the tire, roughly at this position",
   "superbwarfare.ponder.container_type63.text_3": "Hold right-click and rotate the crank clockwise to raise the barrel; sneak + right-click does the opposite",
   "superbwarfare.ponder.container_type63.text_4": "There is a small dial protruding from the right side of the tire, roughly at this position",

@@ -1005,10 +1005,10 @@ open class VehicleEntity(pEntityType: EntityType<*>, pLevel: Level) : Entity(pEn
             define(MOUSE_SPEED_Y, 0f)
 
             define(TURRET_HEALTH, getTurretMaxHealth())
-            define(L_WHEEL_HEALTH, getWheelMaxHealth())
-            define(R_WHEEL_HEALTH, getWheelMaxHealth())
-            define(MAIN_ENGINE_HEALTH, getEngineMaxHealth())
-            define(SUB_ENGINE_HEALTH, getEngineMaxHealth())
+            define(L_WHEEL_HEALTH, getLeftWheelMaxHealth())
+            define(R_WHEEL_HEALTH, getRightWheelMaxHealth())
+            define(MAIN_ENGINE_HEALTH, getMainEngineMaxHealth())
+            define(SUB_ENGINE_HEALTH, getSubEngineMaxHealth())
 
             define(TURRET_DAMAGED, false)
             define(L_WHEEL_DAMAGED, false)
@@ -1603,11 +1603,21 @@ open class VehicleEntity(pEntityType: EntityType<*>, pLevel: Level) : Entity(pEn
             this.getMaxHealth()
         }
 
-        turretHealth = compound.getFloat("TurretHealth")
-        leftWheelHealth = compound.getFloat("LeftWheelHealth")
-        rightWheelHealth = compound.getFloat("RightWheelHealth")
-        mainEngineHealth = compound.getFloat("MainEngineHealth")
-        subEngineHealth = compound.getFloat("SubEngineHealth")
+        turretHealth = if (compound.contains("TurretHealth")) {
+            compound.getFloat("TurretHealth")
+        } else this.getTurretMaxHealth()
+        leftWheelHealth = if (compound.contains("LeftWheelHealth")) {
+            compound.getFloat("LeftWheelHealth")
+        } else this.getLeftWheelMaxHealth()
+        rightWheelHealth = if (compound.contains("RightWheelHealth")) {
+            compound.getFloat("RightWheelHealth")
+        } else this.getRightWheelMaxHealth()
+        mainEngineHealth = if (compound.contains("MainEngineHealth")) {
+            compound.getFloat("MainEngineHealth")
+        } else this.getMainEngineMaxHealth()
+        subEngineHealth = if (compound.contains("SubEngineHealth")) {
+            compound.getFloat("SubEngineHealth")
+        } else this.getSubEngineMaxHealth()
 
         turretDamaged = compound.getBoolean("TurretDamaged")
         leftWheelDamaged = compound.getBoolean("LeftWheelDamaged")
@@ -2246,8 +2256,22 @@ open class VehicleEntity(pEntityType: EntityType<*>, pLevel: Level) : Entity(pEn
 
     open fun getMaxHealth() = computed().maxHealth
     open fun getDecoyReloadTime() = computed().decoyReloadTime
-    open fun getTurretMaxHealth() = 50f
+    open fun getTurretMaxHealth() = computed().partHealth.turret
+    open fun getLeftWheelMaxHealth() = computed().partHealth.leftWheel
+    open fun getRightWheelMaxHealth() = computed().partHealth.rightWheel
+    open fun getMainEngineMaxHealth() = computed().partHealth.mainEngine
+    open fun getSubEngineMaxHealth() = computed().partHealth.subEngine
+
+    @Deprecated(
+        "Use vehicle data or getLeft/RightWheelMaxHealth() instead",
+        replaceWith = ReplaceWith("computed().partHealth.leftWheel")
+    )
     open fun getWheelMaxHealth() = 50f
+
+    @Deprecated(
+        "Use vehicle data or getMain/SubEngineMaxHealth() instead",
+        replaceWith = ReplaceWith("computed().partHealth.mainEngine")
+    )
     open fun getEngineMaxHealth() = 50f
 
     override fun lavaHurt() {

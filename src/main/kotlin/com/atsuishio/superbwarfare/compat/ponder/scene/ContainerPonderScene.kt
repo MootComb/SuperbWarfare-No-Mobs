@@ -158,7 +158,7 @@ object ContainerPonderScene {
         scene.addKeyframe()
         GeneratedPonderSupport.showText(
             scene,
-            "This is the Type-63 107mm multiple rocket launcher",
+            "This is the Type-63 107mm multiple rocket launcher. There may be a conflict between certain mod and Ponder if you can't see it",
             Vec3(3.5, 2.0, 3.5),
             60,
             null,

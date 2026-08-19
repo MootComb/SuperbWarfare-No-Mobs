@@ -161,25 +161,25 @@ object VehicleEffectUtils {
 
         if (vehicle.leftWheelHealth <= 0) {
             vehicle.leftWheelDamaged = true
-        } else if (vehicle.leftWheelHealth > 0.95 * vehicle.getWheelMaxHealth()) {
+        } else if (vehicle.leftWheelHealth > 0.95 * vehicle.getLeftWheelMaxHealth()) {
             vehicle.leftWheelDamaged = false
         }
 
         if (vehicle.rightWheelHealth <= 0) {
             vehicle.rightWheelDamaged = true
-        } else if (vehicle.rightWheelHealth > 0.95 * vehicle.getWheelMaxHealth()) {
+        } else if (vehicle.rightWheelHealth > 0.95 * vehicle.getRightWheelMaxHealth()) {
             vehicle.rightWheelDamaged = false
         }
 
         if (vehicle.mainEngineHealth <= 0) {
             vehicle.mainEngineDamaged = true
-        } else if (vehicle.mainEngineHealth > 0.95 * vehicle.getEngineMaxHealth()) {
+        } else if (vehicle.mainEngineHealth > 0.95 * vehicle.getMainEngineMaxHealth()) {
             vehicle.mainEngineDamaged = false
         }
 
         if (vehicle.subEngineHealth <= 0) {
             vehicle.subEngineDamaged = true
-        } else if (vehicle.subEngineHealth > 0.95 * vehicle.getEngineMaxHealth()) {
+        } else if (vehicle.subEngineHealth > 0.95 * vehicle.getSubEngineMaxHealth()) {
             vehicle.subEngineDamaged = false
         }
 
@@ -189,20 +189,20 @@ object VehicleEffectUtils {
                 vehicle.getTurretMaxHealth()
             )
             vehicle.leftWheelHealth = kotlin.math.min(
-                vehicle.leftWheelHealth + 0.0025f * vehicle.getWheelMaxHealth(),
-                vehicle.getWheelMaxHealth()
+                vehicle.leftWheelHealth + 0.0025f * vehicle.getLeftWheelMaxHealth(),
+                vehicle.getLeftWheelMaxHealth()
             )
             vehicle.rightWheelHealth = kotlin.math.min(
-                vehicle.rightWheelHealth + 0.0025f * vehicle.getWheelMaxHealth(),
-                vehicle.getWheelMaxHealth()
+                vehicle.rightWheelHealth + 0.0025f * vehicle.getRightWheelMaxHealth(),
+                vehicle.getRightWheelMaxHealth()
             )
             vehicle.mainEngineHealth = kotlin.math.min(
-                vehicle.mainEngineHealth + 0.0025f * vehicle.getEngineMaxHealth(),
-                vehicle.getEngineMaxHealth()
+                vehicle.mainEngineHealth + 0.0025f * vehicle.getMainEngineMaxHealth(),
+                vehicle.getMainEngineMaxHealth()
             )
             vehicle.subEngineHealth = kotlin.math.min(
-                vehicle.subEngineHealth + 0.0025f * vehicle.getEngineMaxHealth(),
-                vehicle.getEngineMaxHealth()
+                vehicle.subEngineHealth + 0.0025f * vehicle.getSubEngineMaxHealth(),
+                vehicle.getSubEngineMaxHealth()
             )
         }
     }

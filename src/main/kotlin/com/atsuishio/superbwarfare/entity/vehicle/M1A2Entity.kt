@@ -19,12 +19,6 @@ class M1A2Entity(type: EntityType<M1A2Entity>, world: Level) : VehicleEntity(typ
         super.vehicleShoot(living, uuid, targetPos)
     }
 
-    override fun getTurretMaxHealth() = 100f
-
-    override fun getWheelMaxHealth() = 100f
-
-    override fun getEngineMaxHealth() = 150f
-
     override val customTurretMinPitch: Float
         get() = if (Mth.abs(turretYRot) > 135) ((Mth.abs(turretYRot) - 135) * 0.4f).coerceAtMost(7f) else 0f
 }

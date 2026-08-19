@@ -17,10 +17,4 @@ class T90aEntity(type: EntityType<T90aEntity>, world: Level) : VehicleEntity(typ
         }
         super.vehicleShoot(living, uuid, targetPos)
     }
-
-    override fun getTurretMaxHealth() = 100f
-
-    override fun getWheelMaxHealth() = 100f
-
-    override fun getEngineMaxHealth() = 150f
 }
