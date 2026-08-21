@@ -27,6 +27,7 @@ import com.atsuishio.superbwarfare.item.gun.shotgun.M870Item
 import com.atsuishio.superbwarfare.item.gun.smg.Mp5Item
 import com.atsuishio.superbwarfare.item.gun.smg.VectorItem
 import com.atsuishio.superbwarfare.item.gun.sniper.*
+import com.atsuishio.superbwarfare.item.gun.special.BeastGunTestItem
 import com.atsuishio.superbwarfare.item.gun.special.BocekItem
 import com.atsuishio.superbwarfare.item.gun.special.RepairToolItem
 import com.atsuishio.superbwarfare.item.gun.special.TaserItem
@@ -109,6 +110,8 @@ object ModItems {
     @JvmField val IGLA_9K38 = registerGun("igla_9k38") { IglaItem() }
     @JvmField val BOCEK = registerGun("bocek") { BocekItem() }
     @JvmField val SUPER_STAR_SHOOTER = registerGun("super_star_shooter") { SuperStarShooterItem() }
+
+    @JvmField val BEAST_GUN_TEST = registerGun("beast_gun_test") { BeastGunTestItem() }
 
     @JvmField val VEHICLE_GUN = registerGun("vehicle_gun") { VehicleGunItem() }
     @JvmField val EMPTY_GUN = registerGun("empty_gun") { EmptyGunItem() }
@@ -284,7 +287,10 @@ object ModItems {
     @JvmField val LEAD_INGOT = registerItem("lead_ingot")
     @JvmField val SILVER_INGOT = registerItem("silver_ingot")
     @JvmField val TUNGSTEN_INGOT = registerItem("tungsten_ingot")
+    @JvmField val URANIUM_INGOT = registerItem("uranium_ingot")
     @JvmField val CEMENTED_CARBIDE_INGOT = registerItem("cemented_carbide_ingot")
+    @JvmField val SULFUR = registerItem("sulfur")
+    @JvmField val NITER = registerItem("niter")
     @JvmField val HIGH_ENERGY_EXPLOSIVES = registerItem("high_energy_explosives")
     @JvmField val GRAIN = registerItem("grain")
     @JvmField val IRON_POWDER = registerItem("iron_powder")
@@ -295,6 +301,7 @@ object ModItems {
     @JvmField val GALENA = registerItem("galena")
     @JvmField val SCHEELITE = registerItem("scheelite")
     @JvmField val RAW_SILVER = registerItem("raw_silver")
+    @JvmField val RAW_URANIUM = registerItem("raw_uranium")
     @JvmField val SLIME_COVERED_LEATHER = registerItem("slime_covered_leather")
     @JvmField val DOG_TAG = registerItem("dog_tag") { DogTagItem() }
     @JvmField val IFF = registerItem("iff") { IffItem() }
@@ -422,9 +429,16 @@ object ModItems {
     @JvmField val DEEPSLATE_SCHEELITE_ORE = registerBlock(ModBlocks.DEEPSLATE_SCHEELITE_ORE)
     @JvmField val SILVER_ORE = registerBlock(ModBlocks.SILVER_ORE)
     @JvmField val DEEPSLATE_SILVER_ORE = registerBlock(ModBlocks.DEEPSLATE_SILVER_ORE)
+    @JvmField val URANIUM_ORE = registerBlock(ModBlocks.URANIUM_ORE)
+    @JvmField val DEEPSLATE_URANIUM_ORE = registerBlock(ModBlocks.DEEPSLATE_URANIUM_ORE)
+    @JvmField val SULFUR_ORE = registerBlock(ModBlocks.SULFUR_ORE)
+    @JvmField val DEEPSLATE_SULFUR_ORE = registerBlock(ModBlocks.DEEPSLATE_SULFUR_ORE)
+    @JvmField val NITER_ORE = registerBlock(ModBlocks.NITER_ORE)
+    @JvmField val DEEPSLATE_NITER_ORE = registerBlock(ModBlocks.DEEPSLATE_NITER_ORE)
     @JvmField val RAW_GALENA_BLOCK = registerBlock(ModBlocks.RAW_GALENA_BLOCK)
     @JvmField val RAW_SCHEELITE_BLOCK = registerBlock(ModBlocks.RAW_SCHEELITE_BLOCK)
     @JvmField val RAW_SILVER_BLOCK = registerBlock(ModBlocks.RAW_SILVER_BLOCK)
+    @JvmField val RAW_URANIUM_BLOCK = registerBlock(ModBlocks.RAW_URANIUM_BLOCK)
     @JvmField val JUMP_PAD = registerBlock(ModBlocks.JUMP_PAD)
     @JvmField val SANDBAG = registerBlock(ModBlocks.SANDBAG)
     @JvmField val BARBED_WIRE = registerBlock(ModBlocks.BARBED_WIRE)
@@ -436,7 +450,10 @@ object ModItems {
     @JvmField val STEEL_BLOCK = registerBlock(ModBlocks.STEEL_BLOCK)
     @JvmField val TUNGSTEN_BLOCK = registerBlock(ModBlocks.TUNGSTEN_BLOCK)
     @JvmField val SILVER_BLOCK = registerBlock(ModBlocks.SILVER_BLOCK)
+    @JvmField val URANIUM_BLOCK = registerBlock(ModBlocks.URANIUM_BLOCK)
     @JvmField val CEMENTED_CARBIDE_BLOCK = registerBlock(ModBlocks.CEMENTED_CARBIDE_BLOCK)
+    @JvmField val SULFUR_BLOCK = registerBlock(ModBlocks.SULFUR_BLOCK)
+    @JvmField val NITER_BLOCK = registerBlock(ModBlocks.NITER_BLOCK)
     @JvmField val FUMO_25 = registerBlock(ModBlocks.FUMO_25)
     @JvmField val VEHICLE_DEPLOYER = registerBlock(ModBlocks.VEHICLE_DEPLOYER.id.path) {
         BlockItem(ModBlocks.VEHICLE_DEPLOYER.get(), Properties().stacksTo(1).rarity(Rarity.EPIC))

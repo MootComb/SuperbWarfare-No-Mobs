@@ -94,10 +94,10 @@ class SnapshotWarningScreen(val lastScreen: Screen) : Screen(
 
         @SubscribeEvent(priority = EventPriority.HIGH)
         fun onTitleScreenOpen(event: ScreenEvent.Init.Post) {
-            if (!FMLEnvironment.production) return
-            if (firstTimeStart || event.screen !is TitleScreen) return
-            val version = getVersion() ?: return
-            if (!version.toString().lowercase().contains("snapshot")) return
+            if (!FMLEnvironment.production || firstTimeStart || event.screen !is TitleScreen) return
+
+            val version = getVersion()?.toString()?.lowercase() ?: return
+            if ("snapshot" !in version && "dev" !in version) return
 
             mc.setScreen(SnapshotWarningScreen(event.screen))
             firstTimeStart = true

@@ -15,19 +15,27 @@ object ModBlocks {
     val REGISTRY: DeferredRegister<Block> = DeferredRegister.create(BuiltInRegistries.BLOCK, Mod.MODID)
 
     // @formatter:off
-    @JvmField val SANDBAG = registerBlock("sandbag") { Block(BlockBehaviour.Properties.of().instrument(NoteBlockInstrument.SNARE).sound(SoundType.SAND).strength(10f, 20f)) }
-    @JvmField val BARBED_WIRE = registerBlock("barbed_wire") { BarbedWireBlock() }
-    @JvmField val JUMP_PAD = registerBlock("jump_pad") { JumpPadBlock() }
     @JvmField val GALENA_ORE = registerBlock("galena_ore") { Block(BlockBehaviour.Properties.of().instrument(NoteBlockInstrument.BASEDRUM).sound(SoundType.STONE).strength(3f, 5f).requiresCorrectToolForDrops()) }
     @JvmField val DEEPSLATE_GALENA_ORE = registerBlock("deepslate_galena_ore") { Block(BlockBehaviour.Properties.of().instrument(NoteBlockInstrument.BASEDRUM).sound(SoundType.STONE).strength(3f, 8f).requiresCorrectToolForDrops()) }
     @JvmField val SCHEELITE_ORE = registerBlock("scheelite_ore") { Block(BlockBehaviour.Properties.of().instrument(NoteBlockInstrument.BASEDRUM).sound(SoundType.STONE).strength(3f, 5f).requiresCorrectToolForDrops()) }
     @JvmField val DEEPSLATE_SCHEELITE_ORE = registerBlock("deepslate_scheelite_ore") { Block(BlockBehaviour.Properties.of().instrument(NoteBlockInstrument.BASEDRUM).sound(SoundType.STONE).strength(3f, 8f).requiresCorrectToolForDrops()) }
     @JvmField val SILVER_ORE = registerBlock("silver_ore") { Block(BlockBehaviour.Properties.of().instrument(NoteBlockInstrument.BASEDRUM).sound(SoundType.STONE).strength(3f, 5f).requiresCorrectToolForDrops()) }
     @JvmField val DEEPSLATE_SILVER_ORE = registerBlock("deepslate_silver_ore") { Block(BlockBehaviour.Properties.of().instrument(NoteBlockInstrument.BASEDRUM).sound(SoundType.STONE).strength(3f, 8f).requiresCorrectToolForDrops()) }
+    @JvmField val URANIUM_ORE = registerBlock("uranium_ore") { Block(BlockBehaviour.Properties.of().instrument(NoteBlockInstrument.BASEDRUM).sound(SoundType.STONE).strength(3f, 5f).requiresCorrectToolForDrops()) }
+    @JvmField val DEEPSLATE_URANIUM_ORE = registerBlock("deepslate_uranium_ore") { Block(BlockBehaviour.Properties.of().instrument(NoteBlockInstrument.BASEDRUM).sound(SoundType.STONE).strength(3f, 8f).requiresCorrectToolForDrops()) }
+    @JvmField val SULFUR_ORE = registerBlock("sulfur_ore") { Block(BlockBehaviour.Properties.of().instrument(NoteBlockInstrument.BASEDRUM).sound(SoundType.STONE).strength(3f, 5f).requiresCorrectToolForDrops()) }
+    @JvmField val DEEPSLATE_SULFUR_ORE = registerBlock("deepslate_sulfur_ore") { Block(BlockBehaviour.Properties.of().instrument(NoteBlockInstrument.BASEDRUM).sound(SoundType.STONE).strength(3f, 8f).requiresCorrectToolForDrops()) }
+    @JvmField val NITER_ORE = registerBlock("niter_ore") { Block(BlockBehaviour.Properties.of().instrument(NoteBlockInstrument.BASEDRUM).sound(SoundType.STONE).strength(3f, 5f).requiresCorrectToolForDrops()) }
+    @JvmField val DEEPSLATE_NITER_ORE = registerBlock("deepslate_niter_ore") { Block(BlockBehaviour.Properties.of().instrument(NoteBlockInstrument.BASEDRUM).sound(SoundType.STONE).strength(3f, 8f).requiresCorrectToolForDrops()) }
+
     @JvmField val RAW_GALENA_BLOCK = registerBlock("raw_galena_block") { Block(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_CYAN).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(5.0F, 6.0F)) }
     @JvmField val RAW_SCHEELITE_BLOCK = registerBlock("raw_scheelite_block") { Block(BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_YELLOW).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(5.0F, 6.0F)) }
     @JvmField val RAW_SILVER_BLOCK = registerBlock("raw_silver_block") { Block(BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_WHITE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(5.0F, 6.0F)) }
+    @JvmField val RAW_URANIUM_BLOCK = registerBlock("raw_uranium_block") { Block(BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_GREEN).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(5.0F, 6.0F)) }
 
+    @JvmField val SANDBAG = registerBlock("sandbag") { Block(BlockBehaviour.Properties.of().instrument(NoteBlockInstrument.SNARE).sound(SoundType.SAND).strength(10f, 20f)) }
+    @JvmField val BARBED_WIRE = registerBlock("barbed_wire") { BarbedWireBlock() }
+    @JvmField val JUMP_PAD = registerBlock("jump_pad") { JumpPadBlock() }
     @JvmField val DRAGON_TEETH = registerBlock("dragon_teeth") { DragonTeethBlock() }
     @JvmField val REFORGING_TABLE = registerBlock("reforging_table") { ReforgingTableBlock() }
     @JvmField val LEAD_BLOCK = registerBlock("lead_block") { Block(BlockBehaviour.Properties.of().instrument(NoteBlockInstrument.BASEDRUM).sound(SoundType.METAL).strength(5f, 6f).requiresCorrectToolForDrops()) }
@@ -35,6 +43,9 @@ object ModBlocks {
     @JvmField val TUNGSTEN_BLOCK = registerBlock("tungsten_block") { Block(BlockBehaviour.Properties.of().instrument(NoteBlockInstrument.BASEDRUM).sound(SoundType.METAL).strength(5f, 6f).requiresCorrectToolForDrops()) }
     @JvmField val SILVER_BLOCK = registerBlock("silver_block") { Block(BlockBehaviour.Properties.of().instrument(NoteBlockInstrument.BASEDRUM).sound(SoundType.METAL).strength(5f, 6f).requiresCorrectToolForDrops()) }
     @JvmField val CEMENTED_CARBIDE_BLOCK = registerBlock("cemented_carbide_block") { Block(BlockBehaviour.Properties.of().instrument(NoteBlockInstrument.BASEDRUM).sound(SoundType.METAL).strength(5f, 6f).requiresCorrectToolForDrops()) }
+    @JvmField val URANIUM_BLOCK = registerBlock("uranium_block") { Block(BlockBehaviour.Properties.of().instrument(NoteBlockInstrument.BASEDRUM).sound(SoundType.METAL).strength(5f, 6f).requiresCorrectToolForDrops()) }
+    @JvmField val SULFUR_BLOCK = registerBlock("sulfur_block") { Block(BlockBehaviour.Properties.of().instrument(NoteBlockInstrument.BASEDRUM).sound(SoundType.STONE).strength(3f, 3f).requiresCorrectToolForDrops()) }
+    @JvmField val NITER_BLOCK = registerBlock("niter_block") { Block(BlockBehaviour.Properties.of().instrument(NoteBlockInstrument.BASEDRUM).sound(SoundType.STONE).strength(3f, 3f).requiresCorrectToolForDrops()) }
     @JvmField val CONTAINER = registerBlock("container") { ContainerBlock() }
     @JvmField val BIOGAS_GENERATOR = registerBlock("biogas_generator") { BiogasGeneratorBlock() }
     @JvmField val CHARGING_STATION = registerBlock("charging_station") { ChargingStationBlock() }

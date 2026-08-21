@@ -69,6 +69,8 @@ class ModItemModelProvider(output: PackOutput, existingFileHelper: ExistingFileH
         gunItem(ModItems.QL_1031)
         gunItem(ModItems.SUPER_STAR_SHOOTER)
 
+        gunItem(ModItems.BEAST_GUN_TEST)
+
         simpleItem(ModItems.VEHICLE_GUN)
         withExistingParent(ModItems.EMPTY_GUN.id.path, ResourceLocation.withDefaultNamespace("item/generated"))
             .texture("layer0", loc("item/vehicle_gun"))
@@ -117,6 +119,8 @@ class ModItemModelProvider(output: PackOutput, existingFileHelper: ExistingFileH
         simpleItem(ModItems.LEAD_INGOT)
         simpleItem(ModItems.TUNGSTEN_INGOT)
         simpleItem(ModItems.CEMENTED_CARBIDE_INGOT)
+        simpleItem(ModItems.URANIUM_INGOT)
+        simpleItem(ModItems.RAW_URANIUM)
         simpleItem(ModItems.HIGH_ENERGY_EXPLOSIVES)
         simpleItem(ModItems.GRAIN)
         simpleItem(ModItems.IRON_POWDER)
@@ -126,6 +130,8 @@ class ModItemModelProvider(output: PackOutput, existingFileHelper: ExistingFileH
         simpleItem(ModItems.RAW_CEMENTED_CARBIDE_POWDER)
         simpleItem(ModItems.GALENA)
         simpleItem(ModItems.SCHEELITE)
+        simpleItem(ModItems.SULFUR)
+        simpleItem(ModItems.NITER)
         simpleItem(ModItems.DOG_TAG)
         simpleItem(ModItems.IFF)
         simpleItem(ModItems.TRANSCRIPT)

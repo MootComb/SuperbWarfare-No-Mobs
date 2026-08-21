@@ -2,6 +2,9 @@
   "values": [
     "#c:ores/lead",
     "#c:ores/tungsten",
-    "#c:ores/silver"
+    "#c:ores/silver",
+    "#c:ores/uranium",
+    "#c:ores/sulfur",
+    "#c:ores/niter"
   ]
 }

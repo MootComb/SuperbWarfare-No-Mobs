@@ -36,6 +36,17 @@ object ModEnumExtensions {
         get() = SUPERBWARFARE_SUPERB.getValue()
 
     @JvmField
+    val SUPERBWARFARE_BEAST: EnumProxy<Rarity> = EnumProxy(
+        Rarity::class.java,
+        -1,
+        "superbwarfare:beast",
+        UnaryOperator { s: Style -> s.withColor(0xa56855) }
+    )
+
+    val beast: Rarity
+        get() = SUPERBWARFARE_BEAST.getValue()
+
+    @JvmField
     val SUPERBWARFARE_VIRTUAL: EnumProxy<Rarity> = EnumProxy(
         Rarity::class.java,
         -1,

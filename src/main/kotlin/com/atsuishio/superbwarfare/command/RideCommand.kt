@@ -16,13 +16,13 @@ val RIDE_COMMAND = buildCommand("ride") {
         entityArg("vehicle") vehicle@{
             execute {
                 val res = ride(getArg(this@passenger), getArg(this@vehicle))
-                if (res.success) success(res.index) { res.message } else fail(result = res.index) { res.message }
+                if (res.success) success(result = res.index) { res.message } else fail(result = res.index) { res.message }
             }
 
             intArg("seatIndex", min = 1) {
                 execute {
                     val res = ride(getArg(this@passenger), getArg(this@vehicle), intArg)
-                    if (res.success) success(res.index) { res.message } else fail(result = res.index) { res.message }
+                    if (res.success) success(result = res.index) { res.message } else fail(result = res.index) { res.message }
                 }
 
                 boolArg("forceRide") {
@@ -33,7 +33,7 @@ val RIDE_COMMAND = buildCommand("ride") {
                             intArg,
                             boolArg
                         )
-                        if (res.success) success(res.index) { res.message } else fail(result = res.index) { res.message }
+                        if (res.success) success(result = res.index) { res.message } else fail(result = res.index) { res.message }
                     }
                 }
             }

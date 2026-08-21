@@ -24,26 +24,33 @@ class ModItemTagProvider(
     existingFileHelper: ExistingFileHelper
 ) : ItemTagsProvider(packOutput, providerCompletableFuture, tagLookupCompletableFuture, Mod.MODID, existingFileHelper) {
     override fun addTags(pProvider: HolderLookup.Provider) {
-        this.tag(Tags.Items.DUSTS)
-            .addTags(
-                commonItemTag("dusts/coal_coke"),
-                commonItemTag("dusts/coal"),
-                commonItemTag("dusts/iron"),
-                commonItemTag("dusts/tungsten"),
-                commonItemTag("dusts/scheelite")
-            )
+        this.tag(Tags.Items.DUSTS).addTags(
+            commonItemTag("dusts/coal_coke"),
+            commonItemTag("dusts/coal"),
+            commonItemTag("dusts/iron"),
+            commonItemTag("dusts/tungsten"),
+            commonItemTag("dusts/scheelite"),
+            commonItemTag("dusts/sulfur")
+        )
         this.tag(commonItemTag("dusts/coal_coke")).add(ModItems.COAL_POWDER.get())
         this.tag(commonItemTag("dusts/coal")).add(ModItems.COAL_POWDER.get())
         this.tag(commonItemTag("dusts/iron")).add(ModItems.IRON_POWDER.get())
         this.tag(commonItemTag("dusts/tungsten")).add(ModItems.TUNGSTEN_POWDER.get())
         this.tag(commonItemTag("dusts/scheelite")).add(ModItems.TUNGSTEN_POWDER.get())
+        this.tag(commonItemTag("dusts/sulfur")).add(ModItems.SULFUR.get())
+
+        this.tag(Tags.Items.GEMS).addTags(
+            commonItemTag("gems/niter")
+        )
+        this.tag(commonItemTag("gems/niter")).add(ModItems.NITER.get())
 
         this.tag(Tags.Items.INGOTS).addTags(
             commonItemTag("ingots/lead"),
             commonItemTag("ingots/steel"),
             commonItemTag("ingots/tungsten"),
             commonItemTag("ingots/silver"),
-            commonItemTag("ingots/scheelite")
+            commonItemTag("ingots/scheelite"),
+            commonItemTag("ingots/uranium")
         )
         this.tag(commonItemTag("ingots/lead")).add(ModItems.LEAD_INGOT.get())
         this.tag(commonItemTag("ingots/steel")).add(ModItems.STEEL_INGOT.get())
@@ -51,6 +58,7 @@ class ModItemTagProvider(
         // 这个tag仅用于其他mod配方兼容，自己家配方不用这个
         this.tag(commonItemTag("ingots/scheelite")).add(ModItems.TUNGSTEN_INGOT.get())
         this.tag(commonItemTag("ingots/silver")).add(ModItems.SILVER_INGOT.get())
+        this.tag(commonItemTag("ingots/uranium")).add(ModItems.URANIUM_INGOT.get())
 
         this.tag(ModTags.Items.INGOTS_CEMENTED_CARBIDE).add(ModItems.CEMENTED_CARBIDE_INGOT.get())
 
@@ -59,21 +67,29 @@ class ModItemTagProvider(
             commonItemTag("storage_blocks/steel"),
             commonItemTag("storage_blocks/tungsten"),
             commonItemTag("storage_blocks/silver"),
+            commonItemTag("storage_blocks/uranium"),
+            commonItemTag("storage_blocks/sulfur"),
+            commonItemTag("storage_blocks/niter"),
             commonItemTag("storage_blocks/raw_lead"),
             commonItemTag("storage_blocks/raw_tungsten"),
             commonItemTag("storage_blocks/raw_silver"),
-            commonItemTag("storage_blocks/raw_scheelite")
+            commonItemTag("storage_blocks/raw_scheelite"),
+            commonItemTag("storage_blocks/raw_uranium"),
         )
         this.tag(commonItemTag("storage_blocks/lead")).add(ModItems.LEAD_BLOCK.get())
         this.tag(commonItemTag("storage_blocks/steel")).add(ModItems.STEEL_BLOCK.get())
         this.tag(commonItemTag("storage_blocks/tungsten")).add(ModItems.TUNGSTEN_BLOCK.get())
         this.tag(commonItemTag("storage_blocks/scheelite")).add(ModItems.TUNGSTEN_BLOCK.get())
         this.tag(commonItemTag("storage_blocks/silver")).add(ModItems.SILVER_BLOCK.get())
+        this.tag(commonItemTag("storage_blocks/uranium")).add(ModItems.URANIUM_BLOCK.get())
+        this.tag(commonItemTag("storage_blocks/sulfur")).add(ModItems.SULFUR_BLOCK.get())
+        this.tag(commonItemTag("storage_blocks/niter")).add(ModItems.NITER_BLOCK.get())
 
         this.tag(commonItemTag("storage_blocks/raw_lead")).add(ModItems.RAW_GALENA_BLOCK.get())
         this.tag(commonItemTag("storage_blocks/raw_tungsten")).add(ModItems.RAW_SCHEELITE_BLOCK.get())
         this.tag(commonItemTag("storage_blocks/raw_scheelite")).add(ModItems.RAW_SCHEELITE_BLOCK.get())
         this.tag(commonItemTag("storage_blocks/raw_silver")).add(ModItems.RAW_SILVER_BLOCK.get())
+        this.tag(commonItemTag("storage_blocks/raw_uranium")).add(ModItems.RAW_URANIUM_BLOCK.get())
 
         this.tag(ModTags.Items.STORAGE_BLOCK_CEMENTED_CARBIDE).add(ModItems.CEMENTED_CARBIDE_BLOCK.get())
 
@@ -82,7 +98,10 @@ class ModItemTagProvider(
                 commonItemTag("ores/lead"),
                 commonItemTag("ores/tungsten"),
                 commonItemTag("ores/scheelite"),
-                commonItemTag("ores/silver")
+                commonItemTag("ores/silver"),
+                commonItemTag("ores/uranium"),
+                commonItemTag("ores/sulfur"),
+                commonItemTag("ores/niter")
             )
         this.tag(commonItemTag("ores/lead")).add(ModItems.GALENA_ORE.get(), ModItems.DEEPSLATE_GALENA_ORE.get())
         this.tag(commonItemTag("ores/tungsten"))
@@ -90,33 +109,51 @@ class ModItemTagProvider(
         this.tag(commonItemTag("ores/scheelite"))
             .add(ModItems.SCHEELITE_ORE.get(), ModItems.DEEPSLATE_SCHEELITE_ORE.get())
         this.tag(commonItemTag("ores/silver")).add(ModItems.SILVER_ORE.get(), ModItems.DEEPSLATE_SILVER_ORE.get())
+        this.tag(commonItemTag("ores/uranium")).add(ModItems.URANIUM_ORE.get(), ModItems.DEEPSLATE_URANIUM_ORE.get())
+        this.tag(commonItemTag("ores/sulfur")).add(ModItems.SULFUR_ORE.get(), ModItems.DEEPSLATE_SULFUR_ORE.get())
+        this.tag(commonItemTag("ores/niter")).add(ModItems.NITER_ORE.get(), ModItems.DEEPSLATE_NITER_ORE.get())
 
         this.tag(Tags.Items.RAW_MATERIALS).addTags(
             commonItemTag("raw_materials/lead"),
             commonItemTag("raw_materials/tungsten"),
             commonItemTag("raw_materials/scheelite"),
-            commonItemTag("raw_materials/silver")
+            commonItemTag("raw_materials/silver"),
+            commonItemTag("raw_materials/uranium"),
         )
         this.tag(commonItemTag("raw_materials/lead")).add(ModItems.GALENA.get())
         this.tag(commonItemTag("raw_materials/tungsten")).add(ModItems.SCHEELITE.get())
         this.tag(commonItemTag("raw_materials/scheelite")).add(ModItems.SCHEELITE.get())
         this.tag(commonItemTag("raw_materials/silver")).add(ModItems.RAW_SILVER.get())
+        this.tag(commonItemTag("raw_materials/uranium")).add(ModItems.RAW_URANIUM.get())
 
         this.tag(Tags.Items.ORE_RATES_SINGULAR).add(
             ModItems.GALENA_ORE.get(), ModItems.DEEPSLATE_GALENA_ORE.get(),
             ModItems.SCHEELITE_ORE.get(), ModItems.DEEPSLATE_SCHEELITE_ORE.get(),
-            ModItems.SILVER_ORE.get(), ModItems.DEEPSLATE_SILVER_ORE.get()
+            ModItems.SILVER_ORE.get(), ModItems.DEEPSLATE_SILVER_ORE.get(),
+            ModItems.URANIUM_ORE.get(), ModItems.DEEPSLATE_URANIUM_ORE.get(),
+            ModItems.SULFUR_ORE.get(), ModItems.DEEPSLATE_SULFUR_ORE.get(),
+            ModItems.NITER_ORE.get(), ModItems.DEEPSLATE_NITER_ORE.get()
         )
 
-        this.tag(Tags.Items.ORES_IN_GROUND_STONE)
-            .add(ModItems.GALENA_ORE.get(), ModItems.SCHEELITE_ORE.get(), ModItems.SILVER_ORE.get())
+        this.tag(Tags.Items.ORES_IN_GROUND_STONE).add(
+            ModItems.GALENA_ORE.get(),
+            ModItems.SCHEELITE_ORE.get(),
+            ModItems.SILVER_ORE.get(),
+            ModItems.URANIUM_ORE.get(),
+            ModItems.SULFUR_ORE.get(),
+            ModItems.NITER_ORE.get()
+        )
         this.tag(Tags.Items.ORES_IN_GROUND_DEEPSLATE).add(
             ModItems.DEEPSLATE_GALENA_ORE.get(),
             ModItems.DEEPSLATE_SCHEELITE_ORE.get(),
-            ModItems.DEEPSLATE_SILVER_ORE.get()
+            ModItems.DEEPSLATE_SILVER_ORE.get(),
+            ModItems.DEEPSLATE_URANIUM_ORE.get(),
+            ModItems.DEEPSLATE_SULFUR_ORE.get(),
+            ModItems.DEEPSLATE_NITER_ORE.get()
         )
 
-        this.tag(commonItemTag("plates")).addTags(commonItemTag("plates/copper"), commonItemTag("plates/steel"), commonItemTag("plates/plastic"))
+        this.tag(commonItemTag("plates"))
+            .addTags(commonItemTag("plates/copper"), commonItemTag("plates/steel"), commonItemTag("plates/plastic"))
         this.tag(commonItemTag("plates/copper")).add(ModItems.COPPER_PLATE.get())
         this.tag(commonItemTag("plates/steel")).add(ModItems.STEEL_PLATE.get())
         this.tag(commonItemTag("plates/plastic")).add(ModItems.ENGINEERING_PLASTIC.get())

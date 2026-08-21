@@ -10,5 +10,8 @@ object ModRarities {
     val SUPERB: Rarity = ModEnumExtensions.superb
 
     @JvmField
+    val BEAST: Rarity = ModEnumExtensions.beast
+
+    @JvmField
     val VIRTUAL: Rarity = ModEnumExtensions.virtual
 }

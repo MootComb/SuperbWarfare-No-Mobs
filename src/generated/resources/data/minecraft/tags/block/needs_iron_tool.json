@@ -9,6 +9,10 @@
     "superbwarfare:raw_galena_block",
     "superbwarfare:raw_scheelite_block",
     "superbwarfare:raw_silver_block",
-    "superbwarfare:dragon_teeth"
+    "superbwarfare:dragon_teeth",
+    "superbwarfare:uranium_ore",
+    "superbwarfare:deepslate_uranium_ore",
+    "superbwarfare:uranium_block",
+    "superbwarfare:raw_uranium_block"
   ]
 }

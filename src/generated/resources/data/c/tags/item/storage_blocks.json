@@ -4,9 +4,13 @@
     "#c:storage_blocks/steel",
     "#c:storage_blocks/tungsten",
     "#c:storage_blocks/silver",
+    "#c:storage_blocks/uranium",
+    "#c:storage_blocks/sulfur",
+    "#c:storage_blocks/niter",
     "#c:storage_blocks/raw_lead",
     "#c:storage_blocks/raw_tungsten",
     "#c:storage_blocks/raw_silver",
-    "#c:storage_blocks/raw_scheelite"
+    "#c:storage_blocks/raw_scheelite",
+    "#c:storage_blocks/raw_uranium"
   ]
 }

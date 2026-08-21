@@ -42,7 +42,7 @@ val LOITER_COMMAND = buildCommand("loiter") {
 
             vehicle.loiterActive = enabled
 
-            success(1) {
+            success(result = 1) {
                 if (enabled) {
                     Component.translatable(
                         "commands.superbwarfare.loiter.enabled",
@@ -85,7 +85,7 @@ val LOITER_COMMAND = buildCommand("loiter") {
                             vehicle.loiterParams = Quaternionf(x, safeY, z, r)
                             vehicle.loiterActive = true
 
-                            success(1) {
+                            success(result = 1) {
                                 val hint =
                                     if (safeY != getArg(this@centerY).toFloat()) " §7(已自动抬升至地形+50)" else ""
                                 Component.translatable(
@@ -114,7 +114,7 @@ val LOITER_COMMAND = buildCommand("loiter") {
                                 vehicle.loiterParams = Quaternionf(x, y, z, r)
                                 vehicle.loiterActive = true
 
-                                success(1) {
+                                success(result = 1) {
                                     Component.translatable(
                                         "commands.superbwarfare.loiter.success",
                                         x.toInt(), y.toInt(), z.toInt(), r.toInt()
@@ -136,7 +136,7 @@ val LOITER_COMMAND = buildCommand("loiter") {
             if (vehicle == null || vehicle.computed().engineType != EngineType.AIRCRAFT) {
                 fail { Component.translatable("commands.superbwarfare.loiter.not_aircraft") }
             }
-            success(1) {
+            success(result = 1) {
                 Component.translatable(
                     "commands.superbwarfare.loiter.get",
                     vehicle.loiterCenterX.toInt(),

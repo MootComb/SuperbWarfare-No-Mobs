@@ -1,0 +1,20 @@
+{
+  "Spread": 0,
+  "RecoilX": 0,
+  "RecoilY": 0,
+  "Damage": 60,
+  "Headshot": 2,
+  "ExplosionDamage": 45,
+  "MeleeDamage": 114514,
+  "ProjectileAmount": 0,
+  "MeleeDuration": 2,
+  "Velocity": 3,
+  "Weight": 0,
+  "EmptyReloadTime": 1,
+  "RPM": 300,
+  "Gravity": 0,
+  "DefaultZoom": 1.25,
+  "DefaultFireMode": "Auto",
+  "AvailableFireModes": "Auto",
+  "AmmoType": "Infinity"
+}

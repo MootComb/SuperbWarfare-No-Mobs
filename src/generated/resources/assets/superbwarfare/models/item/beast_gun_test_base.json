@@ -1,0 +1,6 @@
+{
+  "parent": "superbwarfare:displaysettings/beast_gun_test.item",
+  "textures": {
+    "layer0": "superbwarfare:item/beast_gun_test"
+  }
+}

@@ -4,6 +4,7 @@
     "#c:ingots/steel",
     "#c:ingots/tungsten",
     "#c:ingots/silver",
-    "#c:ingots/scheelite"
+    "#c:ingots/scheelite",
+    "#c:ingots/uranium"
   ]
 }

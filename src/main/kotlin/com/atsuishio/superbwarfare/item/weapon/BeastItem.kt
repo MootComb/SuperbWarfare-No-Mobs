@@ -16,7 +16,6 @@ import com.atsuishio.superbwarfare.tools.sendPacketToAll
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Holder
 import net.minecraft.core.particles.ParticleTypes
-import net.minecraft.core.particles.SimpleParticleType
 import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundSoundPacket
 import net.minecraft.server.level.ServerLevel
@@ -33,13 +32,12 @@ import net.minecraft.world.item.Tiers
 import net.minecraft.world.item.TooltipFlag
 import net.minecraft.world.level.gameevent.GameEvent
 import net.minecraft.world.phys.AABB
-import java.util.function.Consumer
 import javax.annotation.ParametersAreNonnullByDefault
 
 open class BeastItem : SwordItem(
     Tiers.NETHERITE, CustomDamageProperty(false)
         .stacksTo(1)
-        .rarity(ModRarities.LEGENDARY)
+        .rarity(ModRarities.BEAST)
         .setNoRepair()
 ) {
     override fun isDamageable(stack: ItemStack): Boolean {
@@ -135,7 +133,7 @@ open class BeastItem : SwordItem(
                 )
 
                 val box = target.boundingBox
-                (attacker.level() as ServerLevel).sendParticles<SimpleParticleType?>(
+                (attacker.level() as ServerLevel).sendParticles(
                     ParticleTypes.DAMAGE_INDICATOR,
                     target.x, target.y + .5, target.z,
                     1000,
@@ -157,11 +155,11 @@ open class BeastItem : SwordItem(
 
             if (target is ServerPlayer) {
                 target.health = 0f
-                target.level().players().forEach { p: Player? ->
-                    p!!.sendSystemMessage(
+                target.level().players().forEach { p ->
+                    p.sendSystemMessage(
                         Component.translatable(
                             "death.attack.beast_gun",
-                            target.getDisplayName(),
+                            target.displayName,
                             if (attacker != null) attacker.displayName else ""
                         )
                     )
@@ -174,7 +172,7 @@ open class BeastItem : SwordItem(
                 target.level().broadcastEntityEvent(target, 60.toByte())
 
                 target.removalReason = Entity.RemovalReason.KILLED
-                target.getPassengers().forEach(Consumer { obj: Entity? -> obj!!.stopRiding() })
+                target.getPassengers().forEach { it.stopRiding() }
                 target.stopRiding()
 
                 target.levelCallback.onRemove(Entity.RemovalReason.KILLED)

@@ -2,6 +2,9 @@
   "values": [
     "superbwarfare:galena_ore",
     "superbwarfare:scheelite_ore",
-    "superbwarfare:silver_ore"
+    "superbwarfare:silver_ore",
+    "superbwarfare:uranium_ore",
+    "superbwarfare:sulfur_ore",
+    "superbwarfare:niter_ore"
   ]
 }

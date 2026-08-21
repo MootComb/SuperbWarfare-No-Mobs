@@ -20,6 +20,15 @@
     },
     {
       "enum": "net/minecraft/world/item/Rarity",
+      "name": "SUPERBWARFARE_BEAST",
+      "constructor": "(ILjava/lang/String;Ljava/util/function/UnaryOperator;)V",
+      "parameters": {
+        "class": "com/atsuishio/superbwarfare/init/ModEnumExtensions",
+        "field": "SUPERBWARFARE_BEAST"
+      }
+    },
+    {
+      "enum": "net/minecraft/world/item/Rarity",
       "name": "SUPERBWARFARE_VIRTUAL",
       "constructor": "(ILjava/lang/String;Ljava/util/function/UnaryOperator;)V",
       "parameters": {
