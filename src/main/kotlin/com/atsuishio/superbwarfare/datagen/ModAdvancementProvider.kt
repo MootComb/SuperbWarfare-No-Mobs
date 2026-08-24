@@ -201,6 +201,13 @@ class ModAdvancementProvider(
                 .whenIconConsumed()
                 .parent(mainRoot)
         }
+
+        val tooHandsome = advancement("too_handsome") {
+            it.icon(ModItems.HANDSOME_GOGGLES.get())
+                .whenIconCollected()
+                .type(ModAdvancement.Type.SECRET_CHALLENGE)
+                .parent(mainRoot)
+        }
     }
 
     private fun advancement(id: String, b: UnaryOperator<ModAdvancement.Builder>): ModAdvancement {

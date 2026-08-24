@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_niter_ore": {
+      "conditions": {
+        "items": [
+          {
+            "items": "#c:ores/niter"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "superbwarfare:niter_blasting_from_ore"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_niter_ore"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "superbwarfare:niter_blasting_from_ore"
+    ]
+  }
+}

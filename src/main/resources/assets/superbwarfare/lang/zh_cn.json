@@ -368,6 +368,7 @@
   "curios.identifier.tactical_terminal": "单兵战术终端",
   "des.superbwarfare.tactical_terminal": "右击使用或装备时按下%1$s以打开战术地图",
   "des.superbwarfare.tactical_terminal.disabled": "已禁用，请查看服务端配置文件",
+  "item.superbwarfare.sonic_absorber": "音波吸收器",
   "item.superbwarfare.creative_vehicle_key": "创造车钥匙",
   "des.superbwarfare.creative_vehicle_key": "可以锁定和解锁任意载具",
   "item.superbwarfare.towline": "拖绳",
@@ -914,6 +915,7 @@
   "tips.superbwarfare.modify_result.tag_key": "[伤害标签] <%1$s>",
   "tips.superbwarfare.modify_result.entity_type": "[实体类型] <%1$s>",
   "tips.superbwarfare.modify_result.entity_id": "[实体ID] <%1$s>",
+  "tips.superbwarfare.modify_result.entity_tag": "[实体标签] <%1$s>",
 
   "tips.superbwarfare.category.land": "地面载具",
   "tips.superbwarfare.category.defense": "固定武器",
@@ -1225,6 +1227,8 @@
   "superbwarfare.advancement.main.critical_hit.des": "已经到了无法停下的程度，直入脑髓的一击",
   "superbwarfare.advancement.main.eat_crust": "画饼充“机”",
   "superbwarfare.advancement.main.eat_crust.des": "谁不想驾驶一张会飞的饼呢？",
+  "superbwarfare.advancement.main.too_handsome": "疑似有点酷炫了",
+  "superbwarfare.advancement.main.too_handsome.des": "还搞起优越感了，我现在就想戴上你",
 
   "context.superbwarfare.tactical_map.create_marker": "创建标记点",
   "context.superbwarfare.tactical_map.edit_marker": "编辑",

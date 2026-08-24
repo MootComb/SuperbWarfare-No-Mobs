@@ -1,0 +1,35 @@
+{
+  "parent": "superbwarfare:main/root",
+  "criteria": {
+    "0": {
+      "conditions": {
+        "items": [
+          {
+            "items": "superbwarfare:handsome_goggles"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "superbwarfare.advancement.main.too_handsome.des"
+    },
+    "frame": "challenge",
+    "hidden": true,
+    "icon": {
+      "count": 1,
+      "id": "superbwarfare:handsome_goggles"
+    },
+    "title": {
+      "translate": "superbwarfare.advancement.main.too_handsome"
+    }
+  },
+  "requirements": [
+    [
+      "0"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

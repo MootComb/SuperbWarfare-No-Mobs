@@ -73,7 +73,10 @@ class ModRecipeProvider(output: PackOutput, registries: CompletableFuture<Holder
         val INGOTS_LEAD: TagKey<Item> = commonItemTag("ingots/lead")
         val INGOTS_SILVER: TagKey<Item> = commonItemTag("ingots/silver")
         val INGOTS_TUNGSTEN: TagKey<Item> = commonItemTag("ingots/tungsten")
+        val INGOTS_URANIUM = commonItemTag("ingots/uranium")
         val STORAGE_BLOCK_STEEL = commonItemTag("storage_blocks/steel")
+        val DUSTS_SULFUR = commonItemTag("dusts/sulfur")
+        val GEMS_NITER = commonItemTag("gems/niter")
 
         private fun buildToolRecipes(writer: RecipeOutput) {
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.ARTILLERY_INDICATOR.get())
@@ -1160,17 +1163,9 @@ class ModRecipeProvider(output: PackOutput, registries: CompletableFuture<Holder
                 ModItems.CEMENTED_CARBIDE_INGOT.get(),
                 8f,
                 200,
-                RecipeSerializer.BLASTING_RECIPE
-            ) { group, category, ingredient, result, experience, cookingTime ->
-                BlastingRecipe(
-                    group,
-                    category,
-                    ingredient,
-                    result,
-                    experience,
-                    cookingTime
-                )
-            }
+                RecipeSerializer.BLASTING_RECIPE,
+                ::BlastingRecipe
+            )
                 .unlockedBy(
                     getHasName(ModItems.RAW_CEMENTED_CARBIDE_POWDER.get()),
                     has(ModItems.RAW_CEMENTED_CARBIDE_POWDER.get())
@@ -1316,17 +1311,9 @@ class ModRecipeProvider(output: PackOutput, registries: CompletableFuture<Holder
                 Items.IRON_INGOT,
                 0.7f,
                 100,
-                RecipeSerializer.BLASTING_RECIPE
-            ) { group, category, ingredient, result, experience, cookingTime ->
-                BlastingRecipe(
-                    group,
-                    category,
-                    ingredient,
-                    result,
-                    experience,
-                    cookingTime
-                )
-            }
+                RecipeSerializer.BLASTING_RECIPE,
+                ::BlastingRecipe
+            )
                 .unlockedBy(getHasName(ModItems.IRON_POWDER.get()), has(ModItems.IRON_POWDER.get()))
                 .save(writer, loc(getItemName(Items.IRON_INGOT) + "_blasting_from_powder"))
             SimpleCookingRecipeBuilder.generic(
@@ -1335,17 +1322,9 @@ class ModRecipeProvider(output: PackOutput, registries: CompletableFuture<Holder
                 Items.IRON_INGOT,
                 0.7f,
                 200,
-                RecipeSerializer.SMELTING_RECIPE
-            ) { group, category, ingredient, result, experience, cookingTime ->
-                SmeltingRecipe(
-                    group,
-                    category,
-                    ingredient,
-                    result,
-                    experience,
-                    cookingTime
-                )
-            }
+                RecipeSerializer.SMELTING_RECIPE,
+                ::SmeltingRecipe
+            )
                 .unlockedBy(getHasName(ModItems.IRON_POWDER.get()), has(ModItems.IRON_POWDER.get()))
                 .save(writer, loc(getItemName(Items.IRON_INGOT) + "_smelting_from_powder"))
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.LARGE_BATTERY_PACK.get())
@@ -1381,17 +1360,9 @@ class ModRecipeProvider(output: PackOutput, registries: CompletableFuture<Holder
                 ModItems.LEAD_INGOT.get(),
                 0.7f,
                 100,
-                RecipeSerializer.BLASTING_RECIPE
-            ) { group, category, ingredient, result, experience, cookingTime ->
-                BlastingRecipe(
-                    group,
-                    category,
-                    ingredient,
-                    result,
-                    experience,
-                    cookingTime
-                )
-            }
+                RecipeSerializer.BLASTING_RECIPE,
+                ::BlastingRecipe
+            )
                 .unlockedBy(getHasName(ModItems.GALENA.get()), has(ModItems.GALENA.get()))
                 .save(writer, loc(getItemName(ModItems.LEAD_INGOT.get()) + "_blasting"))
             SimpleCookingRecipeBuilder.generic(
@@ -1400,17 +1371,9 @@ class ModRecipeProvider(output: PackOutput, registries: CompletableFuture<Holder
                 ModItems.LEAD_INGOT.get(),
                 0.7f,
                 100,
-                RecipeSerializer.BLASTING_RECIPE
-            ) { group, category, ingredient, result, experience, cookingTime ->
-                BlastingRecipe(
-                    group,
-                    category,
-                    ingredient,
-                    result,
-                    experience,
-                    cookingTime
-                )
-            }
+                RecipeSerializer.BLASTING_RECIPE,
+                ::BlastingRecipe
+            )
                 .unlockedBy(getHasName(ModItems.GALENA_ORE.get()), has(commonItemTag("ores/lead")))
                 .save(writer, loc(getItemName(Items.IRON_INGOT) + "_blasting_from_ore"))
             ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, ModItems.LEAD_INGOT.get(), 9)
@@ -1423,17 +1386,9 @@ class ModRecipeProvider(output: PackOutput, registries: CompletableFuture<Holder
                 ModItems.LEAD_INGOT.get(),
                 0.7f,
                 200,
-                RecipeSerializer.SMELTING_RECIPE
-            ) { group, category, ingredient, result, experience, cookingTime ->
-                SmeltingRecipe(
-                    group,
-                    category,
-                    ingredient,
-                    result,
-                    experience,
-                    cookingTime
-                )
-            }
+                RecipeSerializer.SMELTING_RECIPE,
+                ::SmeltingRecipe
+            )
                 .unlockedBy(getHasName(ModItems.GALENA.get()), has(ModItems.GALENA.get()))
                 .save(writer, loc(getItemName(ModItems.LEAD_INGOT.get()) + "_smelting"))
             SimpleCookingRecipeBuilder.generic(
@@ -1442,17 +1397,9 @@ class ModRecipeProvider(output: PackOutput, registries: CompletableFuture<Holder
                 ModItems.LEAD_INGOT.get(),
                 0.7f,
                 200,
-                RecipeSerializer.SMELTING_RECIPE
-            ) { group, category, ingredient, result, experience, cookingTime ->
-                SmeltingRecipe(
-                    group,
-                    category,
-                    ingredient,
-                    result,
-                    experience,
-                    cookingTime
-                )
-            }
+                RecipeSerializer.SMELTING_RECIPE,
+                ::SmeltingRecipe
+            )
                 .unlockedBy(getHasName(ModItems.GALENA_ORE.get()), has(commonItemTag("ores/lead")))
                 .save(writer, loc(getItemName(ModItems.LEAD_INGOT.get()) + "_smelting_from_ore"))
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.LIGHT_ARMAMENT_MODULE.get())
@@ -1595,17 +1542,9 @@ class ModRecipeProvider(output: PackOutput, registries: CompletableFuture<Holder
                 ModItems.SILVER_INGOT.get(),
                 0.7f,
                 100,
-                RecipeSerializer.BLASTING_RECIPE
-            ) { group, category, ingredient, result, experience, cookingTime ->
-                BlastingRecipe(
-                    group,
-                    category,
-                    ingredient,
-                    result,
-                    experience,
-                    cookingTime
-                )
-            }
+                RecipeSerializer.BLASTING_RECIPE,
+                ::BlastingRecipe
+            )
                 .unlockedBy(getHasName(ModItems.RAW_SILVER.get()), has(ModItems.RAW_SILVER.get()))
                 .save(writer, loc(getItemName(ModItems.SILVER_INGOT.get()) + "_blasting"))
             SimpleCookingRecipeBuilder.generic(
@@ -1614,17 +1553,9 @@ class ModRecipeProvider(output: PackOutput, registries: CompletableFuture<Holder
                 ModItems.SILVER_INGOT.get(),
                 0.7f,
                 100,
-                RecipeSerializer.BLASTING_RECIPE
-            ) { group, category, ingredient, result, experience, cookingTime ->
-                BlastingRecipe(
-                    group,
-                    category,
-                    ingredient,
-                    result,
-                    experience,
-                    cookingTime
-                )
-            }
+                RecipeSerializer.BLASTING_RECIPE,
+                ::BlastingRecipe
+            )
                 .unlockedBy(getHasName(ModItems.SILVER_ORE.get()), has(commonItemTag("ores/silver")))
                 .save(writer, loc(getItemName(ModItems.SILVER_INGOT.get()) + "_blasting_from_ore"))
             ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, ModItems.SILVER_INGOT.get(), 9)
@@ -1637,17 +1568,9 @@ class ModRecipeProvider(output: PackOutput, registries: CompletableFuture<Holder
                 ModItems.SILVER_INGOT.get(),
                 0.7f,
                 200,
-                RecipeSerializer.SMELTING_RECIPE
-            ) { group, category, ingredient, result, experience, cookingTime ->
-                SmeltingRecipe(
-                    group,
-                    category,
-                    ingredient,
-                    result,
-                    experience,
-                    cookingTime
-                )
-            }
+                RecipeSerializer.SMELTING_RECIPE,
+                ::SmeltingRecipe
+            )
                 .unlockedBy(getHasName(ModItems.RAW_SILVER.get()), has(ModItems.RAW_SILVER.get()))
                 .save(writer, loc(getItemName(ModItems.SILVER_INGOT.get()) + "_smelting"))
             SimpleCookingRecipeBuilder.generic(
@@ -1656,17 +1579,9 @@ class ModRecipeProvider(output: PackOutput, registries: CompletableFuture<Holder
                 ModItems.SILVER_INGOT.get(),
                 0.7f,
                 200,
-                RecipeSerializer.SMELTING_RECIPE
-            ) { group, category, ingredient, result, experience, cookingTime ->
-                SmeltingRecipe(
-                    group,
-                    category,
-                    ingredient,
-                    result,
-                    experience,
-                    cookingTime
-                )
-            }
+                RecipeSerializer.SMELTING_RECIPE,
+                ::SmeltingRecipe
+            )
                 .unlockedBy(getHasName(ModItems.GALENA_ORE.get()), has(commonItemTag("ores/silver")))
                 .save(writer, loc(getItemName(ModItems.SILVER_INGOT.get()) + "_smelting_from_ore"))
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.SMALL_BATTERY_PACK.get())
@@ -1681,17 +1596,9 @@ class ModRecipeProvider(output: PackOutput, registries: CompletableFuture<Holder
                 ModItems.STEEL_INGOT.get(),
                 0.7f,
                 100,
-                RecipeSerializer.BLASTING_RECIPE
-            ) { group, category, ingredient, result, experience, cookingTime ->
-                BlastingRecipe(
-                    group,
-                    category,
-                    ingredient,
-                    result,
-                    experience,
-                    cookingTime
-                )
-            }
+                RecipeSerializer.BLASTING_RECIPE,
+                ::BlastingRecipe
+            )
                 .unlockedBy(getHasName(ModItems.COAL_IRON_POWDER.get()), has(ModItems.COAL_IRON_POWDER.get()))
                 .save(writer, loc(getItemName(ModItems.STEEL_INGOT.get()) + "_blasting"))
             ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, ModItems.STEEL_INGOT.get(), 9)
@@ -1712,17 +1619,9 @@ class ModRecipeProvider(output: PackOutput, registries: CompletableFuture<Holder
                 ModItems.TUNGSTEN_INGOT.get(),
                 4f,
                 100,
-                RecipeSerializer.BLASTING_RECIPE
-            ) { group, category, ingredient, result, experience, cookingTime ->
-                BlastingRecipe(
-                    group,
-                    category,
-                    ingredient,
-                    result,
-                    experience,
-                    cookingTime
-                )
-            }
+                RecipeSerializer.BLASTING_RECIPE,
+                ::BlastingRecipe
+            )
                 .unlockedBy(getHasName(ModItems.SCHEELITE.get()), has(ModItems.SCHEELITE.get()))
                 .save(writer, loc(getItemName(ModItems.TUNGSTEN_INGOT.get()) + "_blasting"))
             SimpleCookingRecipeBuilder.generic(
@@ -1731,17 +1630,9 @@ class ModRecipeProvider(output: PackOutput, registries: CompletableFuture<Holder
                 ModItems.TUNGSTEN_INGOT.get(),
                 4f,
                 100,
-                RecipeSerializer.BLASTING_RECIPE
-            ) { group, category, ingredient, result, experience, cookingTime ->
-                BlastingRecipe(
-                    group,
-                    category,
-                    ingredient,
-                    result,
-                    experience,
-                    cookingTime
-                )
-            }
+                RecipeSerializer.BLASTING_RECIPE,
+                ::BlastingRecipe
+            )
                 .unlockedBy(getHasName(ModItems.SCHEELITE_ORE.get()), has(commonItemTag("ores/tungsten")))
                 .save(writer, loc(getItemName(ModItems.TUNGSTEN_INGOT.get()) + "_blasting_from_ore"))
             SimpleCookingRecipeBuilder.generic(
@@ -1750,17 +1641,9 @@ class ModRecipeProvider(output: PackOutput, registries: CompletableFuture<Holder
                 ModItems.TUNGSTEN_INGOT.get(),
                 4f,
                 100,
-                RecipeSerializer.BLASTING_RECIPE
-            ) { group, category, ingredient, result, experience, cookingTime ->
-                BlastingRecipe(
-                    group,
-                    category,
-                    ingredient,
-                    result,
-                    experience,
-                    cookingTime
-                )
-            }
+                RecipeSerializer.BLASTING_RECIPE,
+                ::BlastingRecipe
+            )
                 .unlockedBy(getHasName(ModItems.TUNGSTEN_POWDER.get()), has(ModItems.TUNGSTEN_POWDER.get()))
                 .save(writer, loc(getItemName(ModItems.TUNGSTEN_INGOT.get()) + "_blasting_from_powder"))
             ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, ModItems.TUNGSTEN_INGOT.get(), 9)
@@ -1786,6 +1669,104 @@ class ModRecipeProvider(output: PackOutput, registries: CompletableFuture<Holder
                 .define('b', Tags.Items.INGOTS_IRON)
                 .unlockedBy(getHasName(Items.BLACK_WOOL), has(Items.BLACK_WOOL))
                 .save(writer, loc(getItemName(ModItems.WHEEL.get())))
+            SimpleCookingRecipeBuilder.generic(
+                Ingredient.of(ModItems.RAW_URANIUM.get()),
+                RecipeCategory.MISC,
+                ModItems.URANIUM_INGOT.get(),
+                0.7f,
+                100,
+                RecipeSerializer.BLASTING_RECIPE,
+                ::BlastingRecipe
+            )
+                .unlockedBy(getHasName(ModItems.RAW_URANIUM.get()), has(ModItems.RAW_URANIUM.get()))
+                .save(writer, loc(getItemName(ModItems.URANIUM_INGOT.get()) + "_blasting"))
+            SimpleCookingRecipeBuilder.generic(
+                Ingredient.of(ModItems.URANIUM_ORE.get(), ModItems.DEEPSLATE_URANIUM_ORE.get()),
+                RecipeCategory.MISC,
+                ModItems.URANIUM_INGOT.get(),
+                0.7f,
+                100,
+                RecipeSerializer.BLASTING_RECIPE,
+                ::BlastingRecipe
+            )
+                .unlockedBy(getHasName(ModItems.URANIUM_ORE.get()), has(commonItemTag("ores/uranium")))
+                .save(writer, loc(getItemName(ModItems.URANIUM_INGOT.get()) + "_blasting_from_ore"))
+            SimpleCookingRecipeBuilder.generic(
+                Ingredient.of(ModItems.RAW_URANIUM.get()),
+                RecipeCategory.MISC,
+                ModItems.URANIUM_INGOT.get(),
+                0.7f,
+                200,
+                RecipeSerializer.SMELTING_RECIPE,
+                ::SmeltingRecipe
+            )
+                .unlockedBy(getHasName(ModItems.RAW_URANIUM.get()), has(ModItems.RAW_URANIUM.get()))
+                .save(writer, loc(getItemName(ModItems.URANIUM_INGOT.get()) + "_smelting"))
+            SimpleCookingRecipeBuilder.generic(
+                Ingredient.of(ModItems.URANIUM_ORE.get(), ModItems.DEEPSLATE_URANIUM_ORE.get()),
+                RecipeCategory.MISC,
+                ModItems.URANIUM_INGOT.get(),
+                0.7f,
+                200,
+                RecipeSerializer.SMELTING_RECIPE,
+                ::SmeltingRecipe
+            )
+                .unlockedBy(getHasName(ModItems.URANIUM_ORE.get()), has(commonItemTag("ores/uranium")))
+                .save(writer, loc(getItemName(ModItems.URANIUM_INGOT.get()) + "_smelting_from_ore"))
+            SimpleCookingRecipeBuilder.generic(
+                Ingredient.of(ModItems.SULFUR_ORE.get(), ModItems.DEEPSLATE_SULFUR_ORE.get()),
+                RecipeCategory.MISC,
+                ModItems.SULFUR.get(),
+                0.7f,
+                100,
+                RecipeSerializer.BLASTING_RECIPE,
+                ::BlastingRecipe
+            )
+                .unlockedBy(getHasName(ModItems.SULFUR_ORE.get()), has(commonItemTag("ores/sulfur")))
+                .save(writer, loc(getItemName(ModItems.SULFUR.get()) + "_blasting_from_ore"))
+            SimpleCookingRecipeBuilder.generic(
+                Ingredient.of(ModItems.SULFUR_ORE.get(), ModItems.DEEPSLATE_SULFUR_ORE.get()),
+                RecipeCategory.MISC,
+                ModItems.SULFUR.get(),
+                0.7f,
+                200,
+                RecipeSerializer.SMELTING_RECIPE,
+                ::SmeltingRecipe
+            )
+                .unlockedBy(getHasName(ModItems.SULFUR_ORE.get()), has(commonItemTag("ores/sulfur")))
+                .save(writer, loc(getItemName(ModItems.SULFUR.get()) + "_smelting_from_ore"))
+            SimpleCookingRecipeBuilder.generic(
+                Ingredient.of(ModItems.NITER_ORE.get(), ModItems.DEEPSLATE_NITER_ORE.get()),
+                RecipeCategory.MISC,
+                ModItems.NITER.get(),
+                0.7f,
+                100,
+                RecipeSerializer.BLASTING_RECIPE,
+                ::BlastingRecipe
+            )
+                .unlockedBy(getHasName(ModItems.NITER_ORE.get()), has(commonItemTag("ores/niter")))
+                .save(writer, loc(getItemName(ModItems.NITER.get()) + "_blasting_from_ore"))
+            SimpleCookingRecipeBuilder.generic(
+                Ingredient.of(ModItems.NITER_ORE.get(), ModItems.DEEPSLATE_NITER_ORE.get()),
+                RecipeCategory.MISC,
+                ModItems.NITER.get(),
+                0.7f,
+                200,
+                RecipeSerializer.SMELTING_RECIPE,
+                ::SmeltingRecipe
+            )
+                .unlockedBy(getHasName(ModItems.NITER_ORE.get()), has(commonItemTag("ores/niter")))
+                .save(writer, loc(getItemName(ModItems.NITER.get()) + "_smelting_from_ore"))
+            ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, Items.GUNPOWDER, 6)
+                .requires(DUSTS_SULFUR)
+                .requires(GEMS_NITER)
+                .requires(GEMS_NITER)
+                .requires(ItemTags.COALS)
+                .requires(ItemTags.COALS)
+                .requires(ItemTags.COALS)
+                .unlockedBy(getHasName(ModItems.SULFUR.get()), has(DUSTS_SULFUR))
+                .unlockedBy(getHasName(ModItems.NITER.get()), has(GEMS_NITER))
+                .save(writer, loc(getItemName(Items.GUNPOWDER) + "_from_sulfur_niter_coal"))
         }
 
         private fun buildBlockRecipes(writer: RecipeOutput) {
@@ -1974,6 +1955,34 @@ class ModRecipeProvider(output: PackOutput, registries: CompletableFuture<Holder
                 .define('a', commonItemTag("raw_materials/silver"))
                 .unlockedBy(getHasName(ModItems.RAW_SILVER.get()), has(commonItemTag("raw_materials/silver")))
                 .save(writer, loc(getItemName(ModItems.RAW_SILVER_BLOCK.get())))
+            ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModItems.RAW_URANIUM_BLOCK.get())
+                .pattern("aaa")
+                .pattern("aaa")
+                .pattern("aaa")
+                .define('a', commonItemTag("raw_materials/uranium"))
+                .unlockedBy(getHasName(ModItems.RAW_URANIUM.get()), has(commonItemTag("raw_materials/uranium")))
+                .save(writer, loc(getItemName(ModItems.RAW_URANIUM_BLOCK.get())))
+            ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModItems.SULFUR_BLOCK.get())
+                .pattern("aaa")
+                .pattern("aaa")
+                .pattern("aaa")
+                .define('a', DUSTS_SULFUR)
+                .unlockedBy(getHasName(ModItems.SULFUR.get()), has(DUSTS_SULFUR))
+                .save(writer, loc(getItemName(ModItems.SULFUR_BLOCK.get())))
+            ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModItems.NITER_BLOCK.get())
+                .pattern("aaa")
+                .pattern("aaa")
+                .pattern("aaa")
+                .define('a', GEMS_NITER)
+                .unlockedBy(getHasName(ModItems.NITER.get()), has(GEMS_NITER))
+                .save(writer, loc(getItemName(ModItems.NITER_BLOCK.get())))
+            ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModItems.URANIUM_BLOCK.get())
+                .pattern("aaa")
+                .pattern("aaa")
+                .pattern("aaa")
+                .define('a', INGOTS_URANIUM)
+                .unlockedBy(getHasName(ModItems.URANIUM_INGOT.get()), has(INGOTS_URANIUM))
+                .save(writer, loc(getItemName(ModItems.URANIUM_BLOCK.get())))
         }
 
         private fun buildVehicleRecipes(writer: RecipeOutput) {
@@ -3106,6 +3115,34 @@ class ModRecipeProvider(output: PackOutput, registries: CompletableFuture<Holder
                     has(commonItemTag("storage_blocks/raw_silver"))
                 )
                 .save(writer, loc("${getItemName(ModItems.RAW_SILVER.get())}_from_raw_block"))
+            ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, ModItems.RAW_URANIUM.get(), 9)
+                .requires(commonItemTag("storage_blocks/raw_uranium"))
+                .unlockedBy(
+                    getHasName(ModItems.RAW_URANIUM_BLOCK.get()),
+                    has(commonItemTag("storage_blocks/raw_uranium"))
+                )
+                .save(writer, loc("${getItemName(ModItems.RAW_URANIUM.get())}_from_raw_block"))
+            ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, ModItems.SULFUR.get(), 9)
+                .requires(commonItemTag("storage_blocks/sulfur"))
+                .unlockedBy(
+                    getHasName(ModItems.SULFUR_BLOCK.get()),
+                    has(commonItemTag("storage_blocks/sulfur"))
+                )
+                .save(writer, loc("${getItemName(ModItems.SULFUR.get())}_from_block"))
+            ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, ModItems.NITER.get(), 9)
+                .requires(commonItemTag("storage_blocks/niter"))
+                .unlockedBy(
+                    getHasName(ModItems.NITER_BLOCK.get()),
+                    has(commonItemTag("storage_blocks/niter"))
+                )
+                .save(writer, loc("${getItemName(ModItems.NITER.get())}_from_block"))
+            ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, ModItems.URANIUM_INGOT.get(), 9)
+                .requires(commonItemTag("storage_blocks/uranium"))
+                .unlockedBy(
+                    getHasName(ModItems.URANIUM_BLOCK.get()),
+                    has(commonItemTag("storage_blocks/uranium"))
+                )
+                .save(writer, loc("${getItemName(ModItems.URANIUM_INGOT.get())}_from_block"))
 
             VehicleAssemblingRecipeBuilder.item(
                 ModItems.VEHICLE_KEY.get(),

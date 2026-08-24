@@ -38,6 +38,7 @@ import com.atsuishio.superbwarfare.item.projectile.*
 import com.atsuishio.superbwarfare.item.weapon.*
 import com.atsuishio.superbwarfare.perk.Perk
 import com.atsuishio.superbwarfare.tiers.ModItemTier
+import com.atsuishio.superbwarfare.tools.camelToSnake
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.core.registries.Registries
 import net.minecraft.world.item.*
@@ -196,6 +197,12 @@ object ModItems {
      */
     private fun registerItem(id: String) = registerItem(id) { Item(Properties()) }
     private fun <T : Item> registerItem(id: String, item: () -> T): DeferredHolder<Item, T> = ITEMS.register(id, item)
+    private inline fun <reified T : Item> registerItem(noinline item: () -> T): DeferredHolder<Item, T> {
+        val name = T::class.java.simpleName.substringBeforeLast("Item")
+        val id = name.camelToSnake()
+        return registerItem(id, item)
+    }
+
     private fun registerBlueprint(id: String, rarity: Rarity) = registerItem(id) { BlueprintItem(rarity) }
 
     @JvmField
@@ -263,6 +270,8 @@ object ModItems {
     @JvmField val THERMAL_IMAGING_GOGGLES = registerItem("thermal_imaging_goggles") { ThermalImagingGogglesItem() }
     @JvmField val HANDSOME_GOGGLES = registerItem("handsome_goggles") { HandsomeGogglesItem() }
     @JvmField val TACTICAL_TERMINAL = registerItem("tactical_terminal") { TacticalTerminalItem() }
+
+    @JvmField val SONIC_ABSORBER = registerItem { SonicAbsorberItem() }
 
     @JvmField val CRUST = registerItem("crust") { CrustItem() }
 

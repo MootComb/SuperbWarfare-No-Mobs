@@ -154,7 +154,7 @@ fun ItemStack.getOrCreateTag(): CompoundTag = NBTTool.getTag(this)
 var ItemStack.tag
     get() = get(DataComponents.CUSTOM_DATA)?.copyTag()
     set(value) {
-        if (value == null) {
+        if (value == null || value.isEmpty) {
             remove(DataComponents.CUSTOM_DATA)
         } else {
             set(DataComponents.CUSTOM_DATA, CustomData.of(value))

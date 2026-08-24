@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_sulfur_block": {
+      "conditions": {
+        "items": [
+          {
+            "items": "#c:storage_blocks/sulfur"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "superbwarfare:sulfur_from_block"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_sulfur_block"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "superbwarfare:sulfur_from_block"
+    ]
+  }
+}

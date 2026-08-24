@@ -955,21 +955,6 @@ object VehicleMotionUtils {
     }
 
     /**
-     * @deprecated Retained for binary/source compatibility with external call sites that
-     * still call the single-point overload. Prefer [computeSupportedPosition] +
-     * the 4-argument [updateTerrainCompact] when calling in a loop, to avoid repeating
-     * the expensive [net.minecraft.world.level.CollisionGetter.findSupportingBlock] query.
-     */
-    @Deprecated(
-        message = "Recomputes findSupportingBlock on every call; use the 4-arg overload with a cached supportedPos when calling in a loop.",
-        replaceWith = ReplaceWith("updateTerrainCompact(entity, landingTarget, heightY, computeSupportedPosition(entity))")
-    )
-    @JvmStatic
-    fun updateTerrainCompact(entity: VehicleEntity, landingTarget: Vec3, heightY: Double) {
-        updateTerrainCompact(entity, landingTarget, heightY, computeSupportedPosition(entity))
-    }
-
-    /**
      * 在指定列(wx,wz)上、以OBB底面高度wy为基准，探测最贴合的地形碰撞面顶部Y。
      *
      * 仅统计落在垂直窗口 [wy - searchDown, wy + searchUp] 内、且该列水平位置确实位于

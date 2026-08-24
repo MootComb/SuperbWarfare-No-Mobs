@@ -1,0 +1,43 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_niter": {
+      "conditions": {
+        "items": [
+          {
+            "items": "#c:gems/niter"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_sulfur": {
+      "conditions": {
+        "items": [
+          {
+            "items": "#c:dusts/sulfur"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "superbwarfare:gunpowder_from_sulfur_niter_coal"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_sulfur",
+      "has_niter"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "superbwarfare:gunpowder_from_sulfur_niter_coal"
+    ]
+  }
+}

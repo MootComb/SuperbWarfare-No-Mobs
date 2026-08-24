@@ -1,6 +1,5 @@
 package com.atsuishio.superbwarfare.entity.projectile
 
-import com.atsuishio.superbwarfare.Mod.Companion.loc
 import com.atsuishio.superbwarfare.client.animation.entity.BasicProjectileAnimationInstance
 import com.atsuishio.superbwarfare.resource.model.ProjectileModelReloadListener
 import com.github.mcmodderanchor.simplebedrockmodel.v2.common.model.runtime.BakedModelInstance
@@ -8,12 +7,6 @@ import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.entity.Entity
 
 interface BasicGeoProjectileEntity {
-    @Deprecated("Model location is auto loaded now")
-    fun getModel(): ResourceLocation = loc("projectile/projectile")
-
-    @Deprecated("Animation location is auto loaded now")
-    fun getAnimation(): ResourceLocation? = null
-
     fun getAnimationInstance(): BasicProjectileAnimationInstance<*>? = null
 
     fun getEmissiveTexture(): ResourceLocation? = null

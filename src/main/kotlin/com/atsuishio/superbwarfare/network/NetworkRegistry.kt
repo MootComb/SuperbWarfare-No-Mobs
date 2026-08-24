@@ -5,6 +5,7 @@ import com.atsuishio.superbwarfare.network.message.receive.*
 import com.atsuishio.superbwarfare.network.message.send.*
 import com.atsuishio.superbwarfare.serialization.ByteBufDecoder
 import com.atsuishio.superbwarfare.serialization.ByteBufEncoder
+import com.atsuishio.superbwarfare.tools.camelToSnake
 import com.atsuishio.superbwarfare.tools.createStreamCodec
 import kotlinx.serialization.serializer
 import net.minecraft.network.FriendlyByteBuf
@@ -30,17 +31,7 @@ private inline fun <reified T : PacketPayload> playTo(reg: (CustomPacketPayload.
     val codec = createStreamCodec<T>()
     val className = T::class.java.simpleName.substringBefore("Message")
 
-    val name = buildString {
-        append(className[0].lowercase())
-
-        for (i in 1 until className.length) {
-            val c = className[i]
-            if (c.isUpperCase()) {
-                append("_")
-            }
-            append(className[i].lowercase())
-        }
-    }
+    val name = className.camelToSnake()
 
     val type = CustomPacketPayload.Type<T>(loc(name))
     payloadTypeMap[T::class.java] = type
