@@ -3,7 +3,7 @@
     "minecraft:player",
     "minecraft:villager",
     "minecraft:wandering_trader",
-    "superbwarfare:senpai",
+    "#superbwarfare:senpai",
     {
       "id": "touhou_little_maid:maid",
       "required": false

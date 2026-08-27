@@ -1,6 +1,7 @@
 package com.atsuishio.superbwarfare.item.misc
 
 import com.atsuishio.superbwarfare.init.ModItems
+import com.atsuishio.superbwarfare.registerToEventBus
 import com.atsuishio.superbwarfare.tools.getOrCreateTag
 import com.atsuishio.superbwarfare.tools.tag
 import net.minecraft.sounds.SoundEvents
@@ -14,10 +15,18 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Rarity
 import net.minecraft.world.level.Level
 import net.neoforged.bus.api.SubscribeEvent
-import net.neoforged.fml.common.EventBusSubscriber
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent
 
-class SonicAbsorberItem : Item(Properties().rarity(Rarity.EPIC)) {
+object SonicAbsorberItem : Item(Properties().rarity(Rarity.EPIC)) {
+
+    init {
+        registerToEventBus(this)
+    }
+
+    const val PARRY_TICK_TAG = "SonicParryTicks"
+    const val PARRY_TICKS = 6
+    const val PARRY_FAIL_COOLDOWN_TICKS = 80
+    const val PARRY_SUCCESS_COOLDOWN_TICKS = 20
 
     override fun use(
         level: Level,
@@ -27,7 +36,7 @@ class SonicAbsorberItem : Item(Properties().rarity(Rarity.EPIC)) {
         val stack = player.getItemInHand(usedHand)
         if (level.isClientSide) return InteractionResultHolder.fail(stack)
         if (usedHand != InteractionHand.MAIN_HAND) return InteractionResultHolder.fail(stack)
-        if (stack.item !is SonicAbsorberItem) return InteractionResultHolder.fail(stack)
+        if (stack.item != this) return InteractionResultHolder.fail(stack)
 
         if ((stack.tag?.getInt(PARRY_TICK_TAG) ?: 0) > 0) return InteractionResultHolder.fail(stack)
 
@@ -65,29 +74,21 @@ class SonicAbsorberItem : Item(Properties().rarity(Rarity.EPIC)) {
         super.inventoryTick(stack, level, entity, slotId, isSelected)
     }
 
-    @EventBusSubscriber
-    companion object {
-        const val PARRY_TICK_TAG = "SonicParryTicks"
-        const val PARRY_TICKS = 6
-        const val PARRY_FAIL_COOLDOWN_TICKS = 80
-        const val PARRY_SUCCESS_COOLDOWN_TICKS = 20
+    @SubscribeEvent
+    fun onEntityAttackedBySonicBoom(event: LivingIncomingDamageEvent) {
+        val source = event.source
+        if (!source.`is`(DamageTypes.SONIC_BOOM)) return
 
-        @SubscribeEvent
-        fun onEntityAttackedBySonicBoom(event: LivingIncomingDamageEvent) {
-            val source = event.source
-            if (!source.`is`(DamageTypes.SONIC_BOOM)) return
+        val entity = event.entity
+        val stack = entity.mainHandItem
+        val tag = stack.tag
+        if (stack.item != this || tag == null || tag.getInt(PARRY_TICK_TAG) <= 0) return
 
-            val entity = event.entity
-            val stack = entity.mainHandItem
-            val tag = stack.tag
-            if (stack.item !is SonicAbsorberItem || tag == null || tag.getInt(PARRY_TICK_TAG) <= 0) return
+        event.isCanceled = true
+        tag.remove(PARRY_TICK_TAG)
+        stack.tag = tag
 
-            event.isCanceled = true
-            tag.remove(PARRY_TICK_TAG)
-            stack.tag = tag
-
-            entity.playSound(SoundEvents.ARROW_HIT)
-            source.entity?.hurt(entity.damageSources().sonicBoom(entity), event.originalAmount * 15)
-        }
+        entity.playSound(SoundEvents.ARROW_HIT)
+        source.entity?.hurt(entity.damageSources().sonicBoom(entity), event.originalAmount * 15)
     }
 }

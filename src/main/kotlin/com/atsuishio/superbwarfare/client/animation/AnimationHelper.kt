@@ -144,18 +144,12 @@ object AnimationHelper {
         if (itemStack.item !is GunItem) return
 
         val gunResource = GunResource.from(itemStack).compute()
-        if (gunResource.flarePosition != null) {
+        val pos = gunResource.flarePosition
+        if (pos != null) {
             handleShootFlare(
-                name,
-                stack,
-                itemStack,
-                bone,
-                buffer,
-                packedLightIn,
-                gunResource.flarePosition.x,
-                gunResource.flarePosition.y,
-                gunResource.flarePosition.z,
-                gunResource.flareSize.toDouble()
+                name, stack, itemStack, bone, buffer, packedLightIn,
+                pos.x, pos.y,
+                pos.z, gunResource.flareSize.toDouble()
             )
         }
     }

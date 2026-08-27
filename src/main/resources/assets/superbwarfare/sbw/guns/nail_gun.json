@@ -1,0 +1,12 @@
+{
+  "Icon": "superbwarfare:textures/gun_icon/taser_icon.png",
+  "SlotIcon": "superbwarfare:textures/item/taser_icon.png",
+  "Animation": {
+    "Idle": "animation.nail_gun.idle"
+  },
+  "Model": {
+    "Animation": "superbwarfare:animations/bedrock/gun/nail_gun.animation.json",
+    "Model": "superbwarfare:models/bedrock/gun/nail_gun.geo.json",
+    "Texture": "superbwarfare:textures/bedrock/gun/nail_gun.png"
+  }
+}

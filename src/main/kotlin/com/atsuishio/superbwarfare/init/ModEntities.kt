@@ -2,10 +2,7 @@ package com.atsuishio.superbwarfare.init
 
 import com.atsuishio.superbwarfare.Mod
 import com.atsuishio.superbwarfare.config.server.SpawnConfig
-import com.atsuishio.superbwarfare.entity.living.DPSGeneratorEntity
-import com.atsuishio.superbwarfare.entity.living.SenpaiEntity
-import com.atsuishio.superbwarfare.entity.living.SteelCoilEntity
-import com.atsuishio.superbwarfare.entity.living.TargetEntity
+import com.atsuishio.superbwarfare.entity.living.*
 import com.atsuishio.superbwarfare.entity.misc.CatapultShuttleEntity
 import com.atsuishio.superbwarfare.entity.projectile.*
 import com.atsuishio.superbwarfare.entity.vehicle.*
@@ -48,6 +45,13 @@ object ModEntities {
         "senpai",
         EntityType.Builder.of(::SenpaiEntity, MobCategory.MONSTER)
             .setTrackingRange(64).setUpdateInterval(3).sized(0.65f, 2f).eyeHeight(1.75f)
+    )
+
+    @JvmField
+    val CREEPING_SENPAI = register(
+        "creeping_senpai",
+        EntityType.Builder.of(::CreepingSenpaiEntity, MobCategory.MONSTER)
+            .setTrackingRange(64).setUpdateInterval(3).sized(1.0f, 0.9f)
     )
 
     @JvmField
@@ -416,6 +420,16 @@ object ModEntities {
             },
             RegisterSpawnPlacementsEvent.Operation.OR
         )
+        event.register(
+            CREEPING_SENPAI.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+            { entityType, world, reason, pos, random ->
+                world.difficulty != Difficulty.PEACEFUL
+                        && SpawnConfig.SPAWN_CREEPING_SENPAI.get()
+                        && Monster.isDarkEnoughToSpawn(world, pos, random)
+                        && Mob.checkMobSpawnRules(entityType, world, reason, pos, random)
+            },
+            RegisterSpawnPlacementsEvent.Operation.OR
+        )
     }
 
     @SubscribeEvent
@@ -423,6 +437,7 @@ object ModEntities {
         event.put(TARGET.get(), TargetEntity.createAttributes().build())
         event.put(DPS_GENERATOR.get(), DPSGeneratorEntity.createAttributes().build())
         event.put(SENPAI.get(), SenpaiEntity.createAttributes().build())
+        event.put(CREEPING_SENPAI.get(), CreepingSenpaiEntity.createAttributes().build())
         event.put(STEEL_COIL.get(), SteelCoilEntity.createAttributes().build())
     }
 }

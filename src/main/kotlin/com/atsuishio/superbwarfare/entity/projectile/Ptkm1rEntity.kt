@@ -3,13 +3,9 @@ package com.atsuishio.superbwarfare.entity.projectile
 import com.atsuishio.superbwarfare.Mod.Companion.loc
 import com.atsuishio.superbwarfare.client.animation.entity.Ptkm1rAnimationInstance
 import com.atsuishio.superbwarfare.config.server.ExplosionConfig
-import com.atsuishio.superbwarfare.entity.living.SenpaiEntity
 import com.atsuishio.superbwarfare.entity.vehicle.base.VehicleEntity
 import com.atsuishio.superbwarfare.entity.vehicle.damage.DamageModifier.Companion.createDefaultModifier
-import com.atsuishio.superbwarfare.init.ModDamageTypes
-import com.atsuishio.superbwarfare.init.ModEntities
-import com.atsuishio.superbwarfare.init.ModItems
-import com.atsuishio.superbwarfare.init.ModSounds
+import com.atsuishio.superbwarfare.init.*
 import com.atsuishio.superbwarfare.resource.model.ProjectileModelReloadListener
 import com.atsuishio.superbwarfare.tools.CustomExplosion
 import com.atsuishio.superbwarfare.tools.EntityFindUtil
@@ -207,7 +203,7 @@ open class Ptkm1rEntity : Entity, OwnableEntity {
                             && this.owner !== entity
                             && !(entity is Player && (entity.isCreative || entity.isSpectator))
                             && !entity.isShiftKeyDown
-                            && ((entity.boundingBox.size > 1.5 || entity is VehicleEntity || entity is SenpaiEntity) && entity.deltaMovement.lengthSqr() > 0.009)
+                            && ((entity.boundingBox.size > 1.5 || entity is VehicleEntity || entity.type.`is`(ModTags.EntityTypes.SENPAI)) && entity.deltaMovement.lengthSqr() > 0.009)
                             && this.owner?.vehicle !== entity
                             && (!ExplosionConfig.FRIENDLY_MINES.get() || !SeekTool.IS_FRIENDLY.test(this.owner, entity))
                 if (!condition) continue

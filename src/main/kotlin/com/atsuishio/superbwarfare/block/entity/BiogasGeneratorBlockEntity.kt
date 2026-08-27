@@ -1,6 +1,5 @@
 package com.atsuishio.superbwarfare.block.entity
 
-import com.atsuishio.superbwarfare.entity.living.SenpaiEntity
 import com.atsuishio.superbwarfare.init.ModBlockEntities
 import com.atsuishio.superbwarfare.init.ModTags
 import net.minecraft.core.BlockPos
@@ -33,16 +32,14 @@ open class BiogasGeneratorBlockEntity(pos: BlockPos, state: BlockState) :
         var count = 0f
         list.forEach {
             count += when (it) {
-                is SenpaiEntity -> {
-                    2f
-                }
-
                 is Cow -> {
                     1.5f
                 }
 
                 else -> {
-                    1f
+                    if (it.type.`is`(ModTags.EntityTypes.SENPAI)) {
+                        2f
+                    } else 1f
                 }
             } * it.boundingBox.size.toFloat()
         }

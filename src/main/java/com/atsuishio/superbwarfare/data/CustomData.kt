@@ -49,7 +49,7 @@ object CustomData {
 
     @JvmField
     val GUN_RESOURCE = DataLoader.createResource(
-        "sbw/guns", DefaultGunResource::class.java
+        "sbw/guns", DefaultGunResource::class.java, isKtData = true
     ) { _ -> GunResource.RESOURCE_CACHE.invalidateAll() }
 
     @JvmField

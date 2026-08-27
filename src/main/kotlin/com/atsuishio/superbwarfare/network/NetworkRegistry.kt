@@ -29,7 +29,7 @@ inline fun <reified T> decodeFrom(input: FriendlyByteBuf): T {
 private inline fun <reified T : PacketPayload> playTo(reg: (CustomPacketPayload.Type<T>, StreamCodec<in RegistryFriendlyByteBuf, T>, IPayloadHandler<T>) -> Unit) {
 
     val codec = createStreamCodec<T>()
-    val className = T::class.java.simpleName.substringBefore("Message")
+    val className = T::class.java.simpleName.substringBeforeLast("Message")
 
     val name = className.camelToSnake()
 

@@ -108,7 +108,6 @@ object LivingEventHandler {
         renderDamageIndicator(event)
         reduceDamage(event)
         giveExpToWeapon(event)
-        handleGunLevels(event)
     }
 
     @SubscribeEvent
@@ -225,43 +224,12 @@ object LivingEventHandler {
         if (entity.type.`is`(ModTags.EntityTypes.NO_EXPERIENCE)) return
 
         val data = GunData.from(stack)
-        val amount = (0.5f * event.amount).coerceAtMost(entity.maxHealth)
+        val amount = (0.5f * event.amount).coerceAtMost(entity.maxHealth).toDouble()
 
-        // 先处理发射器类武器或高爆弹的爆炸伤害
-        if (source.`is`(ModDamageTypes.PROJECTILE_EXPLOSION)) {
-            if (data.get(GunProp.EXPLOSION_DAMAGE) > 0 || GunData.from(stack).perk.getLevel(ModPerks.HE_BULLET) > 0) {
-                data.exp.set(data.exp.get() + amount)
-            }
-        }
+        // 判断是不是枪械能造成的伤害
+        if (!DamageTypeTool.isGunDamage(source) && !source.`is`(DamageTypes.PLAYER_ATTACK)) return
 
-        // 再判断是不是枪械能造成的伤害
-        if (!isGunDamage(source) && !source.`is`(DamageTypes.PLAYER_ATTACK)) return
-
-        data.exp.set(data.exp.get() + amount)
-        data.save()
-    }
-
-    private fun giveKillExpToWeapon(event: LivingDeathEvent) {
-        val source = event.source ?: return
-        val sourceEntity = source.entity as? LivingEntity ?: return
-        val stack = sourceEntity.mainHandItem
-        if (stack.item !is GunItem) return
-        if (event.entity.type.`is`(ModTags.EntityTypes.NO_EXPERIENCE)) return
-
-        val data = GunData.from(stack)
-        val amount = (20 + 2 * event.entity.maxHealth).toDouble()
-
-        // 先处理发射器类武器或高爆弹的爆炸伤害
-        if (source.`is`(ModDamageTypes.PROJECTILE_EXPLOSION)) {
-            if (data.get(GunProp.EXPLOSION_DAMAGE) > 0 || GunData.from(stack).perk.getLevel(ModPerks.HE_BULLET) > 0) {
-                data.exp.add(amount)
-            }
-        }
-
-        // 再判断是不是枪械能造成的伤害
-        if (isGunDamage(source) || source.`is`(DamageTypes.PLAYER_ATTACK)) {
-            data.exp.add(amount)
-        }
+        data.exp.add(amount)
 
         // 提升武器等级
         var level = data.level.get()
@@ -278,14 +246,23 @@ object LivingEventHandler {
         data.save()
     }
 
-    private fun handleGunLevels(event: LivingIncomingDamageEvent) {
+    private fun giveKillExpToWeapon(event: LivingDeathEvent) {
         val source = event.source ?: return
         val sourceEntity = source.entity as? LivingEntity ?: return
         val stack = sourceEntity.mainHandItem
         if (stack.item !is GunItem) return
+        val entity = event.entity
         if (event.entity.type.`is`(ModTags.EntityTypes.NO_EXPERIENCE)) return
 
         val data = GunData.from(stack)
+        val amount = 20 + 2 * entity.maxHealth.toDouble()
+
+        // 判断是不是枪械能造成的伤害
+        if (DamageTypeTool.isGunDamage(source) || source.`is`(DamageTypes.PLAYER_ATTACK)) {
+            data.exp.add(amount)
+        }
+
+        // 提升武器等级
         var level = data.level.get()
         var exp = data.exp.get()
         var upgradeExpNeeded = 20 * level.toDouble().pow(2.0) + 160 * level + 20

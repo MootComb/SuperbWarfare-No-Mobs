@@ -54,21 +54,32 @@ object FormatTool {
 
     /**
      * Converts camelCase string to snake_case format safely.
-     * Use lowercaseChar() for efficient char mutations.
+     * Supports acronyms (DPSGenerator -> dps_generator) and digit transitions (Tm62 -> tm_62, M18Smoke -> m18_smoke).
+     * Existing underscores are preserved so already snake_cased input stays unchanged.
      */
     @JvmStatic
     fun camelToSnake(camel: String): String {
         if (camel.isEmpty()) return camel
         val result = StringBuilder()
-        result.append(camel[0].lowercaseChar())
-        for (i in 1 until camel.length) {
+        for (i in camel.indices) {
             val ch = camel[i]
-            if (ch.isUpperCase()) {
-                result.append('_')
-                result.append(ch.lowercaseChar())
-            } else {
-                result.append(ch)
+            if (i > 0) {
+                val prev = camel[i - 1]
+                val next = if (i + 1 < camel.length) camel[i + 1] else null
+                val boundary =
+                    // 大写跟在字母/数字后（普通驼峰边界）
+                    (ch.isUpperCase() && (prev.isLowerCase() || prev.isDigit())) ||
+                            // 连续大写简称的最后一个字母后接小写（如 DPSGenerator -> dps_generator）
+                            (ch.isUpperCase() && prev.isUpperCase() && next != null && next.isLowerCase()) ||
+                            // 数字跟在字母后（如 Tm62 -> tm_62）
+                            (ch.isDigit() && prev.isLowerCase()) ||
+                            // 字母跟在数字后（如 M18Smoke -> m18_smoke）
+                            (ch.isLetter() && prev.isDigit())
+                if (boundary && prev != '_' && next != '_') {
+                    result.append('_')
+                }
             }
+            result.append(ch.lowercaseChar())
         }
         return result.toString()
     }

@@ -144,7 +144,7 @@ object BiogasGeneratorPonderScene {
             null,
             null,
             null,
-            "{AbsorptionAmount:0.0f,ArmorDropChances:[0.085f,0.085f,0.085f,0.085f],ArmorItems:[{},{},{},{}],Attributes:[{Base:0.08d,Name:\"forge:entity_gravity\"},{Base:0.0d,Name:\"forge:step_height_addition\"},{Base:0.23d,Name:\"minecraft:generic.movement_speed\"}],Brain:{memories:{}},CanPickUpLoot:0b,CanUpdate:1b,FallFlying:0b,ForgeCaps:{\"curios:inventory\":{Curios:[]},\"superbwarfare:phosphorus_fire_capability\":{SbwPhosphorusFire:0b}},ForgeData:{},HandDropChances:[0.085f,0.085f],HandItems:[{},{}],Health:24.0f,HurtByTimestamp:0,Invulnerable:0b,LeftHanded:1b,PersistenceRequired:0b,Runner:0b}",
+            "{AbsorptionAmount:0.0f,ArmorDropChances:[0.085f,0.085f,0.085f,0.085f],ArmorItems:[{},{},{},{}],Attributes:[{Base:0.08d,Name:\"neoforge:entity_gravity\"},{Base:0.0d,Name:\"forge:step_height_addition\"},{Base:0.23d,Name:\"minecraft:generic.movement_speed\"}],Brain:{memories:{}},CanPickUpLoot:0b,CanUpdate:1b,FallFlying:0b,ForgeCaps:{\"curios:inventory\":{Curios:[]},\"superbwarfare:phosphorus_fire_capability\":{SbwPhosphorusFire:0b}},ForgeData:{},HandDropChances:[0.085f,0.085f],HandItems:[{},{}],Health:24.0f,HurtByTimestamp:0,Invulnerable:0b,LeftHanded:1b,PersistenceRequired:0b,Runner:0b}",
             null,
             "simultaneous",
             null,

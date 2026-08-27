@@ -77,7 +77,7 @@ object DpsGeneratorDeployerPonderScene {
         GeneratedPonderSupport.preScanBounds(scene, BlockPos(2, 1, 2), BlockPos(2, 1, 2))
         GeneratedPonderSupport.showStructure(scene, context, null, null, null, null)
         scene.idle(20)
-        GeneratedPonderSupport.createEntity(scene, context, "superbwarfare:dps_generator", Vec3(2.5, 2.0, 2.5), Vec3(2.5, 0.0, 0.5), null, null, "{AbsorptionAmount:0.0f,Attributes:[{Base:0.0d,Name:\"forge:step_height_addition\"},{Base:0.08d,Name:\"forge:entity_gravity\"},{Base:0.0d,Name:\"minecraft:generic.movement_speed\"}],Brain:{memories:{}},CanUpdate:1b,Energy:0,FallFlying:0b,ForgeCaps:{\"curios:inventory\":{Curios:[]},\"superbwarfare:phosphorus_fire_capability\":{SbwPhosphorusFire:0b}},Health:40.0f,HurtByTimestamp:0,Invulnerable:0b,Level:0,NoGravity:1b}", null, "simultaneous", null, "down")
+        GeneratedPonderSupport.createEntity(scene, context, "superbwarfare:dps_generator", Vec3(2.5, 2.0, 2.5), Vec3(2.5, 0.0, 0.5), null, null, "{AbsorptionAmount:0.0f,Attributes:[{Base:0.0d,Name:\"neoforge:step_height_addition\"},{Base:0.08d,Name:\"forge:entity_gravity\"},{Base:0.0d,Name:\"minecraft:generic.movement_speed\"}],Brain:{memories:{}},CanUpdate:1b,Energy:0,FallFlying:0b,ForgeCaps:{\"curios:inventory\":{Curios:[]},\"superbwarfare:phosphorus_fire_capability\":{SbwPhosphorusFire:0b}},Health:40.0f,HurtByTimestamp:0,Invulnerable:0b,Level:0,NoGravity:1b}", null, "simultaneous", null, "down")
         GeneratedPonderSupport.setBlock(scene, context, "superbwarfare:charging_station", mapOf("show_range" to "false"), BlockPos(2, 1, 2), null, "{Energy:0,FuelTick:0,Items:[],MaxFuelTick:1600,ShowRange:0b}", false, false, "down", 20, 1, false, null, "down")
         scene.idle(20)
         scene.addKeyframe()

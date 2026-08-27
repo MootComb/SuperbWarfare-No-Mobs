@@ -29,7 +29,7 @@ class ModelResource {
         if (level < 1 || lodModel == null || lodModel!!.list.isEmpty()) return model
 
         val availableLevel = min(level - 1, lodModel!!.list.size - 1)
-        return lodModel!!.list.get(availableLevel)
+        return lodModel!!.list[availableLevel]
     }
 
     @JvmField

@@ -103,6 +103,11 @@ class ModEntityTypeTagProvider(
             ModEntities.SENPAI.get()
         ).addOptional(ResourceLocation.fromNamespaceAndPath("touhou_little_maid", "maid"))
 
+        this.tag(ModTags.EntityTypes.SENPAI).add(
+            ModEntities.SENPAI.get(),
+            ModEntities.CREEPING_SENPAI.get()
+        )
+
         this.tag(
             TagKey.create(
                 Registries.ENTITY_TYPE,

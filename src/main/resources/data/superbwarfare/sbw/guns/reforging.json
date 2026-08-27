@@ -1,0 +1,25 @@
+{
+  "Spread": 0,
+  "RecoilX": 0.0025,
+  "RecoilY": 0.014,
+  "Damage": 10,
+  "Headshot": 2.5,
+  "Velocity": 42.5,
+  "Magazine": 200,
+  "Weight": 5,
+  "DefaultFireMode": "Auto",
+  "NormalReloadTime": 54,
+  "EmptyReloadTime": 71,
+  "BypassesArmor": 0.8,
+  "SoundRadius": 16,
+  "RPM": 600,
+  "GunType": "Rifle",
+  "DamageReduce": {
+    "Type": "Rifle"
+  },
+  "AvailableFireModes": [
+    "Auto"
+  ],
+  "AmmoType": "@RifleAmmo",
+  "Icon": "superbwarfare:textures/gun_icon/mk_14_icon.png"
+}

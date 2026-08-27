@@ -1,0 +1,12 @@
+{
+  "Icon": "superbwarfare:textures/gun_icon/taser_icon.png",
+  "SlotIcon": "superbwarfare:textures/item/reforging_icon.png",
+  "Animation": {
+    "Idle": "animation.reforging.idle"
+  },
+  "Model": {
+    "Animation": "superbwarfare:animations/bedrock/gun/reforging.animation.json",
+    "Model": "superbwarfare:models/bedrock/gun/reforging.geo.json",
+    "Texture": "superbwarfare:textures/bedrock/gun/reforging.png"
+  }
+}

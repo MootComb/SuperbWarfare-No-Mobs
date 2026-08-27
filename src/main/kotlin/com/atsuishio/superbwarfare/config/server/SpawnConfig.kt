@@ -14,6 +14,13 @@ object SpawnConfig {
     }
 
     @JvmField
+    val SPAWN_CREEPING_SENPAI = buildServerConfig {
+        comment("Set true to allow Creeping Senpai to spawn naturally")
+        comment("是否允许爬行先辈自然生成（悲）")
+        define("spawn_creeping_senpai", false)
+    }
+
+    @JvmField
     val SPAWN_STEEL_COIL = buildServerConfig {
         comment("Set true to allow Steel Coil to spawn naturally")
         comment("是否允许钢卷自然生成")

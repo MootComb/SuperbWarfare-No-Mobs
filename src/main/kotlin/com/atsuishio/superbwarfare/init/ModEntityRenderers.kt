@@ -14,6 +14,7 @@ object ModEntityRenderers {
         with(event) {
             registerEntityRenderer(ModEntities.MORTAR.get(), ::MortarRenderer)
             registerEntityRenderer(ModEntities.SENPAI.get(), ::SenpaiRenderer)
+            registerEntityRenderer(ModEntities.CREEPING_SENPAI.get(), ::CreepingSenpaiRenderer)
             registerEntityRenderer(ModEntities.CLAYMORE.get(), ::ClaymoreRenderer)
             registerEntityRenderer(ModEntities.C4.get(), ::C4Renderer)
             registerEntityRenderer(ModEntities.TASER_BULLET.get(), ::BasicProjectileRenderer)

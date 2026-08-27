@@ -27,6 +27,7 @@ import com.atsuishio.superbwarfare.resource.gun.GunResource
 import com.atsuishio.superbwarfare.tools.*
 import com.atsuishio.superbwarfare.world.saveddata.TDMSavedData
 import com.mojang.blaze3d.vertex.PoseStack
+import com.mojang.math.Axis
 import net.minecraft.ChatFormatting
 import net.minecraft.client.CameraType
 import net.minecraft.client.Minecraft
@@ -2297,6 +2298,51 @@ object ClientEventHandler {
         root.rotX = gunRotX
         root.rotY = gunRotY
         root.rotZ = gunRotZ
+    }
+
+    @JvmStatic
+    fun gunRootMoveV2(
+        poseStack: PoseStack,
+        customX: Float,
+        customY: Float,
+        customZ: Float,
+        useCustomAnim: Boolean
+    ) {
+        val walkPosX = movePosX.toFloat()
+        val walkPosY = (swayY + movePosY).toFloat()
+        val walkPosZ = 0f
+        val walkRotX = swayX.toFloat()
+        val walkRotY = (0.2f * movePosX).toFloat()
+        val walkRotZ = (0.2f * movePosX).toFloat()
+
+        val i = if (useCustomAnim) 0 else 1
+
+        val basicSprintPosX = (sprintBasicPosX * (-2.5 + customX)).toFloat() * i
+        val basicSprintPosY =
+            (sprintBasicPosY * (-7.5 + customY - 8 * AnimationCurves.PARABOLA.apply(sprintBasicPosY))).toFloat() * i
+        val basicSprintPosZ = (sprintBasicPosZ * (-0.55 + customZ)).toFloat() * i
+
+        val basicSprintRotX = (sprintBasicRotX * 33 * Mth.DEG_TO_RAD).toFloat() * i
+        val basicSprintRotY = (sprintBasicRotY * 35.6 * Mth.DEG_TO_RAD).toFloat() * i
+        val basicSprintRotZ = (sprintBasicRotZ * 25.7 * Mth.DEG_TO_RAD).toFloat() * i
+
+        val gunPosX =
+            (walkPosX + basicSprintPosX + sprintPosX * i + 20 * drawTime + 9.3f * movePosHorizon).toFloat() * (1 - 0.5 * zoomTime).toFloat()
+        val gunPosY =
+            (walkPosY + basicSprintPosY + sprintPosY * i - 40 * drawTime - 2f * velocityY).toFloat() * (1 - 0.5 * zoomTime).toFloat()
+        val gunPosZ = (walkPosZ + basicSprintPosZ) * (1 - 1 * zoomTime).toFloat()
+        val gunRotX =
+            ((walkRotX + basicSprintRotX - Mth.DEG_TO_RAD * 60 * drawTime - 0.15f * velocityY) * (1 - 0.5 * zoomTime) + Mth.DEG_TO_RAD * turnRot[0]).toFloat()
+        val gunRotY =
+            ((walkRotY + basicSprintRotY + (0.2f * sprintBasicPosX * i) + Mth.DEG_TO_RAD * 300 * drawTime) * (1 - 0.75 * zoomTime) + Mth.DEG_TO_RAD * turnRot[1]).toFloat()
+        val gunRotZ =
+            ((walkRotZ + basicSprintRotZ + moveRotZ + Mth.DEG_TO_RAD * 90 * drawTime + 2.7f * movePosHorizon) * (1 - 0.5 * zoomTime) + Mth.DEG_TO_RAD * turnRot[2]).toFloat()
+
+        poseStack.translate(-gunPosX / 16, gunPosY / 16, gunPosZ / 16)
+
+        poseStack.mulPose(Axis.XP.rotation(gunRotX))
+        poseStack.mulPose(Axis.YP.rotation(gunRotY))
+        poseStack.mulPose(Axis.ZP.rotation(gunRotZ))
     }
 
     private fun handleWeaponZoom(entity: LivingEntity) {

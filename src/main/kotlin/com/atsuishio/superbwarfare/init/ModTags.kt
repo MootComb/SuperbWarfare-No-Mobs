@@ -205,6 +205,9 @@ object ModTags {
 
         @JvmField
         val BIOGAS_GENERATOR_WHITELIST = modEntityTag("biogas_generator_whitelist")
+
+        @JvmField
+        val SENPAI = modEntityTag("senpai")
     }
 
     object Perks {

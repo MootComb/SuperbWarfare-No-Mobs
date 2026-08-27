@@ -400,7 +400,7 @@ object CrossHairOverlay : CommonOverlay("cross_hair") {
         }
     }
 
-    fun renderGrenadeCrosshair(guiGraphics: GuiGraphics, stack: ItemStack?, screenWidth: Int, screenHeight: Int) {
+    fun renderGrenadeCrosshair(guiGraphics: GuiGraphics, stack: ItemStack, screenWidth: Int, screenHeight: Int) {
         if (ClientEventHandler.zoomTime > 0.8 && GunResource.compute(stack).hideCrosshairWhenZoom) return
 
         guiGraphics.blit(REX, screenWidth / 2 - 16, screenHeight / 2 - 16, 0f, 0f, 32, 32, 32, 32)
