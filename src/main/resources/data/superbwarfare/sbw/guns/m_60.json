@@ -1,15 +1,32 @@
 {
   "Spread": 5,
+  "OpenBolt": true,
   "RecoilX": 0.004,
   "RecoilY": 0.014,
   "Damage": 10,
   "Headshot": 2,
-  "Velocity": 43,
+  "Velocity": 19,
   "Magazine": 100,
   "Weight": 8,
+  "DrawTime": 15,
+  "ZoomTime": 10,
   "DefaultFireMode": "Auto",
   "NormalReloadTime": 114,
   "EmptyReloadTime": 133,
+  "ActionSteps": [
+    {
+      "Timeline": "RELOAD_NORMAL",
+      "Progress": 0.51754,
+      "Action": "HIDE_BULLET_CHAIN",
+      "Value": false
+    },
+    {
+      "Timeline": "RELOAD_EMPTY",
+      "Progress": 0.58647,
+      "Action": "HIDE_BULLET_CHAIN",
+      "Value": false
+    }
+  ],
   "BypassesArmor": 0.25,
   "SoundRadius": 15,
   "RPM": 600,

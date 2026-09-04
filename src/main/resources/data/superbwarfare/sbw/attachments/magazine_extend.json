@@ -1,0 +1,11 @@
+{
+  "Slot": "Magazine",
+  "Level": 1,
+  "Modifiers": [
+    {
+      "Prop": "Weight",
+      "Op": "Add",
+      "Value": 1.0
+    }
+  ]
+}

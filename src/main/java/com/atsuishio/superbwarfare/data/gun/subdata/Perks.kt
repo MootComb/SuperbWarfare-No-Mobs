@@ -100,14 +100,20 @@ class Perks(private val gun: GunData) {
      */
     fun getLevel(perk: Perk): Short {
         val name = perk.type.typeName
-        if (rootTag.contains(name, Tag.TAG_COMPOUND.toInt())) {
+
+        // TODO 自动转换旧版tag
+        if (rootTag.contains(name, Tag.TAG_COMPOUND.toInt()) && rootTag.getCompound(name)
+                .getString("Name") == perk.name
+        ) {
             return rootTag.getCompound(name).getShort("Level")
         }
+
         if (rootTag.contains(name, Tag.TAG_LIST.toInt())) {
             val list = rootTag.getList(name, Tag.TAG_COMPOUND.toInt())
             val entry = list.firstOrNull { (it as CompoundTag).getString("Name") == perk.name } as? CompoundTag
             return entry?.getShort("Level") ?: 0
         }
+
         return 0
     }
 

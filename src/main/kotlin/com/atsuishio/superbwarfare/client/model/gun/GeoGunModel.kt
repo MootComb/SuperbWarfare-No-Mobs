@@ -37,16 +37,37 @@ open class GeoGunModel @JvmOverloads constructor(
 ) {
     val instance: TreeModelInstance = baseModel.createInstance()
 
+    private val illuminatedBoneIndices: IntArray = baseModel.bones()
+        .asSequence()
+        .filter { it.name().endsWith(ILLUMINATED_SUFFIX) }
+        .map { it.index() }
+        .toList()
+        .toIntArray()
+
+    private val magazineBones: Map<String, Int> = mapOf(
+        MAGAZINE_STANDARD_BONE to baseModel.getIndex(MAGAZINE_STANDARD_BONE),
+        MAGAZINE_EXTEND_BONE to baseModel.getIndex(MAGAZINE_EXTEND_BONE),
+        MAGAZINE_EXTEND_PRO_BONE to baseModel.getIndex(MAGAZINE_EXTEND_PRO_BONE)
+    ).filterValues { it >= 0 }
+
+    private val stockBones: Map<String, Int> = mapOf(
+        OEM_STOCK_STANDARD_BONE to baseModel.getIndex(OEM_STOCK_STANDARD_BONE),
+        OEM_STOCK_LIGHT_BONE to baseModel.getIndex(OEM_STOCK_LIGHT_BONE),
+        OEM_STOCK_HEAVY_BONE to baseModel.getIndex(OEM_STOCK_HEAVY_BONE),
+        CUSTOM_STOCK_ADAPTER_BONE to baseModel.getIndex(CUSTOM_STOCK_ADAPTER_BONE)
+    ).filterValues { it >= 0 }
+
     protected val rootBoneIndex: Int = baseModel.getIndex(ROOT_BONE)
-    protected val gunBoneIndex: Int = baseModel.getIndex(GUN_BONE)
     protected val cameraBoneIndex: Int = baseModel.getIndex(CAMERA_BONE)
-    protected val mainBoneIndex: Int = baseModel.getIndex(MAIN_BONE)
-    protected val moveBoneIndex: Int = baseModel.getIndex(MOVE_BONE)
     protected val leftHandBoneIndex: Int = baseModel.getIndex(LEFT_HAND_BONE)
     protected val rightHandBoneIndex: Int = baseModel.getIndex(RIGHT_HAND_BONE)
 
     protected val bindGlobalTransformCache = hashMapOf<String, Matrix4f?>()
     protected var modelCenterCache: Vector3f? = null
+
+    init {
+        markIlluminatedBones()
+    }
 
     fun getBone(boneName: String): BoneState? = instance.getBone(boneName)
 
@@ -62,6 +83,7 @@ open class GeoGunModel @JvmOverloads constructor(
 
     fun resetPose() {
         instance.resetPose()
+        markIlluminatedBones()
     }
 
     fun getGlobalTransform(boneName: String): Matrix4f? {
@@ -71,15 +93,29 @@ open class GeoGunModel @JvmOverloads constructor(
 
     fun getGlobalTransform(boneIndex: Int): Matrix4f = instance.getGlobalTransform(boneIndex)
 
-    fun getGunRootBone(): BoneState? = instance.getBone(rootBoneIndex)
-
-    fun getGunBone(): BoneState? = instance.getBone(gunBoneIndex)
+    fun getRootBone(): BoneState? = instance.getBone(rootBoneIndex)
 
     fun getCameraBone(): BoneState? = instance.getBone(cameraBoneIndex)
 
-    fun getMainBone(): BoneState? = instance.getBone(mainBoneIndex)
+    fun showMagazineBone(visibleBoneName: String) {
+        val visibleIndex = magazineBones[visibleBoneName]
+            ?: magazineBones[MAGAZINE_STANDARD_BONE]
+            ?: return
+        for ((_, index) in magazineBones) {
+            instance.getBone(index)?.visible = index == visibleIndex
+        }
+    }
 
-    fun getMoveBone(): BoneState? = instance.getBone(moveBoneIndex)
+    fun showStockBone(
+        visibleBoneName: String,
+        fallbackBoneName: String = OEM_STOCK_STANDARD_BONE
+    ) {
+        val visibleIndex = stockBones[visibleBoneName]
+            ?: stockBones[fallbackBoneName]
+        for ((_, index) in stockBones) {
+            instance.getBone(index)?.visible = index == visibleIndex
+        }
+    }
 
     /**
      * Global transform for a bone in bind pose, cached by name.
@@ -193,6 +229,8 @@ open class GeoGunModel @JvmOverloads constructor(
     ) {
         hideBone(leftHandBoneIndex)
         hideBone(rightHandBoneIndex)
+        hideShellGeometry()
+        markIlluminatedBones()
 
         baseModel.renderToBuffer(
             instance,
@@ -218,6 +256,20 @@ open class GeoGunModel @JvmOverloads constructor(
         instance.getBone(boneIndex)?.visible = false
     }
 
+    private fun hideShellGeometry() {
+        baseModel.bones().forEach { bone ->
+            if (SHELL_GEOMETRY_PATTERN.matches(bone.name())) {
+                instance.getBone(bone.index())?.visible = false
+            }
+        }
+    }
+
+    private fun markIlluminatedBones() {
+        for (index in illuminatedBoneIndices) {
+            instance.getBone(index)?.illuminated = true
+        }
+    }
+
     private fun renderHands(poseStack: PoseStack, packedLight: Int, bufferSource: MultiBufferSource) {
         val player = localPlayer ?: return
 
@@ -237,13 +289,38 @@ open class GeoGunModel @JvmOverloads constructor(
     }
 
     companion object {
-        protected const val GUN_BONE = "gun"
         protected const val ROOT_BONE = "root"
         protected const val CAMERA_BONE = "camera"
-        protected const val MAIN_BONE = "main"
-        protected const val MOVE_BONE = "move"
         protected const val LEFT_HAND_BONE = "lefthand_pos"
         protected const val RIGHT_HAND_BONE = "righthand_pos"
+
+        private const val ILLUMINATED_SUFFIX = "_illuminated"
+
+        const val MAGAZINE_STANDARD_BONE = "magazine_standard"
+        const val MAGAZINE_EXTEND_BONE = "magazine_extend"
+        const val MAGAZINE_EXTEND_PRO_BONE = "magazine_extend_pro"
+
+        const val OEM_STOCK_STANDARD_BONE = "oem_stock_standard"
+        const val OEM_STOCK_LIGHT_BONE = "oem_stock_light"
+        const val OEM_STOCK_HEAVY_BONE = "oem_stock_heavy"
+        const val CUSTOM_STOCK_ADAPTER_BONE = "custom_stock_adapter"
+
+        @JvmField
+        val MAGAZINE_BONE_NAMES: Set<String> = setOf(
+            MAGAZINE_STANDARD_BONE,
+            MAGAZINE_EXTEND_BONE,
+            MAGAZINE_EXTEND_PRO_BONE
+        )
+
+        @JvmField
+        val STOCK_BONE_NAMES: Set<String> = setOf(
+            OEM_STOCK_STANDARD_BONE,
+            OEM_STOCK_LIGHT_BONE,
+            OEM_STOCK_HEAVY_BONE,
+            CUSTOM_STOCK_ADAPTER_BONE
+        )
+
+        private val SHELL_GEOMETRY_PATTERN = Regex("^shells$|^shell\\d+$|^bullet_shell$", RegexOption.IGNORE_CASE)
 
         @JvmStatic
         fun create(modelPath: ResourceLocation): GeoGunModel? {

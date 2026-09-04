@@ -1,12 +1,14 @@
 {
   "Spread": 2,
-  "RecoilX": 0.004,
-  "RecoilY": 0.031,
+  "RecoilX": 0.006,
+  "RecoilY": 0.051,
   "Damage": 16,
   "Headshot": 2.5,
-  "Velocity": 38,
+  "Velocity": 17,
   "Magazine": 8,
   "Weight": 3,
+  "DrawTime": 10,
+  "ZoomTime": 5,
   "ReloadTypes": [
     "Iterative"
   ],
@@ -14,6 +16,31 @@
   "IterativeTime": 14,
   "IterativeAmmoLoadTime": 3,
   "FinishTime": 19,
+  "ActionSteps": [
+    {
+      "Timeline": "RELOAD_FINISH",
+      "Progress": 0.52381,
+      "Action": "CLOSE_STRIKE",
+      "Value": false
+    },
+    {
+      "Timeline": "RELOAD_FINISH",
+      "Progress": 0.52381,
+      "Action": "EMPTY",
+      "Value": false
+    },
+    {
+      "Timeline": "BOLT",
+      "Progress": 0.22222,
+      "Action": "CLOSE_STRIKE",
+      "Value": false
+    },
+    {
+      "Timeline": "NO_AMMO",
+      "Action": "CLOSE_STRIKE",
+      "Value": true
+    }
+  ],
   "BypassesArmor": 0.3,
   "SoundRadius": 15,
   "BoltActionTime": 8,
@@ -32,6 +59,10 @@
     "superbwarfare:powerful_attraction",
     "superbwarfare:intelligent_chip",
     "superbwarfare:backpack_linked_magazine",
+    "superbwarfare:adrenaline_rush",
+    "superbwarfare:quickdraw",
+    "superbwarfare:snapshot_sights",
+    "superbwarfare:triple_tap",
     "superbwarfare:kill_clip",
     "superbwarfare:gutshot_straight",
     "superbwarfare:monster_hunter",
@@ -48,19 +79,26 @@
     "!superbwarfare:longer_wire",
     "!superbwarfare:cupid_arrow"
   ],
+  "AvailableAttachments": {
+    "Scope": [
+      "superbwarfare:iron_sight",
+      "superbwarfare:acog_4x"
+    ],
+    "Barrel": [
+      "superbwarfare:meowlencer",
+      "superbwarfare:hissilencer",
+      "superbwarfare:silaowuncer",
+      "superbwarfare:ru_silencer",
+      "superbwarfare:ar_silencer",
+      "superbwarfare:loudspeaker"
+    ]
+  },
   "SoundInfo": {
     "Fire1P": "superbwarfare:marlin_fire_1p",
     "Fire3P": "superbwarfare:marlin_fire_3p",
+    "Fire1PSilent": "superbwarfare:marlin_fire_1p_s",
+    "Fire3PSilent": "superbwarfare:marlin_fire_3p_s",
     "Fire3PFar": "superbwarfare:marlin_far",
-    "Fire3PVeryFar": "superbwarfare:marlin_veryfar",
-    "ReloadPrepare": "superbwarfare:marlin_prepare",
-    "ReloadLoop": "superbwarfare:marlin_loop",
-    "ReloadEnd": "superbwarfare:marlin_bolt",
-    "Bolt": "superbwarfare:marlin_bolt",
-    "CancellableSounds": [
-      "superbwarfare:marlin_prepare",
-      "superbwarfare:marlin_loop",
-      "superbwarfare:marlin_bolt"
-    ]
+    "Fire3PVeryFar": "superbwarfare:marlin_veryfar"
   }
 }

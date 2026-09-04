@@ -1,7 +1,7 @@
 package com.atsuishio.superbwarfare.item.ammo
 
 import com.atsuishio.superbwarfare.data.gun.Ammo
-import com.atsuishio.superbwarfare.init.ModAttachments
+import com.atsuishio.superbwarfare.init.ModDataAttachments
 import com.atsuishio.superbwarfare.init.ModItems
 import com.atsuishio.superbwarfare.init.ModSounds
 import com.atsuishio.superbwarfare.tools.InventoryTool
@@ -50,7 +50,7 @@ open class AmmoSupplierItem(val type: Ammo, val ammoToAdd: Int, properties: Prop
 
             toAddCount
         } else {
-            val capability = player.getData(ModAttachments.PLAYER_VARIABLE).watch()
+            val capability = player.getData(ModDataAttachments.PLAYER_VARIABLE).watch()
 
             val canAddAmount = type.limit - type.get(capability)
             val toAddCount = (canAddAmount / ammoToAdd).coerceAtMost(count)
@@ -62,7 +62,7 @@ open class AmmoSupplierItem(val type: Ammo, val ammoToAdd: Int, properties: Prop
             }
 
             this.type.add(capability, ammoToAdd * toAddCount)
-            player.setData(ModAttachments.PLAYER_VARIABLE, capability)
+            player.setData(ModDataAttachments.PLAYER_VARIABLE, capability)
             capability.sync(player)
 
             toAddCount

@@ -5,7 +5,7 @@ import com.atsuishio.superbwarfare.client.animation.AnimationTimer
 import com.atsuishio.superbwarfare.client.animation.ValueAnimator
 import com.atsuishio.superbwarfare.data.gun.Ammo
 import com.atsuishio.superbwarfare.entity.vehicle.base.VehicleEntity
-import com.atsuishio.superbwarfare.init.ModAttachments
+import com.atsuishio.superbwarfare.init.ModDataAttachments
 import com.atsuishio.superbwarfare.init.ModItems
 import com.atsuishio.superbwarfare.item.ammo.AmmoSupplierItem
 import com.atsuishio.superbwarfare.item.ammo.ammoBoxData
@@ -72,7 +72,7 @@ object AmmoCountOverlay : CommonOverlay("ammo_count") {
         var yOffset = (-h - Ammo.entries.size * fontHeight) / 2f
 
         // 渲染总弹药数量
-        val cap = player.getData(ModAttachments.PLAYER_VARIABLE)
+        val cap = player.getData(ModDataAttachments.PLAYER_VARIABLE)
         val font = Minecraft.getInstance().font
 
         for (type in Ammo.entries) {

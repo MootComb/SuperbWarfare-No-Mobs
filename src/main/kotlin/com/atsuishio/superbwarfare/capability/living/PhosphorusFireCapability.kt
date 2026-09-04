@@ -1,7 +1,7 @@
 package com.atsuishio.superbwarfare.capability.living
 
 import com.atsuishio.superbwarfare.Mod.Companion.loc
-import com.atsuishio.superbwarfare.init.ModAttachments
+import com.atsuishio.superbwarfare.init.ModDataAttachments
 import net.minecraft.core.HolderLookup
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.resources.ResourceLocation
@@ -31,7 +31,7 @@ class PhosphorusFireCapability : INBTSerializable<CompoundTag> {
 
         @JvmStatic
         fun of(living: LivingEntity): PhosphorusFireCapability {
-            return living.getData(ModAttachments.PHOSPHORUS_FIRE)
+            return living.getData(ModDataAttachments.PHOSPHORUS_FIRE)
         }
     }
 }

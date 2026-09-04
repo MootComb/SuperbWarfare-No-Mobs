@@ -69,12 +69,13 @@ import org.joml.Math
 import software.bernie.geckolib.animatable.GeoItem
 import java.util.*
 import java.util.concurrent.atomic.AtomicReference
-import java.util.function.Consumer
 
 abstract class GunItem(properties: Properties) : Item(properties.stacksTo(1)), ItemScreenProvider,
     EnergyStorageItem, PropertyModifier<GunData, DefaultGunData> {
 
     protected val random: RandomSource = RandomSource.create()
+
+    private var isDamageable = false
 
     override fun getMaxEnergy(stack: ItemStack): Int {
         return if (stack.item is GunItem) GunData.get(stack, GunProp.MAX_ENERGY) else 0
@@ -88,29 +89,17 @@ abstract class GunItem(properties: Properties) : Item(properties.stacksTo(1)), I
         return if (stack.item is GunItem) GunData.get(stack, GunProp.MAX_EXTRACT_ENERGY) else -1
     }
 
-    @JvmField
-    val reloadTimeBehaviors = mutableMapOf<Int, Consumer<GunData>?>()
-
-    @JvmField
-    val boltTimeBehaviors = mutableMapOf<Int, Consumer<GunData>?>()
-
-    init {
-        addReloadTimeBehavior(this.reloadTimeBehaviors)
-        addBoltTimeBehavior(this.boltTimeBehaviors)
-    }
-
     override fun modifyProperty(modifier: PMC<GunData, DefaultGunData>) = with(GunProp) {
         val data = modifier.data
 
         modifier[DAMAGE] += getCustomDamage(data)
         modifier[HEADSHOT] += getCustomHeadshot(data)
         modifier[BYPASSES_ARMOR] += getCustomBypassArmor(data)
-        modifier[MAGAZINE] += getCustomMagazine(data)
         modifier[DEFAULT_ZOOM] += getCustomZoom(data)
         modifier[RPM] += getCustomRPM(data)
         modifier[WEIGHT] += getCustomWeight(data)
         modifier[VELOCITY] += getCustomVelocity(data)
-        modifier[SOUND_RADIUS] += getCustomSoundRadius(data)
+        modifier[SOUND_RADIUS] *= getCustomSoundRadius(data)
         modifier[BOLT_ACTION_TIME] += getCustomBoltActionTime(data)
     }
 
@@ -251,12 +240,12 @@ abstract class GunItem(properties: Properties) : Item(properties.stacksTo(1)), I
     /**
      * 开膛待击
      */
-    open fun isOpenBolt(data: GunData) = false
+    open fun isOpenBolt(data: GunData) = data.get(GunProp.OPEN_BOLT)
 
     /**
      * 是否允许额外往枪管里塞入一发子弹
      */
-    open fun hasBulletInBarrel(data: GunData) = false
+    open fun hasBulletInBarrel(data: GunData) = data.get(GunProp.HAS_BARREL_BULLET)
 
     /**
      * 武器是否能更换枪管配件
@@ -389,9 +378,15 @@ abstract class GunItem(properties: Properties) : Item(properties.stacksTo(1)), I
     open fun getCustomVelocity(data: GunData) = 0.0
 
     /**
-     * 获取额外音效半径加成
+     * 获取音效半径倍率；没有配件时为 1.0
      */
-    open fun getCustomSoundRadius(data: GunData) = if (data.attachment.get(AttachmentType.BARREL) == 2) 0.6 else 1.0
+    open fun getCustomSoundRadius(data: GunData): Double {
+        var multiplier = 1.0
+        for (instance in data.attachment.installed()) {
+            multiplier *= instance.definition.soundRadiusMultiplier
+        }
+        return multiplier
+    }
 
     /**
      * 是否允许缩放
@@ -402,16 +397,6 @@ abstract class GunItem(properties: Properties) : Item(properties.stacksTo(1)), I
      * 是否允许切换瞄具
      */
     open fun canSwitchScope(data: GunData) = false
-
-    /**
-     * 添加达到指定换弹时间时的额外行为
-     */
-    open fun addReloadTimeBehavior(behaviors: MutableMap<Int, Consumer<GunData>?>?) {}
-
-    /**
-     * 添加达到指定拉栓/泵动时间时的额外行为
-     */
-    open fun addBoltTimeBehavior(behaviors: MutableMap<Int, Consumer<GunData>?>?) {}
 
     /**
      * 判断武器能否开火
@@ -428,7 +413,6 @@ abstract class GunItem(properties: Properties) : Item(properties.stacksTo(1)), I
 
     open fun useSpecialFireProcedure(data: GunData) = false
     open fun hideBulletChainBelowShots() = -1
-    open fun whenNoAmmo(data: GunData) {}
 
     /**
      * 服务端在开火前的额外行为
@@ -462,7 +446,6 @@ abstract class GunItem(properties: Properties) : Item(properties.stacksTo(1)), I
 
         if (!data.useBackpackAmmo()) {
             data.ammo.set(data.ammo.get() - data.get(GunProp.AMMO_COST_PER_SHOOT))
-            //            data.item.whenNoAmmo(data);
         } else {
             data.consumeBackupAmmo(ammoSupplier, data.get(GunProp.AMMO_COST_PER_SHOOT))
         }
@@ -484,7 +467,9 @@ abstract class GunItem(properties: Properties) : Item(properties.stacksTo(1)), I
             }
         }
 
-        data.closeStrike.set(true)
+        if (data.get(GunProp.BOLT_ACTION_TIME) > 0) {
+            data.closeStrike.set(true)
+        }
 
         // 真实后坐（
         if (shooter != null && data.get(GunProp.RECOIL) != 0.0) {
@@ -624,7 +609,7 @@ abstract class GunItem(properties: Properties) : Item(properties.stacksTo(1)), I
 
         val soundRadius = data.get(GunProp.SOUND_RADIUS).toFloat()
         val soundInfo = data.get(GunProp.SOUND_INFO)
-        val isSilent = data.attachment.get(AttachmentType.BARREL) == 2
+        val isSilent = data.isBarrelSilenced()
 
         val sound3p = if (isSilent) soundInfo.fire3PSilent else soundInfo.fire3P
         if (sound3p != null) {

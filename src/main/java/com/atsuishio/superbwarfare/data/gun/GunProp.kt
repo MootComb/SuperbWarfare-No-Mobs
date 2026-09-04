@@ -1,6 +1,7 @@
 package com.atsuishio.superbwarfare.data.gun
 
 import com.atsuishio.superbwarfare.Mod
+import com.atsuishio.superbwarfare.data.ObjectToList
 import com.atsuishio.superbwarfare.data.PMC
 import com.atsuishio.superbwarfare.data.Prop
 import com.atsuishio.superbwarfare.data.gun.GunData.Companion.getPerkPriority
@@ -13,7 +14,8 @@ import kotlin.reflect.KMutableProperty1
 class GunProp<T, R>(
     prop: KMutableProperty1<DefaultGunData, T>,
     transform: (T) -> R,
-) : Prop<GunData, DefaultGunData, T, R, GunProp<T, R>>(prop, transform) {
+    contextTransform: ((GunData, T) -> R)? = null,
+) : Prop<GunData, DefaultGunData, T, R, GunProp<T, R>>(prop, transform, contextTransform) {
 
     override fun toString() = "GunProp[$serializationName]"
 
@@ -23,14 +25,24 @@ class GunProp<T, R>(
         inline fun <reified T> plainProp(
             prop: KMutableProperty1<DefaultGunData, T>,
         ): GunProp<T, T> {
-            return GunProp(prop) { it }.also { entries.add(it) }
+            return GunProp(prop = prop, transform = { it }).also { entries.add(it) }
         }
 
         inline fun <reified T, R> complexProp(
             prop: KMutableProperty1<DefaultGunData, T>,
             noinline transform: (T) -> R
         ): GunProp<T, R> {
-            return GunProp(prop, transform).also { entries.add(it) }
+            return GunProp(prop = prop, transform = transform).also { entries.add(it) }
+        }
+
+        fun leveledIntProp(
+            prop: KMutableProperty1<DefaultGunData, ObjectToList<Int>>,
+        ): GunProp<ObjectToList<Int>, Int> {
+            return GunProp(
+                prop,
+                { it.firstOrNull() ?: 0 },
+                { data, values -> values.atMagazineLevel(data.magazineLevel()) }
+            ).also { entries.add(it) }
         }
 
 
@@ -146,7 +158,17 @@ class GunProp<T, R>(
             complexProp(DefaultGunData::availableFireModes) { it.list.map { l -> l.value } }
 
         @JvmField
-        val MAGAZINE = plainProp(DefaultGunData::magazine)
+        val MAGAZINE = GunProp(
+            DefaultGunData::magazine,
+            { it.firstOrNull() ?: 0 },
+            { data, values ->
+                if (values.list.size <= 1) {
+                    (values.firstOrNull() ?: 0) + data.item.getCustomMagazine(data)
+                } else {
+                    values.atMagazineLevel(data.magazineLevel())
+                }
+            }
+        ).also { entries.add(it) }
 
         @JvmField
         val RELOAD_TYPES = complexProp(DefaultGunData::reloadTypes) { it }
@@ -174,6 +196,12 @@ class GunProp<T, R>(
         val DEFAULT_ZOOM = plainProp(DefaultGunData::defaultZoom)
 
         @JvmField
+        val MIN_ZOOM = plainProp(DefaultGunData::minZoom)
+
+        @JvmField
+        val MAX_ZOOM = plainProp(DefaultGunData::maxZoom)
+
+        @JvmField
         val BOUND_BONES = plainProp(DefaultGunData::boundBones)
 
         @JvmField
@@ -194,37 +222,37 @@ class GunProp<T, R>(
         ) { it.list.map { l -> l.value.also { consumer -> consumer.init() } } }
 
         @JvmField
-        val NORMAL_RELOAD_TIME = plainProp(DefaultGunData::normalReloadTime)
+        val NORMAL_RELOAD_TIME = leveledIntProp(DefaultGunData::normalReloadTime)
 
         @JvmField
-        val EMPTY_RELOAD_TIME = plainProp(DefaultGunData::emptyReloadTime)
+        val EMPTY_RELOAD_TIME = leveledIntProp(DefaultGunData::emptyReloadTime)
 
         @JvmField
-        val BOLT_ACTION_TIME = plainProp(DefaultGunData::boltActionTime)
+        val BOLT_ACTION_TIME = leveledIntProp(DefaultGunData::boltActionTime)
 
         @JvmField
-        val PREPARE_TIME = plainProp(DefaultGunData::prepareTime)
+        val PREPARE_TIME = leveledIntProp(DefaultGunData::prepareTime)
 
         @JvmField
-        val PREPARE_LOAD_TIME = plainProp(DefaultGunData::prepareLoadTime)
+        val PREPARE_LOAD_TIME = leveledIntProp(DefaultGunData::prepareLoadTime)
 
         @JvmField
-        val PREPARE_AMMO_LOAD_TIME = plainProp(DefaultGunData::prepareAmmoLoadTime)
+        val PREPARE_AMMO_LOAD_TIME = leveledIntProp(DefaultGunData::prepareAmmoLoadTime)
 
         @JvmField
-        val PREPARE_EMPTY_TIME = plainProp(DefaultGunData::prepareEmptyTime)
+        val PREPARE_EMPTY_TIME = leveledIntProp(DefaultGunData::prepareEmptyTime)
 
         @JvmField
-        val ITERATIVE_TIME = plainProp(DefaultGunData::iterativeTime)
+        val ITERATIVE_TIME = leveledIntProp(DefaultGunData::iterativeTime)
 
         @JvmField
-        val ITERATIVE_AMMO_LOAD_TIME = plainProp(DefaultGunData::iterativeAmmoLoadTime)
+        val ITERATIVE_AMMO_LOAD_TIME = leveledIntProp(DefaultGunData::iterativeAmmoLoadTime)
 
         @JvmField
         val ITERATIVE_LOAD_AMOUNT = plainProp(DefaultGunData::iterativeLoadAmount)
 
         @JvmField
-        val FINISH_TIME = plainProp(DefaultGunData::finishTime)
+        val FINISH_TIME = leveledIntProp(DefaultGunData::finishTime)
 
         @JvmField
         val BURST_COOLDOWN = plainProp(DefaultGunData::burstCooldown)
@@ -270,6 +298,25 @@ class GunProp<T, R>(
 
         @JvmField
         val USE_NACELLE_CAMERA = plainProp(DefaultGunData::useNacelleCamera)
+
+        @JvmField
+        val OPEN_BOLT = plainProp(DefaultGunData::openBolt)
+
+        @JvmField
+        val HAS_BARREL_BULLET = plainProp(DefaultGunData::hasBarrelBullet)
+
+        @JvmField
+        val DRAW_TIME = plainProp(DefaultGunData::drawTime)
+
+        /**
+         * 武器进入瞄准的时间，单位是tick
+         *
+         * 主创否定了将进入瞄准和退出瞄准时间分离的设计，现在ZOOM_OUT_TIME = ZOOM_TIME * 0.75f
+         * 这导致无法制作瞄准时间1秒，退出瞄准时间需要10秒的池沼瞄准镜
+         * 如果以后哪天要做这种功能了，记得带上这段注释来打脸
+         */
+        @JvmField
+        val ZOOM_TIME = plainProp(DefaultGunData::zoomTime)
 
         @JvmField
         val AVAILABLE_PERKS = complexProp(DefaultGunData::availablePerks) {
@@ -409,6 +456,9 @@ class GunProp<T, R>(
             modify(BURST_AMOUNT) { it.coerceAtLeast(0) }
             modify(RPM) { it.coerceIn(1, 114514) }
             modify(UNDERWATER_MOTION_SCALE) { it.coerceIn(0.0f, 1.0f) }
+
+            modify(DRAW_TIME) { it.coerceAtLeast(1) }
+            modify(ZOOM_TIME) { it.coerceAtLeast(1) }
         }
     }
 }

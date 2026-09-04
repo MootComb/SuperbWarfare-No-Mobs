@@ -87,7 +87,7 @@ repositories {
     maven {
         url = uri("https://jitpack.io")
         content {
-            includeGroup("com.github.MCModderAnchor")
+            includeGroup("com.github.mcmodderanchor")
         }
     }
 }
@@ -242,7 +242,7 @@ fun DependencyHandler.jijImplement(dependency: String, maxVersion: String? = nul
 
 dependencies {
     ksp(project(":ksp"))
-    implementation(project(":ksp"))
+    compileOnly(project(":ksp"))
 
     implementation("thedarkcolour:kotlinforforge-neoforge:5.10.0")
 
@@ -256,7 +256,7 @@ dependencies {
     jijImplement("org.ywzj:rhino:1.8.1-SNAPSHOT")
 
     // SBM
-    jijImplement("com.github.MCModderAnchor:SimpleBedrockModel:2.5.1.1-neoforge-mc1.21.1")
+    jijImplement("com.github.mcmodderanchor:simplebedrockmodel:2.5.7-neoforge-mc1.21.1")
 
     compileOnly("com.maydaymemory:mae:1.1.2") {
         exclude("com.google.code.findbugs", "jsr305")
@@ -393,6 +393,15 @@ tasks.withType<JavaCompile> {
 
 tasks.processResources {
     from("COPYING", "COPYING.LESSER")
+}
+
+// 统一所有 Copy 类任务（processResources / generateModMetadata / jar 等）的过滤字符集。
+// filteringCharset 默认取 Gradle daemon JVM 的默认字符集（命令行可能是 GBK，IDEA 里是 UTF-8），
+// 环境一换就会让任务输入指纹变化，导致没改文件也触发全量重跑，因此显式固定为 UTF-8。
+allprojects {
+    tasks.withType<AbstractCopyTask>().configureEach {
+        filteringCharset = "UTF-8"
+    }
 }
 
 tasks.named("createMinecraftArtifacts") {

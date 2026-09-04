@@ -1,7 +1,7 @@
 package com.atsuishio.superbwarfare.item.ammo
 
 import com.atsuishio.superbwarfare.data.gun.Ammo
-import com.atsuishio.superbwarfare.init.ModAttachments
+import com.atsuishio.superbwarfare.init.ModDataAttachments
 import com.atsuishio.superbwarfare.init.ModDataComponents
 import com.atsuishio.superbwarfare.init.ModSounds
 import com.atsuishio.superbwarfare.tools.FormatTool.format0D
@@ -85,7 +85,7 @@ open class AmmoBoxItem : Item(Properties().stacksTo(1)) {
 
         val info = stack.ammoBoxData
 
-        val cap = player.getData(ModAttachments.PLAYER_VARIABLE).watch()
+        val cap = player.getData(ModDataAttachments.PLAYER_VARIABLE).watch()
         if (!level.isClientSide()) {
             for (type in info.selectedTypes) {
                 if (player.isCrouching && !info.isDrop) {
@@ -104,7 +104,7 @@ open class AmmoBoxItem : Item(Properties().stacksTo(1)) {
                     type.add(stack, -countToStore)
                 }
             }
-            player.setData(ModAttachments.PLAYER_VARIABLE, cap)
+            player.setData(ModDataAttachments.PLAYER_VARIABLE, cap)
             cap.sync(player)
             level.playSound(null, player.blockPosition(), SoundEvents.ARROW_HIT_PLAYER, SoundSource.PLAYERS, 1f, 1f)
 

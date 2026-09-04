@@ -7,6 +7,8 @@
   "Velocity": 42.5,
   "Magazine": 200,
   "Weight": 5,
+  "DrawTime": 12,
+  "ZoomTime": 7,
   "DefaultFireMode": "Auto",
   "NormalReloadTime": 54,
   "EmptyReloadTime": 71,
@@ -21,5 +23,5 @@
     "Auto"
   ],
   "AmmoType": "@RifleAmmo",
-  "Icon": "superbwarfare:textures/gun_icon/mk_14_icon.png"
+  "Icon": "superbwarfare:textures/gun_icon/reforging_icon.png"
 }

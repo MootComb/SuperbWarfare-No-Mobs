@@ -2,7 +2,6 @@ package com.atsuishio.superbwarfare.item.gun.shotgun;
 
 import com.atsuishio.superbwarfare.client.GunRendererBuilder;
 import com.atsuishio.superbwarfare.client.model.item.HomemadeShotgunItemModel;
-import com.atsuishio.superbwarfare.data.gun.GunData;
 import com.atsuishio.superbwarfare.data.gun.ShootParameters;
 import com.atsuishio.superbwarfare.item.gun.GunGeoItem;
 import com.atsuishio.superbwarfare.tools.ParticleTool;
@@ -23,11 +22,6 @@ public class HomemadeShotgunItem extends GunGeoItem {
     @Override
     public Supplier<? extends GeoItemRenderer<? extends Item>> getRenderer() {
         return GunRendererBuilder.simple(HomemadeShotgunItemModel::new);
-    }
-
-    @Override
-    public boolean isOpenBolt(GunData data) {
-        return true;
     }
 
     @Override

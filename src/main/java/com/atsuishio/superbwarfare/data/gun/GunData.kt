@@ -1,9 +1,7 @@
 package com.atsuishio.superbwarfare.data.gun
 
-import com.atsuishio.superbwarfare.data.DefaultDataSupplier
-import com.atsuishio.superbwarfare.data.JsonPropertyModifier
-import com.atsuishio.superbwarfare.data.PMC
-import com.atsuishio.superbwarfare.data.StringOrVec3
+import com.atsuishio.superbwarfare.data.*
+import com.atsuishio.superbwarfare.data.attachment.AttachmentDefinition
 import com.atsuishio.superbwarfare.data.gun.GunData.Companion.BACKUP_AMMO_CACHE_TICKS
 import com.atsuishio.superbwarfare.data.gun.GunData.Companion.get
 import com.atsuishio.superbwarfare.data.gun.GunProp.Companion.AMMO_CONSUMER
@@ -13,7 +11,9 @@ import com.atsuishio.superbwarfare.data.gun.GunProp.Companion.AVAILABLE_PERKS
 import com.atsuishio.superbwarfare.data.gun.GunProp.Companion.BOLT_ACTION_TIME
 import com.atsuishio.superbwarfare.data.gun.GunProp.Companion.DEFAULT_ZOOM
 import com.atsuishio.superbwarfare.data.gun.GunProp.Companion.MAGAZINE
+import com.atsuishio.superbwarfare.data.gun.GunProp.Companion.MAX_ZOOM
 import com.atsuishio.superbwarfare.data.gun.GunProp.Companion.MELEE_DAMAGE
+import com.atsuishio.superbwarfare.data.gun.GunProp.Companion.MIN_ZOOM
 import com.atsuishio.superbwarfare.data.gun.GunProp.Companion.PROJECTILE_AMOUNT
 import com.atsuishio.superbwarfare.data.gun.GunProp.Companion.SHOOT_POS
 import com.atsuishio.superbwarfare.data.gun.GunProp.Companion.SHOOT_SHAKE
@@ -26,6 +26,7 @@ import com.atsuishio.superbwarfare.item.gun.GunItem
 import com.atsuishio.superbwarfare.network.message.receive.ShakeClientMessage
 import com.atsuishio.superbwarfare.perk.Perk
 import com.atsuishio.superbwarfare.tools.InventoryTool
+import com.atsuishio.superbwarfare.tools.tag
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.common.cache.LoadingCache
@@ -34,13 +35,13 @@ import net.minecraft.core.component.DataComponents
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.codec.StreamCodec
+import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.util.Mth
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
-import net.minecraft.world.item.component.CustomData
 import net.minecraft.world.phys.Vec3
 import net.neoforged.neoforge.energy.IEnergyStorage
 import net.neoforged.neoforge.items.IItemHandler
@@ -48,6 +49,32 @@ import java.util.*
 import java.util.function.Function
 import kotlin.math.max
 import kotlin.math.min
+
+/**
+ * Selects the magazine-level value, falling back to the last configured value
+ * when the list is shorter than the requested level.
+ */
+fun ObjectToList<Int>.atMagazineLevel(level: Int): Int {
+    if (list.isEmpty()) return 0
+    return list[level.coerceAtLeast(0).coerceAtMost(list.lastIndex)]
+}
+
+/**
+ * Resolves the current magazine level from the installed attachment definition.
+ * Level 0 is the no-attachment/original magazine state.
+ */
+fun GunData.magazineLevel(): Int {
+    val id = attachment.id(AttachmentType.MAGAZINE) ?: return 0
+    return AttachmentDefinition.from(id)?.level?.coerceAtLeast(0) ?: 0
+}
+
+/**
+ * Checks whether the installed barrel attachment is configured as a silencer.
+ */
+fun GunData.isBarrelSilenced(): Boolean {
+    val id = attachment.id(AttachmentType.BARREL) ?: return false
+    return AttachmentDefinition.from(id)?.isSilenced == true
+}
 
 /**
  * Extension function checking whether an [ItemStack] represents a valid gun item.
@@ -218,6 +245,7 @@ class GunData private constructor(
     }
 
     private val jsonPropModifier = JsonPropertyModifier(GunProp.entries)
+    private val attachmentJsonPropModifier = JsonPropertyModifier(GunProp.entries)
     private var cache: DefaultGunData? = null
     private var tempModifications: Function<DefaultGunData, DefaultGunData>? = null
     private val pmcInstance: PMC<GunData, DefaultGunData> by lazy { PMC(this) }
@@ -249,13 +277,23 @@ class GunData private constructor(
         // 2. Gun item level modifiers
         item.modifyProperty(pmcInstance)
 
-        // 3. FireMode modifiers
+        // 3. Attachments
+        attachmentJsonPropModifier.update(`object` = null)
+        for (instance in attachment.installed()) {
+            attachmentOption(instance.slot, instance.id)?.let { option ->
+                attachmentJsonPropModifier.update(option.override)
+                attachmentJsonPropModifier.modifyProperty(pmcInstance)
+            }
+            instance.definition.modifyProperty(pmcInstance)
+        }
+
+        // 4. FireMode modifiers
         selectedFireModeInfo(pmcInstance[AVAILABLE_FIRE_MODES]).modifyProperty(pmcInstance)
 
-        // 4. AmmoConsumer modifiers
+        // 5. AmmoConsumer modifiers
         selectedAmmoConsumer(pmcInstance[AMMO_CONSUMER]).modifyProperty(pmcInstance)
 
-        // 5. Active Perks
+        // 6. Active Perks
         for (type in PERK_TYPES) {
             val list = perk.getInstances(type)
             for (instance in list) {
@@ -268,7 +306,7 @@ class GunData private constructor(
 //            rawData = tempModifications!!.apply(rawData)
 //        }
 
-        // 6. Global property bounds limit
+        // 7. Global property bounds limit
         GunProp.modifyProperty(pmcInstance)
 
         cachedStructuralVersion = nbtVersion.structural
@@ -303,8 +341,11 @@ class GunData private constructor(
      * @return minimum allowed zoom value.
      */
     fun minZoom(): Double {
-        val scopeType = this.attachment.get(AttachmentType.SCOPE)
-        return if (scopeType == 3) max(getDefault().minZoom, 1.25) else 1.25
+        val zoomDefinition = attachment.id(AttachmentType.SCOPE)
+            ?.let { AttachmentDefinition.from(it) }
+            ?.zoom
+        if (zoomDefinition == null) return 1.25
+        return get(MIN_ZOOM)
     }
 
     /**
@@ -313,8 +354,11 @@ class GunData private constructor(
      * @return maximum allowed zoom value.
      */
     fun maxZoom(): Double {
-        val scopeType = this.attachment.get(AttachmentType.SCOPE)
-        return if (scopeType == 3) getDefault().maxZoom else 114514.0
+        val zoomDefinition = attachment.id(AttachmentType.SCOPE)
+            ?.let { AttachmentDefinition.from(it) }
+            ?.zoom
+        if (zoomDefinition == null) return 114514.0
+        return get(MAX_ZOOM)
     }
 
     /**
@@ -378,7 +422,7 @@ class GunData private constructor(
             this.ammo.set(get(MAGAZINE))
         }
 
-        this.item.whenNoAmmo(this)
+        GunActionStepExecutor.triggerNoAmmo(this)
         this.closeHammer.set(false)
         this.fireIndex.reset()
 
@@ -398,12 +442,15 @@ class GunData private constructor(
         this.reload.setState(ReloadState.NOT_RELOADING)
         this.reload.iterativeLoadTimer.reset()
         this.reload.reloadTimer.reset()
+        this.reload.totalTicks.reset()
         this.reload.finishTimer.reset()
+        this.reload.finishTotalTicks.reset()
         this.reload.prepareTimer.reset()
         this.reload.prepareLoadTimer.reset()
         this.reload.reloadStarter.finish()
         this.reload.singleReloadStarter.finish()
         this.bolt.actionTimer.reset()
+        this.bolt.totalTicks.reset()
         this.bolt.needed.reset()
         this.charge.starter.finish()
         this.charge.timer.reset()
@@ -467,7 +514,7 @@ class GunData private constructor(
 
     /** Starts manual bolt-action sequence. */
     fun startBolt() {
-        this.bolt.actionTimer.set(get(BOLT_ACTION_TIME) + 1)
+        this.bolt.start(get(BOLT_ACTION_TIME) + 1)
 
         nbtVersion.invalidateStructural()
     }
@@ -769,6 +816,29 @@ class GunData private constructor(
     /** Checks if specific perk can be applied. */
     fun canApplyPerk(perk: Perk): Boolean = availablePerks().contains(perk)
 
+    /** Gets attachments allowed on [slot] from the gun data definition. */
+    fun availableAttachments(slot: AttachmentType): List<ResourceLocation> {
+        return getDefault().availableAttachments[slot.attachmentName]
+            .orEmpty()
+            .mapNotNull { ResourceLocation.tryParse(it.value.id) }
+    }
+
+    /** Returns the weapon-level option for [id] installed in [slot], if declared. */
+    fun attachmentOption(slot: AttachmentType, id: ResourceLocation): AttachmentOption? {
+        val idString = id.toString()
+        return getDefault().availableAttachments[slot.attachmentName]
+            .orEmpty()
+            .firstOrNull { it.value.id == idString }
+            ?.value
+    }
+
+    /** Checks whether [id] can be installed in [slot] for this gun. */
+    fun canInstall(slot: AttachmentType, id: ResourceLocation): Boolean {
+        if (id !in availableAttachments(slot)) return false
+        val definition = AttachmentDefinition.from(id) ?: return false
+        return definition.slot == slot
+    }
+
     /** Raw damage reduction property structure. */
     val rawDamageReduce: DamageReduce
         get() = getDefault().damageReduce
@@ -898,8 +968,15 @@ class GunData private constructor(
     @JvmField
     val overHeat: BooleanValue
 
+    /** Checks if the installed scope has data-driven zoom state. */
+    fun hasAdjustableScopeZoom(): Boolean {
+        return attachment.id(AttachmentType.SCOPE)
+            ?.let { AttachmentDefinition.from(it) }
+            ?.zoom != null
+    }
+
     /** Checks if scope zoom adjustment is supported. */
-    fun canAdjustZoom(): Boolean = item.canAdjustZoom(this)
+    fun canAdjustZoom(): Boolean = item.canAdjustZoom(this) || hasAdjustableScopeZoom()
 
     /** Checks if scope switching is supported. */
     fun canSwitchScope(): Boolean = item.canSwitchScope(this)
@@ -998,7 +1075,7 @@ class GunData private constructor(
             val current = stack.get(DataComponents.CUSTOM_DATA)?.copyTag()
             if (current == cleanedTag) return
 
-            stack.set(DataComponents.CUSTOM_DATA, CustomData.of(cleanedTag))
+            stack.tag = cleanedTag
         } else {
             if (!stack.has(DataComponents.CUSTOM_DATA)) return
             stack.remove(DataComponents.CUSTOM_DATA)
@@ -1157,8 +1234,8 @@ class GunData private constructor(
         /** Retrieves default un-modified properties by item registry identifier. */
         @JvmStatic
         fun getDefault(id: String): DefaultGunData {
-            val isDefault = !com.atsuishio.superbwarfare.data.CustomData.GUN_DATA.containsKey(id)
-            val data = com.atsuishio.superbwarfare.data.CustomData.GUN_DATA.getOrElseGet(id) { DefaultGunData() }
+            val isDefault = !CustomData.GUN_DATA.containsKey(id)
+            val data = CustomData.GUN_DATA.getOrElseGet(id) { DefaultGunData() }
             data.isDefaultData = isDefault
             return data
         }

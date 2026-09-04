@@ -227,7 +227,7 @@ object LivingEventHandler {
         val amount = (0.5f * event.amount).coerceAtMost(entity.maxHealth).toDouble()
 
         // 判断是不是枪械能造成的伤害
-        if (!DamageTypeTool.isGunDamage(source) && !source.`is`(DamageTypes.PLAYER_ATTACK)) return
+        if (!isGunDamage(source) && !source.`is`(DamageTypes.PLAYER_ATTACK)) return
 
         data.exp.add(amount)
 
@@ -258,7 +258,7 @@ object LivingEventHandler {
         val amount = 20 + 2 * entity.maxHealth.toDouble()
 
         // 判断是不是枪械能造成的伤害
-        if (DamageTypeTool.isGunDamage(source) || source.`is`(DamageTypes.PLAYER_ATTACK)) {
+        if (isGunDamage(source) || source.`is`(DamageTypes.PLAYER_ATTACK)) {
             data.exp.add(amount)
         }
 
@@ -619,7 +619,7 @@ object LivingEventHandler {
         val player = event.entity as? Player ?: return
         if (!MiscConfig.DROP_AMMO_BOX.get()) return
 
-        val cap = player.getData(ModAttachments.PLAYER_VARIABLE).watch()
+        val cap = player.getData(ModDataAttachments.PLAYER_VARIABLE).watch()
 
         val drop = Ammo.entries.sumOf { it.get(cap) } > 0
         if (!drop) return
@@ -633,7 +633,7 @@ object LivingEventHandler {
 
         stack.ammoBoxData = stack.ammoBoxData.asDrop()
 
-        player.setData(ModAttachments.PLAYER_VARIABLE, cap)
+        player.setData(ModDataAttachments.PLAYER_VARIABLE, cap)
         cap.sync(player)
 
         event.drops += ItemEntity(player.level(), player.x, player.y + 1, player.z, stack)

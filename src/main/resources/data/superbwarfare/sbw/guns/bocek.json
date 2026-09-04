@@ -3,6 +3,8 @@
   "Headshot": 2.5,
   "Damage": 48,
   "Weight": 3,
+  "DrawTime": 10,
+  "ZoomTime": 5,
   "BypassesArmor": 0.25,
   "Velocity": 24,
   "Magazine": 1,

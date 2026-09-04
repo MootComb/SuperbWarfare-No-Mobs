@@ -13,6 +13,8 @@
   "Velocity": 3.75,
   "Magazine": 8,
   "Weight": 9,
+  "DrawTime": 17,
+  "ZoomTime": 11,
   "ReloadTypes": [
     "Iterative"
   ],

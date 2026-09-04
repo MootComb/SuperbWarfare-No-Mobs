@@ -11,7 +11,33 @@
   "Velocity": 4,
   "Magazine": 1,
   "Weight": 7,
+  "DrawTime": 14,
+  "ZoomTime": 9,
   "EmptyReloadTime": 100,
+  "ActionSteps": [
+    {
+      "Timeline": "RELOAD_EMPTY",
+      "Progress": 0.16,
+      "Action": "EMPTY",
+      "Value": false
+    },
+    {
+      "Timeline": "RELOAD_EMPTY",
+      "Progress": 0.91,
+      "Action": "CLOSE_HAMMER",
+      "Value": false
+    },
+    {
+      "Timeline": "NO_AMMO",
+      "Action": "EMPTY",
+      "Value": true
+    },
+    {
+      "Timeline": "NO_AMMO",
+      "Action": "CLOSE_HAMMER",
+      "Value": true
+    }
+  ],
   "RPM": 120,
   "Gravity": 0.03,
   "ProjectileLife": 100,

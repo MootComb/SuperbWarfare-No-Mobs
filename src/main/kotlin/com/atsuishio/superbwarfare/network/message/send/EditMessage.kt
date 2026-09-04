@@ -7,12 +7,14 @@ import com.atsuishio.superbwarfare.entity.vehicle.base.VehicleEntity
 import com.atsuishio.superbwarfare.event.LivingEventHandler
 import com.atsuishio.superbwarfare.init.ModSounds
 import com.atsuishio.superbwarfare.item.gun.GunItem
+import com.atsuishio.superbwarfare.ksp.annotation.RegisterPacket
 import com.atsuishio.superbwarfare.network.PayloadContext
 import com.atsuishio.superbwarfare.network.ServerPacketPayload
 import com.atsuishio.superbwarfare.tools.playLocalSound
 import kotlinx.serialization.Serializable
 
 @Serializable
+@RegisterPacket
 data class EditMessage(val type: Int, val add: Boolean, val isVehicle: Boolean) : ServerPacketPayload() {
     override fun PayloadContext.handler() {
         val player = sender()
@@ -39,35 +41,13 @@ data class EditMessage(val type: Int, val add: Boolean, val isVehicle: Boolean) 
 
             val data = from(stack)
             when (type) {
-                0 -> {
-                    var att = data.attachment.get(AttachmentType.BARREL)
-                    att = setAttachment(item.validBarrels, att, add)
-                    data.attachment.set(AttachmentType.BARREL, att)
-                }
-
-                1 -> {
-                    var att = data.attachment.get(AttachmentType.SCOPE)
-                    att = setAttachment(item.validScopes, att, add)
-                    data.attachment.set(AttachmentType.SCOPE, att)
-                }
-
-                2 -> {
-                    var att = data.attachment.get(AttachmentType.GRIP)
-                    att = setAttachment(item.validGrips, att, add)
-                    data.attachment.set(AttachmentType.GRIP, att)
-                }
-
-                3 -> {
-                    var att = data.attachment.get(AttachmentType.STOCK)
-                    att = setAttachment(item.validStocks, att, add)
-                    data.attachment.set(AttachmentType.STOCK, att)
-                }
-
+                0 -> data.attachment.cycle(AttachmentType.BARREL, add)
+                1 -> data.attachment.cycle(AttachmentType.SCOPE, add)
+                2 -> data.attachment.cycle(AttachmentType.GRIP, add)
+                3 -> data.attachment.cycle(AttachmentType.STOCK, add)
                 4 -> {
-                    var att = data.attachment.get(AttachmentType.MAGAZINE)
-                    att = setAttachment(item.validMagazines, att, add)
                     data.withdrawAmmo(player)
-                    data.attachment.set(AttachmentType.MAGAZINE, att)
+                    data.attachment.cycle(AttachmentType.MAGAZINE, add)
                 }
 
                 5 -> {
@@ -81,17 +61,6 @@ data class EditMessage(val type: Int, val add: Boolean, val isVehicle: Boolean) 
             data.save()
             player.playLocalSound(ModSounds.EDIT.get(), 1f, 1f)
         }
-    }
-
-    private fun setAttachment(arr: IntArray, value: Int, add: Boolean): Int {
-        if (arr.isEmpty()) return 0
-
-        val sorted = arr.copyOf(arr.size).sorted()
-        var index = sorted.binarySearch(value)
-        if (index < 0) index = -index - 1
-
-        index = (if (add) (index + 1) else (index + arr.size - 1)) % arr.size
-        return sorted[index]
     }
 }
 

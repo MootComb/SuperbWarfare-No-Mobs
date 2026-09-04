@@ -20,8 +20,6 @@ import software.bernie.geckolib.animation.*;
 import software.bernie.geckolib.constant.DataTickets;
 import software.bernie.geckolib.renderer.GeoItemRenderer;
 
-import java.util.Map;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class M2HBItem extends GunGeoItem {
@@ -88,24 +86,8 @@ public class M2HBItem extends GunGeoItem {
     }
 
     @Override
-    public boolean isOpenBolt(GunData data) {
-        return true;
-    }
-
-    @Override
-    public boolean hasBulletInBarrel(GunData data) {
-        return true;
-    }
-
-    @Override
     public int hideBulletChainBelowShots() {
         return 5;
     }
 
-    @Override
-    public void addReloadTimeBehavior(Map<Integer, Consumer<GunData>> behaviors) {
-        super.addReloadTimeBehavior(behaviors);
-
-        behaviors.put(70, data -> data.hideBulletChain.reset());
-    }
 }

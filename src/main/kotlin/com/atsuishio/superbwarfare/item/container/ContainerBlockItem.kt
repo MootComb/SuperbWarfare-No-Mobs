@@ -3,10 +3,15 @@ package com.atsuishio.superbwarfare.item.container
 import com.atsuishio.superbwarfare.Mod
 import com.atsuishio.superbwarfare.api.event.RegisterContainersEvent
 import com.atsuishio.superbwarfare.client.renderer.item.ContainerBlockItemRenderer
+import com.atsuishio.superbwarfare.config.server.VehicleConfig
+import com.atsuishio.superbwarfare.entity.vehicle.base.VehicleEntity
 import com.atsuishio.superbwarfare.init.ModBlockEntities
 import com.atsuishio.superbwarfare.init.ModBlocks
 import com.atsuishio.superbwarfare.init.ModEntities
 import com.atsuishio.superbwarfare.init.ModItems
+import com.atsuishio.superbwarfare.tools.component1
+import com.atsuishio.superbwarfare.tools.component2
+import com.atsuishio.superbwarfare.tools.component3
 import com.atsuishio.superbwarfare.tools.mc
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer
 import net.minecraft.core.component.DataComponents
@@ -27,12 +32,15 @@ import net.minecraft.world.item.context.BlockPlaceContext
 import net.minecraft.world.item.context.UseOnContext
 import net.minecraft.world.level.ClipContext
 import net.minecraft.world.level.Level
+import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.phys.HitResult
 import net.neoforged.bus.api.EventPriority
 import net.neoforged.bus.api.SubscribeEvent
 import net.neoforged.fml.common.EventBusSubscriber
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent
+import org.joml.Math
+import kotlin.jvm.optionals.getOrNull
 
 class ContainerBlockItem : BlockItem(ModBlocks.CONTAINER.get(), Properties().stacksTo(1).fireResistant()) {
 
@@ -53,6 +61,43 @@ class ContainerBlockItem : BlockItem(ModBlocks.CONTAINER.get(), Properties().sta
         val blockHitResult = playerPOVHitResult.withPosition(playerPOVHitResult.blockPos.above())
         val result = super.useOn(UseOnContext(player, hand, blockHitResult))
         return InteractionResultHolder(result, player.getItemInHand(hand))
+    }
+
+    override fun placeBlock(
+        context: BlockPlaceContext,
+        state: BlockState
+    ): Boolean {
+        if (!VehicleConfig.PLACE_VEHICLES_DIRECTLY.get()) {
+            return super.placeBlock(context, state)
+        }
+
+        // TODO 打开空间检测，优化这部分代码
+
+        val tag = context.itemInHand.get(DataComponents.BLOCK_ENTITY_DATA)?.copyTag()
+        if (!(tag?.contains("EntityType") ?: false)) return false
+
+        val type = tag.getString("EntityType")
+        val entityType = EntityType.byString(type).getOrNull() ?: return false
+
+        val level = context.level
+        val entity = entityType.create(level) ?: return false
+
+        entity.load(tag.getCompound("Entity"))
+        val (x, y, z) = context.clickedPos
+        entity.setPos(
+            x + 0.5 + (2 * Math.random() - 1) * 0.1f,
+            y + 0.5 + (2 * Math.random() - 1) * 0.1f,
+            z + 0.5 + (2 * Math.random() - 1) * 0.1f
+        )
+
+        val direction = context.nearestLookingDirection
+        entity.yRot = direction.toYRot()
+        if (entity is VehicleEntity) {
+            entity.serverYaw = direction.toYRot()
+        }
+        level.addFreshEntity(entity)
+
+        return true
     }
 
     override fun place(pContext: BlockPlaceContext): InteractionResult {

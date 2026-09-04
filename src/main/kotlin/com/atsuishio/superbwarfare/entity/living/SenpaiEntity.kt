@@ -41,7 +41,7 @@ open class SenpaiEntity(type: EntityType<SenpaiEntity>, level: Level) : Monster(
 
     init {
         xpReward = 40
-        setNoAi(false)
+        isNoAi = false
     }
 
     override fun defineSynchedData(builder: SynchedEntityData.Builder) {
@@ -98,7 +98,6 @@ open class SenpaiEntity(type: EntityType<SenpaiEntity>, level: Level) : Monster(
         this.goalSelector.addGoal(5, RandomStrollGoal(this, 0.8))
         this.targetSelector.addGoal(6, NearestAttackableTargetGoal(this, Player::class.java, false, false))
     }
-
 
     public override fun getAmbientSound(): SoundEvent? {
         return ModSounds.IDLE.get()

@@ -73,7 +73,7 @@ class Mod(bus: IEventBus, container: ModContainer) {
         ModArmorMaterial.MATERIALS.register(bus)
         ModAttributes.ATTRIBUTES.register(bus)
         ModCriteriaTriggers.REGISTRY.register(bus)
-        ModAttachments.ATTACHMENT_TYPES.register(bus)
+        ModDataAttachments.ATTACHMENT_TYPES.register(bus)
         ModCommandArguments.COMMAND_ARGUMENT_TYPES.register(bus)
 
         bus.addListener<FMLClientSetupEvent> { onClientSetup(it) }

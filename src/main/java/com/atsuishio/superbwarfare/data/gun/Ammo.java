@@ -2,7 +2,7 @@ package com.atsuishio.superbwarfare.data.gun;
 
 import com.atsuishio.superbwarfare.capability.player.PlayerVariable;
 import com.atsuishio.superbwarfare.config.server.AmmoConfigKt;
-import com.atsuishio.superbwarfare.init.ModAttachments;
+import com.atsuishio.superbwarfare.init.ModDataAttachments;
 import com.atsuishio.superbwarfare.init.ModItems;
 import com.atsuishio.superbwarfare.item.ammo.AmmoSupplierItem;
 import net.minecraft.ChatFormatting;
@@ -167,15 +167,15 @@ public enum Ammo {
 
     // Entity
     public int get(Entity entity) {
-        return get(entity.getData(ModAttachments.PLAYER_VARIABLE));
+        return get(entity.getData(ModDataAttachments.PLAYER_VARIABLE));
     }
 
     public boolean set(Entity entity, int count) {
         if (entity.level().isClientSide || count > getLimit()) return false;
 
-        var cap = entity.getData(ModAttachments.PLAYER_VARIABLE).watch();
+        var cap = entity.getData(ModDataAttachments.PLAYER_VARIABLE).watch();
         set(cap, count);
-        entity.setData(ModAttachments.PLAYER_VARIABLE, cap);
+        entity.setData(ModDataAttachments.PLAYER_VARIABLE, cap);
         cap.sync(entity);
 
         return true;

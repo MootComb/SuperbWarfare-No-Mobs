@@ -5,13 +5,15 @@
   "RecoilY": 0.063,
   "Damage": 33,
   "Headshot": 3,
-  "Velocity": 42,
+  "Velocity": 25,
   "Magazine": 5,
   "ReloadTypes": [
     "Iterative"
   ],
   "BoltActionTime": 22,
   "Weight": 5,
+  "DrawTime": 12,
+  "ZoomTime": 7,
   "ZoomSpreadRate": 0.005,
   "PrepareTime": 29,
   "PrepareEmptyTime": 16,

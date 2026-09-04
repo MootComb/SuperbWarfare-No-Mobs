@@ -5,6 +5,7 @@ import com.atsuishio.superbwarfare.client.RenderHelper
 import com.atsuishio.superbwarfare.data.gun.GunData.Companion.from
 import com.atsuishio.superbwarfare.data.gun.GunProp
 import com.atsuishio.superbwarfare.event.ClientEventHandler.editModelShake
+import com.atsuishio.superbwarfare.event.ClientEventHandler.editingAttachmentType
 import com.atsuishio.superbwarfare.event.ClientEventHandler.onCloseEditScreen
 import com.atsuishio.superbwarfare.init.ModKeyMappings
 import com.atsuishio.superbwarfare.item.gun.GunItem
@@ -22,6 +23,7 @@ import net.minecraft.network.chat.Component
 import net.minecraft.world.item.ItemStack
 import net.neoforged.api.distmarker.Dist
 import net.neoforged.api.distmarker.OnlyIn
+import org.lwjgl.glfw.GLFW
 import kotlin.math.min
 
 @OnlyIn(Dist.CLIENT)
@@ -251,6 +253,10 @@ class WeaponEditScreen(private val stack: ItemStack) : Screen(Component.empty())
             this.onClose()
             return true
         }
+        if (pKeyCode == GLFW.GLFW_KEY_ESCAPE && editingAttachmentType != -1) {
+            editingAttachmentType = -1
+            return true
+        }
         return super.keyPressed(pKeyCode, pScanCode, pModifiers)
     }
 
@@ -302,6 +308,7 @@ class WeaponEditScreen(private val stack: ItemStack) : Screen(Component.empty())
             if (!this.isActive()) return
             sendPacketToServer(EditMessage(this.type, !this.left, false))
             editModelShake()
+            editingAttachmentType = this.type
         }
 
         override fun isActive(): Boolean {

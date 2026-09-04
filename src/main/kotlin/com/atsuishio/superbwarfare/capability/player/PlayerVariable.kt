@@ -2,7 +2,7 @@ package com.atsuishio.superbwarfare.capability.player
 
 import com.atsuishio.superbwarfare.Mod
 import com.atsuishio.superbwarfare.data.gun.Ammo
-import com.atsuishio.superbwarfare.init.ModAttachments
+import com.atsuishio.superbwarfare.init.ModDataAttachments
 import com.atsuishio.superbwarfare.network.message.receive.PlayerVariablesSyncMessage
 import net.minecraft.core.HolderLookup
 import net.minecraft.nbt.CompoundTag
@@ -25,9 +25,9 @@ class PlayerVariable : INBTSerializable<CompoundTag> {
     var activeThermalImaging: Boolean = false
 
     fun sync(entity: Entity) {
-        if (!entity.hasData(ModAttachments.PLAYER_VARIABLE)) return
+        if (!entity.hasData(ModDataAttachments.PLAYER_VARIABLE)) return
 
-        val newVariable = entity.getData(ModAttachments.PLAYER_VARIABLE)
+        val newVariable = entity.getData(ModDataAttachments.PLAYER_VARIABLE)
         if (old != null && old == newVariable) return
 
         if (entity is ServerPlayer) {
@@ -126,14 +126,14 @@ class PlayerVariable : INBTSerializable<CompoundTag> {
     companion object {
         @JvmStatic
         fun modify(player: Player, consumer: Consumer<PlayerVariable>) {
-            val cap = player.getData(ModAttachments.PLAYER_VARIABLE).watch()
+            val cap = player.getData(ModDataAttachments.PLAYER_VARIABLE).watch()
             consumer.accept(cap)
             cap.sync(player)
         }
 
         @JvmStatic
         fun getOrDefault(entity: Entity): PlayerVariable {
-            return entity.getData(ModAttachments.PLAYER_VARIABLE)
+            return entity.getData(ModDataAttachments.PLAYER_VARIABLE)
         }
 
         @SubscribeEvent
@@ -172,9 +172,9 @@ class PlayerVariable : INBTSerializable<CompoundTag> {
         @SubscribeEvent
         fun clonePlayer(event: Clone) {
             event.original.revive()
-            val original = event.original.getData(ModAttachments.PLAYER_VARIABLE)
+            val original = event.original.getData(ModDataAttachments.PLAYER_VARIABLE)
             if (event.entity.level().isClientSide()) return
-            event.entity.setData(ModAttachments.PLAYER_VARIABLE, original.copy())
+            event.entity.setData(ModDataAttachments.PLAYER_VARIABLE, original.copy())
         }
     }
 

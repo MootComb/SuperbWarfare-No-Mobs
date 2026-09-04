@@ -1,5 +1,6 @@
 {
   "values": [
+    "superbwarfare:adrenaline_rush",
     "superbwarfare:backpack_linked_magazine",
     "superbwarfare:cast_no_shadows",
     "superbwarfare:eager_edge",
@@ -7,8 +8,11 @@
     "superbwarfare:fourth_times_charm",
     "superbwarfare:heal_clip",
     "superbwarfare:powerful_cooler",
+    "superbwarfare:quickdraw",
     "superbwarfare:regeneration",
+    "superbwarfare:snapshot_sights",
     "superbwarfare:subsistence",
+    "superbwarfare:triple_tap",
     "superbwarfare:turbo_charger",
     "superbwarfare:powerful_attraction",
     "superbwarfare:intelligent_chip"

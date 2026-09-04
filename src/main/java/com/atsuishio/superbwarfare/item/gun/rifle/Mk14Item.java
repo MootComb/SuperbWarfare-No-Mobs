@@ -18,8 +18,6 @@ import software.bernie.geckolib.animation.*;
 import software.bernie.geckolib.constant.DataTickets;
 import software.bernie.geckolib.renderer.GeoItemRenderer;
 
-import java.util.Map;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class Mk14Item extends GunGeoItem {
@@ -133,16 +131,6 @@ public class Mk14Item extends GunGeoItem {
     }
 
     @Override
-    public boolean isOpenBolt(GunData data) {
-        return true;
-    }
-
-    @Override
-    public boolean hasBulletInBarrel(GunData data) {
-        return true;
-    }
-
-    @Override
     public boolean hasCustomBarrel(GunData data) {
         return true;
     }
@@ -165,18 +153,6 @@ public class Mk14Item extends GunGeoItem {
     @Override
     public boolean hasCustomStock(GunData data) {
         return true;
-    }
-
-    @Override
-    public void whenNoAmmo(GunData data) {
-        data.holdOpen.set(true);
-    }
-
-    @Override
-    public void addReloadTimeBehavior(Map<Integer, Consumer<GunData>> behaviors) {
-        super.addReloadTimeBehavior(behaviors);
-
-        behaviors.put(18, data -> data.holdOpen.set(false));
     }
 
     @Override

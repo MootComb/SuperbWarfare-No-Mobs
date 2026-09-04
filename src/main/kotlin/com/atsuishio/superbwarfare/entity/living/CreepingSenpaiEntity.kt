@@ -68,26 +68,15 @@ open class CreepingSenpaiEntity(type: EntityType<CreepingSenpaiEntity>, level: L
         return CreepingSenpaiNavigation(this, level)
     }
 
-    override fun getEyeY() = 0.65
-
     override fun registerGoals() {
         super.registerGoals()
-        // TODO reach
         this.goalSelector.addGoal(1, MeleeAttackGoal(this, 1.4, false))
-//        this.goalSelector.addGoal(1, object : MeleeAttackGoal(this, 1.4, false) {
-//            override fun getAttackReachSqr(entity: LivingEntity): Double {
-//                return (this.mob.bbWidth * this.mob.bbWidth + entity.bbWidth).toDouble()
-//            }
-//        })
         this.targetSelector.addGoal(2, HurtByTargetGoal(this).setAlertOthers())
         this.goalSelector.addGoal(3, RandomLookAroundGoal(this))
         this.goalSelector.addGoal(4, FloatGoal(this))
         this.goalSelector.addGoal(5, RandomStrollGoal(this, 0.8))
         this.targetSelector.addGoal(6, CreepingSenpaiTargetGoal())
     }
-
-    // TODO type
-//    override fun getMobType(): MobType = MobType.ILLAGER
 
     override fun onClimbable(): Boolean {
         return this.attachedFace != Direction.UP
@@ -174,7 +163,7 @@ open class CreepingSenpaiEntity(type: EntityType<CreepingSenpaiEntity>, level: L
         }
 
         navigation.stop()
-        this.setTarget(null)
+        this.target = null
         this.navigationRetargetCooldown = NAVIGATION_RETARGET_COOLDOWN
         this.lastNavigationTarget = null
     }
@@ -272,7 +261,7 @@ open class CreepingSenpaiEntity(type: EntityType<CreepingSenpaiEntity>, level: L
             }
 
             if (!this.hasWanted() || entity.isDeadOrDying) {
-                entity.setSpeed(0f)
+                entity.speed = 0f
                 entity.setYya(0f)
                 return
             }
@@ -286,14 +275,14 @@ open class CreepingSenpaiEntity(type: EntityType<CreepingSenpaiEntity>, level: L
             }
 
             if (surfaceMove.lengthSqr() < 1.0E-6) {
-                entity.setSpeed(0f)
+                entity.speed = 0f
                 entity.setYya(0f)
                 return
             }
 
             val speed = (this.speedModifier * entity.getAttributeValue(Attributes.MOVEMENT_SPEED)).toFloat()
             entity.deltaMovement = surfaceMove.normalize().scale(speed.toDouble())
-            entity.setSpeed(0f)
+            entity.speed = 0f
             entity.setYya(0f)
 
             if (face == Direction.DOWN) {

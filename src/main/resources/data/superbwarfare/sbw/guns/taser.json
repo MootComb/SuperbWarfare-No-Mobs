@@ -7,6 +7,8 @@
   "Velocity": 3,
   "Magazine": 1,
   "Weight": 1,
+  "DrawTime": 7,
+  "ZoomTime": 3,
   "Headshot": 0,
   "EmptyReloadTime": 58,
   "RPM": 240,
@@ -23,10 +25,6 @@
   ],
   "SoundInfo": {
     "Fire1P": "superbwarfare:taser_fire_1p",
-    "Fire3P": "superbwarfare:taser_fire_3p",
-    "ReloadEmpty": "superbwarfare:taser_reload_empty",
-    "CancellableSounds": [
-      "superbwarfare:taser_reload_empty"
-    ]
+    "Fire3P": "superbwarfare:taser_fire_3p"
   }
 }

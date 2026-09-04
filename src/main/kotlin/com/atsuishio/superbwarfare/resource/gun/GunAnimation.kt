@@ -5,10 +5,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 class GunAnimation {
-    @JvmField
-    @SerialName("TransitionTickTime")
-    var transitionTickTime: Int = 1
-
     // This should NOT be null or empty!
     @JvmField
     @SerialName("Idle")
@@ -17,6 +13,14 @@ class GunAnimation {
     @JvmField
     @SerialName("Fire")
     var fire: String? = null
+
+    @JvmField
+    @SerialName("ChangeFireMode")
+    var changeFireMode: String? = null
+
+    @JvmField
+    @SerialName("FireModes")
+    var fireModes: List<String> = emptyList()
 
     // Reload > ReloadNormal | ReloadEmpty
     @JvmField
@@ -31,12 +35,31 @@ class GunAnimation {
     @SerialName("ReloadEmpty")
     var reloadEmpty: String? = null
 
+    @JvmField
+    @SerialName("ReloadNormalDrum")
+    var reloadNormalDrum: String? = null
+
+    @JvmField
+    @SerialName("ReloadEmptyDrum")
+    var reloadEmptyDrum: String? = null
+
+    @JvmField
+    @SerialName("HoldOpen")
+    var holdOpen: String? = null
+
+    @JvmField
+    @SerialName("CloseStrike")
+    var closeStrike: String? = null
+
+    @JvmField
     @SerialName("Prepare")
     var prepare: String? = null
 
+    @JvmField
     @SerialName("Iterative")
     var iterative: String? = null
 
+    @JvmField
     @SerialName("Finish")
     var finish: String? = null
 

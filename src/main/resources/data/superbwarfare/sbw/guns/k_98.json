@@ -4,10 +4,12 @@
   "RecoilY": 0.063,
   "Damage": 35,
   "Headshot": 3,
-  "Velocity": 37.75,
+  "Velocity": 22,
   "Magazine": 5,
   "BoltActionTime": 22,
   "Weight": 5,
+  "DrawTime": 12,
+  "ZoomTime": 7,
   "ZoomSpreadRate": 0.005,
   "DefaultFireMode": "Auto",
   "GunType": "Sniper",
@@ -16,9 +18,35 @@
     "Iterative"
   ],
   "EmptyReloadTime": 59,
-  "PrepareTime": 29,
-  "IterativeTime": 11,
-  "FinishTime": 18,
+  "PrepareTime": 30,
+  "IterativeTime": 13,
+  "FinishTime": 20,
+  "ActionSteps": [
+    {
+      "Timeline": "RELOAD_EMPTY",
+      "Progress": 0.8,
+      "Action": "CLOSE_STRIKE",
+      "Value": false
+    },
+    {
+      "Timeline": "RELOAD_FINISH",
+      "Progress": 0.52381,
+      "Action": "CLOSE_STRIKE",
+      "Value": false
+    },
+    {
+      "Timeline": "RELOAD_FINISH",
+      "Progress": 0.52381,
+      "Action": "EMPTY",
+      "Value": false
+    },
+    {
+      "Timeline": "BOLT",
+      "Progress": 0.22222,
+      "Action": "CLOSE_STRIKE",
+      "Value": false
+    }
+  ],
   "BypassesArmor": 0.5,
   "SoundRadius": 18,
   "DamageReduce": {
@@ -46,22 +74,22 @@
     "!superbwarfare:longer_wire",
     "!superbwarfare:cupid_arrow"
   ],
+  "AvailableAttachments": {
+    "Barrel": [
+      "superbwarfare:meowlencer",
+      "superbwarfare:hissilencer",
+      "superbwarfare:silaowuncer",
+      "superbwarfare:ru_silencer",
+      "superbwarfare:ar_silencer",
+      "superbwarfare:loudspeaker"
+    ]
+  },
   "SoundInfo": {
     "Fire1P": "superbwarfare:k_98_fire_1p",
     "Fire3P": "superbwarfare:k_98_fire_3p",
     "Fire3PFar": "superbwarfare:k_98_far",
     "Fire3PVeryFar": "superbwarfare:k_98_veryfar",
-    "ReloadEmpty": "superbwarfare:k_98_reload_empty",
-    "Bolt": "superbwarfare:k_98_bolt",
-    "ReloadPrepare": "superbwarfare:k_98_prepare",
-    "ReloadLoop": "superbwarfare:k_98_loop",
-    "ReloadEnd": "superbwarfare:k_98_end",
-    "CancellableSounds": [
-      "superbwarfare:k_98_reload_empty",
-      "superbwarfare:k_98_bolt",
-      "superbwarfare:k_98_prepare",
-      "superbwarfare:k_98_loop",
-      "superbwarfare:k_98_end"
-    ]
+    "Fire1PSilent": "superbwarfare:k_98_fire_1p_s",
+    "Fire3PSilent": "superbwarfare:k_98_fire_3p_s"
   }
 }

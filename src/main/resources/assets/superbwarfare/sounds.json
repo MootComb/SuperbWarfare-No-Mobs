@@ -15,10 +15,18 @@
       }
     ]
   },
-  "taser_reload_empty": {
+  "taser_head_out": {
     "sounds": [
       {
-        "name": "superbwarfare:gun/taser/taser_reload_empty",
+        "name": "superbwarfare:gun/taser/taser_head_out",
+        "stream": false
+      }
+    ]
+  },
+  "taser_head_in": {
+    "sounds": [
+      {
+        "name": "superbwarfare:gun/taser/taser_head_in",
         "stream": false
       }
     ]
@@ -351,18 +359,26 @@
       }
     ]
   },
-  "ak_47_reload_normal": {
+  "ak_47_mag_in": {
     "sounds": [
       {
-        "name": "superbwarfare:gun/ak_47/ak_47_reload_normal",
+        "name": "superbwarfare:gun/ak_47/ak_47_mag_in",
         "stream": false
       }
     ]
   },
-  "ak_47_reload_empty": {
+  "ak_47_mag_out": {
     "sounds": [
       {
-        "name": "superbwarfare:gun/ak_47/ak_47_reload_empty",
+        "name": "superbwarfare:gun/ak_47/ak_47_mag_out",
+        "stream": false
+      }
+    ]
+  },
+  "ak_47_bolt": {
+    "sounds": [
+      {
+        "name": "superbwarfare:gun/ak_47/ak_47_bolt",
         "stream": false
       }
     ]
@@ -1279,6 +1295,22 @@
       }
     ]
   },
+  "marlin_fire_1p_s": {
+    "sounds": [
+      {
+        "name": "superbwarfare:gun/marlin/marlin_fire_1p_s",
+        "stream": false
+      }
+    ]
+  },
+  "marlin_fire_3p_s": {
+    "sounds": [
+      {
+        "name": "superbwarfare:gun/marlin/marlin_fire_3p_s",
+        "stream": false
+      }
+    ]
+  },
   "marlin_far": {
     "sounds": [
       {
@@ -1415,6 +1447,22 @@
       }
     ]
   },
+  "glock_17_fire_1p_s": {
+    "sounds": [
+      {
+        "name": "superbwarfare:gun/glock_17/glock_17_fire_1p_s",
+        "stream": false
+      }
+    ]
+  },
+  "glock_17_fire_3p_s": {
+    "sounds": [
+      {
+        "name": "superbwarfare:gun/glock_17/glock_17_fire_3p_s",
+        "stream": false
+      }
+    ]
+  },
   "glock_17_far": {
     "sounds": [
       {
@@ -1431,18 +1479,26 @@
       }
     ]
   },
-  "glock_17_reload_normal": {
+  "glock_17_mag_in": {
     "sounds": [
       {
-        "name": "superbwarfare:gun/glock_17/glock_17_reload_normal",
+        "name": "superbwarfare:gun/glock_17/glock_17_mag_in",
         "stream": false
       }
     ]
   },
-  "glock_17_reload_empty": {
+  "glock_17_mag_out": {
     "sounds": [
       {
-        "name": "superbwarfare:gun/glock_17/glock_17_reload_empty",
+        "name": "superbwarfare:gun/glock_17/glock_17_mag_out",
+        "stream": false
+      }
+    ]
+  },
+  "glock_17_slide": {
+    "sounds": [
+      {
+        "name": "superbwarfare:gun/glock_17/glock_17_slide",
         "stream": false
       }
     ]
@@ -1491,6 +1547,22 @@
     "sounds": [
       {
         "name": "superbwarfare:gun/m_1911/m_1911_fire_3p",
+        "stream": false
+      }
+    ]
+  },
+  "m_1911_fire_1p_s": {
+    "sounds": [
+      {
+        "name": "superbwarfare:gun/m_1911/m_1911_fire_1p_s",
+        "stream": false
+      }
+    ]
+  },
+  "m_1911_fire_3p_s": {
+    "sounds": [
+      {
+        "name": "superbwarfare:gun/m_1911/m_1911_fire_3p_s",
         "stream": false
       }
     ]
@@ -1591,6 +1663,22 @@
       }
     ]
   },
+  "k_98_fire_1p_s": {
+    "sounds": [
+      {
+        "name": "superbwarfare:gun/k_98/k_98_fire_1p_s",
+        "stream": false
+      }
+    ]
+  },
+  "k_98_fire_3p_s": {
+    "sounds": [
+      {
+        "name": "superbwarfare:gun/k_98/k_98_fire_3p_s",
+        "stream": false
+      }
+    ]
+  },
   "k_98_far": {
     "sounds": [
       {
@@ -1639,10 +1727,50 @@
       }
     ]
   },
-  "k_98_end": {
+  "k_98_finish": {
     "sounds": [
       {
-        "name": "superbwarfare:gun/k_98/k_98_end",
+        "name": "superbwarfare:gun/k_98/k_98_finish",
+        "stream": false
+      }
+    ]
+  },
+  "k_98_bolt_close": {
+    "sounds": [
+      {
+        "name": "superbwarfare:gun/k_98/k_98_bolt_close",
+        "stream": false
+      }
+    ]
+  },
+  "k_98_bolt_open": {
+    "sounds": [
+      {
+        "name": "superbwarfare:gun/k_98/k_98_bolt_open",
+        "stream": false
+      }
+    ]
+  },
+  "k_98_clip": {
+    "sounds": [
+      {
+        "name": "superbwarfare:gun/k_98/k_98_clip",
+        "stream": false
+      }
+    ]
+  },
+  "k_98_clip_out": {
+    "sounds": [
+      {
+        "name": "superbwarfare:gun/k_98/k_98_clip_out",
+        "stream": false
+      }
+    ]
+  },
+  "k_98_first_bullet_in": {
+    "sounds": [
+      {
+        "name": "superbwarfare:gun/k_98/k_98_first_bullet_in",
         "stream": false
       }
     ]
@@ -4668,6 +4796,20 @@
         "stream": false,
         "name": "superbwarfare:vehicle/fh_77bw/fh_77bw_fire_3p"
       }
+    ]
+  },
+  "laowu": {
+    "sounds": [
+      "superbwarfare:laowu/laowu_1",
+      "superbwarfare:laowu/laowu_2",
+      "superbwarfare:laowu/laowu_3"
+    ]
+  },
+  "laowu_single": {
+    "sounds": [
+      "superbwarfare:laowu/laowu_1s",
+      "superbwarfare:laowu/laowu_2s",
+      "superbwarfare:laowu/laowu_3s"
     ]
   }
 }

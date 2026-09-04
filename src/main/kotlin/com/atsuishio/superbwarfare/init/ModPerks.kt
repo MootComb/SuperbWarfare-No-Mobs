@@ -98,6 +98,10 @@ object ModPerks {
     lateinit var POWERFUL_COOLER: PERK
     lateinit var CAST_NO_SHADOWS: PERK
     lateinit var EAGER_EDGE: PERK
+    lateinit var ADRENALINE_RUSH: PERK
+    lateinit var QUICKDRAW: PERK
+    lateinit var SNAPSHOT_SIGHTS: PERK
+    lateinit var TRIPLE_TAP: PERK
     // @formatter:on
 
     /**
@@ -127,6 +131,8 @@ object ModPerks {
     lateinit var BRAIN_STORM: PERK
     lateinit var BATTLE_OF_WITS: PERK
     lateinit var TARGET_LOCK: PERK
+    lateinit var SOUL_REAVER: PERK
+    lateinit var STEADY_RESOLVE: PERK
     // @formatter:on
 
     fun register(bus: IEventBus) {
@@ -236,6 +242,18 @@ object ModPerks {
         EAGER_EDGE = autoRegistryObjects["eager_edge"] ?: registerFuncPerk("eager_edge") {
             EmptyPerk("eager_edge", Perk.Type.FUNCTIONAL)
         }
+        ADRENALINE_RUSH = autoRegistryObjects["adrenaline_rush"] ?: registerFuncPerk("adrenaline_rush") {
+            EmptyPerk("adrenaline_rush", Perk.Type.FUNCTIONAL)
+        }
+        QUICKDRAW = autoRegistryObjects["quickdraw"] ?: registerFuncPerk("quickdraw") {
+            EmptyPerk("quickdraw", Perk.Type.FUNCTIONAL)
+        }
+        SNAPSHOT_SIGHTS = autoRegistryObjects["snapshot_sights"] ?: registerFuncPerk("snapshot_sights") {
+            EmptyPerk("snapshot_sights", Perk.Type.FUNCTIONAL)
+        }
+        TRIPLE_TAP = autoRegistryObjects["triple_tap"] ?: registerFuncPerk("triple_tap") {
+            EmptyPerk("triple_tap", Perk.Type.FUNCTIONAL)
+        }
 
         // Damage Perks
         KILL_CLIP = autoRegistryObjects["kill_clip"] ?: registerDamagePerk("kill_clip") { KillClip }
@@ -258,6 +276,12 @@ object ModPerks {
         BATTLE_OF_WITS = autoRegistryObjects["battle_of_wits"] ?: registerDamagePerk("battle_of_wits") { BattleOfWits }
         TARGET_LOCK = autoRegistryObjects["target_lock"] ?: registerDamagePerk("target_lock") {
             EmptyPerk("target_lock", Perk.Type.DAMAGE)
+        }
+        SOUL_REAVER = autoRegistryObjects["soul_reaver"] ?: registerDamagePerk("soul_reaver") {
+            EmptyPerk("soul_reaver", Perk.Type.DAMAGE)
+        }
+        STEADY_RESOLVE = autoRegistryObjects["steady_resolve"] ?: registerDamagePerk("steady_resolve") {
+            EmptyPerk("steady_resolve", Perk.Type.DAMAGE)
         }
     }
 }

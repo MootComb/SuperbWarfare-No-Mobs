@@ -6,6 +6,7 @@
   "Damage": 3,
   "Velocity": 1,
   "Weight": 3,
+  "DrawTime": 10,
   "Headshot": 0,
   "Range": 3,
   "EmptyReloadTime": 1,

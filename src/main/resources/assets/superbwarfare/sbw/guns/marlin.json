@@ -1,12 +1,43 @@
 {
-  "Model": {
-    "Animation": "superbwarfare:animations/marlin.animation.json",
-    "Model": "superbwarfare:geo/marlin.geo.json",
-    "Texture": "superbwarfare:textures/item/marlin.png",
-    "LODModel": "superbwarfare:geo/lod/marlin.geo.json",
-    "LODTexture": "superbwarfare:textures/item/lod/marlin.png"
+  "Icon": "superbwarfare:textures/gun_icon/marlin_icon.png",
+  "SlotIcon": "superbwarfare:textures/item/marlin_icon.png",
+  "Animation": {
+    "Idle": "animation.marlin.idle",
+    "Fire": "animation.marlin.fire",
+    "Prepare": "animation.marlin.prepare",
+    "Iterative": "animation.marlin.iterative_load",
+    "Finish": "animation.marlin.finish",
+    "Bolt": "animation.marlin.bolt",
+    "Edit": "animation.marlin.edit",
+    "CloseStrike": "animation.marlin.close_strike"
   },
-  "FlarePosition": [0, 0, 1.33720625],
+  "ShootRecoil": {
+    "Offset": [1.0, 1.0, 3.5],
+    "Rotation": [1.1, 0.6, 0.5],
+    "ZoomRate": 0.9,
+    "Speed": 1.0
+  },
+  "Model": {
+    "Animation": "superbwarfare:animations/bedrock/gun/marlin.animation.json",
+    "Model": "superbwarfare:models/bedrock/gun/marlin.geo.json",
+    "Texture": "superbwarfare:textures/bedrock/gun/marlin.png",
+    "LODModel": "superbwarfare:models/bedrock/gun_lod/marlin.geo.json",
+    "LODTexture": "superbwarfare:textures/bedrock/gun_lod/marlin.png"
+  },
   "FlareSize": 0.4,
-  "UseOldHandRenderer": true
+  "HasSmoke": true,
+  "Smoke": {
+    "Size": 0.15,
+    "Growth": 0.25,
+    "Lifetime": 0.3,
+    "Speed": 0.4,
+    "Count": 2,
+    "Opacity": 0.9,
+    "Drag": 2,
+    "RandomSize": 0.05,
+    "RandomGrowth": 0.2,
+    "RandomLifetime": 0.2,
+    "RandomSpeed": 0.2,
+    "RandomOpacity": 0.1
+  }
 }

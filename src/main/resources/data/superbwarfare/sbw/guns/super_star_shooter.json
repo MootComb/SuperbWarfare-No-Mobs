@@ -9,6 +9,8 @@
   "Velocity": 3,
   "Magazine": 300,
   "Weight": 20,
+  "DrawTime": 29,
+  "ZoomTime": 21,
   "EmptyReloadTime": 111,
   "RPM": 300,
   "Gravity": 0,

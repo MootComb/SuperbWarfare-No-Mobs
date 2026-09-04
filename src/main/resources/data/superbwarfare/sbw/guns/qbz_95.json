@@ -2,16 +2,39 @@
   "MinZoom": 4,
   "MaxZoom": 8,
   "Spread": 3.7,
+  "OpenBolt": true,
+  "HasBarrelBullet": true,
   "RecoilX": 0.0013,
   "RecoilY": 0.009,
   "Damage": 8.5,
   "Headshot": 2,
-  "Velocity": 46,
+  "Velocity": 22,
   "Magazine": 30,
   "Weight": 4,
+  "DrawTime": 11,
+  "ZoomTime": 6,
   "DefaultFireMode": "Auto",
   "NormalReloadTime": 60,
   "EmptyReloadTime": 74,
+  "ActionSteps": [
+    {
+      "Timeline": "RELOAD_NORMAL",
+      "Progress": 0.76667,
+      "Action": "HOLD_OPEN",
+      "Value": false
+    },
+    {
+      "Timeline": "RELOAD_EMPTY",
+      "Progress": 0.81081,
+      "Action": "HOLD_OPEN",
+      "Value": false
+    },
+    {
+      "Timeline": "NO_AMMO",
+      "Action": "HOLD_OPEN",
+      "Value": true
+    }
+  ],
   "BypassesArmor": 0.28,
   "SoundRadius": 13,
   "RPM": 650,

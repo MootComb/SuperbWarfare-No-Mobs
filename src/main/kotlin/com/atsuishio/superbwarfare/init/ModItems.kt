@@ -6,6 +6,7 @@ import com.atsuishio.superbwarfare.entity.projectile.MediumRocketEntity
 import com.atsuishio.superbwarfare.item.*
 import com.atsuishio.superbwarfare.item.ammo.*
 import com.atsuishio.superbwarfare.item.armor.*
+import com.atsuishio.superbwarfare.item.attachment.AttachmentItem
 import com.atsuishio.superbwarfare.item.blockitem.BlueprintResearchTableBlockItem
 import com.atsuishio.superbwarfare.item.blockitem.ChargingStationBlockItem
 import com.atsuishio.superbwarfare.item.blockitem.CreativeChargingStationBlockItem
@@ -97,7 +98,6 @@ object ModItems {
     // @formatter:off
     @JvmField val REPAIR_TOOL = registerGun<RepairToolItem>("repair_tool")
     @JvmField val TASER = registerGun<TaserItem>("taser")
-    @JvmField val TASER_V2 = registerGun<TaserV2Item>("taser_v2")
     @JvmField val GLOCK_17 = registerGun<Glock17Item>("glock_17")
     @JvmField val GLOCK_18 = registerGun<Glock18Item>("glock_18")
     @JvmField val MP_443 = registerGun<Mp443Item>("mp_443")
@@ -108,6 +108,7 @@ object ModItems {
     @JvmField val MP_5 = registerGun<Mp5Item>("mp_5")
     @JvmField val VECTOR = registerGun<VectorItem>("vector")
     @JvmField val AK_47 = registerGun<AK47Item>("ak_47")
+    @JvmField val AK_47_V2 = registerGun<AK47V2Item>("ak_47_v2")
     @JvmField val AK_12 = registerGun<AK12Item>("ak_12")
     @JvmField val SKS = registerGun<SksItem>("sks")
     @JvmField val M_4 = registerGun<M4Item>("m_4")
@@ -600,6 +601,49 @@ object ModItems {
     @JvmField val EMPTY_PERK = registerPerkItem("empty_perk") { Item(Properties()) }
     // @formatter:on
 
+    /**
+     * Attachment Items
+     */
+    @JvmField
+    val ATTACHMENTS: ItemRegister = DeferredRegister.create(BuiltInRegistries.ITEM, Mod.MODID)
+
+    private fun registerAttachment(id: String, rarity: Rarity = Rarity.COMMON): ItemRegistry<out Item> {
+        return ATTACHMENTS.register(id, Supplier { AttachmentItem("${Mod.MODID}:$id", rarity) })
+    }
+
+    // Stock
+    // @formatter:off
+    @JvmField val OEM_STOCK_LIGHT = registerAttachment("oem_stock_light")
+    @JvmField val OEM_STOCK_HEAVY = registerAttachment("oem_stock_heavy")
+    @JvmField val STOCK_UBR = registerAttachment("stock_ubr")
+    @JvmField val STOCK_PRS = registerAttachment("stock_prs")
+    // @formatter:on
+
+    // Magazine
+    // @formatter:off
+    @JvmField val MAGAZINE_EXTEND = registerAttachment("magazine_extend", Rarity.RARE)
+    @JvmField val MAGAZINE_EXTEND_PRO = registerAttachment("magazine_extend_pro", Rarity.EPIC)
+    // @formatter:on
+
+    // Barrel
+    // @formatter:off
+    @JvmField val MEOWLENCER = registerAttachment("meowlencer", Rarity.RARE)
+    @JvmField val HISSILENCER = registerAttachment("hissilencer", Rarity.RARE)
+    @JvmField val SILAOWUNCER = registerAttachment("silaowuncer", Rarity.RARE)
+    @JvmField val RU_SILENCER = registerAttachment("ru_silencer")
+    @JvmField val AR_SILENCER = registerAttachment("ar_silencer")
+    @JvmField val HANDGUN_SILENCER = registerAttachment("handgun_silencer")
+    @JvmField val OSPREY_SILENCER = registerAttachment("osprey_silencer", Rarity.RARE)
+    @JvmField val LOUDSPEAKER = registerAttachment("loudspeaker", ModRarities.LEGENDARY)
+    @JvmField val OSPREY_SILENCER_TRACHELIUM = registerAttachment("osprey_silencer_trachelium", ModRarities.VIRTUAL)
+    // @formatter:on
+
+    // Grip
+    // @formatter:off
+    @JvmField val VERTICAL_GRIP = registerAttachment("vertical_grip")
+    @JvmField val TRIANGLE_GRIP = registerAttachment("triangle_grip")
+    // @formatter:on
+
     fun registerDispenserBehavior() {
         val list = mutableListOf<ItemRegistry<out Item>>()
         list.addAll(AMMO.entries)
@@ -624,5 +668,6 @@ object ModItems {
         VEHICLES.register(bus)
         registerPerkItems()
         PERKS.register(bus)
+        ATTACHMENTS.register(bus)
     }
 }

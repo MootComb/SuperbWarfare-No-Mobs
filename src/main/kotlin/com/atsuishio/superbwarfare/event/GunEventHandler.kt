@@ -4,7 +4,7 @@ import com.atsuishio.superbwarfare.api.event.ReloadEvent
 import com.atsuishio.superbwarfare.data.gun.*
 import com.atsuishio.superbwarfare.data.gun.value.ReloadState
 import com.atsuishio.superbwarfare.entity.vehicle.base.VehicleEntity
-import com.atsuishio.superbwarfare.init.ModAttachments
+import com.atsuishio.superbwarfare.init.ModDataAttachments
 import com.atsuishio.superbwarfare.init.ModItems
 import com.atsuishio.superbwarfare.init.ModSounds
 import com.atsuishio.superbwarfare.tools.InventoryTool
@@ -35,8 +35,8 @@ object GunEventHandler {
 
         data.bolt.actionTimer.reduce()
 
-        // 执行拉栓期间额外行为
-        data.item.boltTimeBehaviors[data.bolt.actionTimer.get()]?.accept(data)
+        // 执行数据驱动的拉栓阶段行为
+        GunActionStepExecutor.tickBolt(data)
 
         if (data.bolt.actionTimer.get() == 1) {
             data.bolt.needed.set(false)
@@ -107,7 +107,7 @@ object GunEventHandler {
      * 完成换弹过程，装填弹药
      */
     private fun finishReload(shooter: Entity?, data: GunData) {
-        if (data.item.isOpenBolt(data)) {
+        if (data.item.hasBulletInBarrel(data)) {
             if (!data.hasEnoughAmmoToShoot(shooter)) {
                 finishGunEmptyReload(shooter, data)
             } else {
@@ -182,7 +182,7 @@ object GunEventHandler {
 
             if (canMagazineReload || canClipLoad) {
                 val magazine = data.get(GunProp.MAGAZINE)
-                val extra = if (data.item.isOpenBolt(data) && data.item.hasBulletInBarrel(data)) 1 else 0
+                val extra = if (data.item.hasBulletInBarrel(data)) 1 else 0
                 val maxAmmo = magazine + extra
 
                 if (data.ammo.get() < maxAmmo) {
@@ -272,12 +272,12 @@ object GunEventHandler {
             val count = ammoCount - magazine - (if (hasBulletInBarrel) 1 else 0)
 
             if (shooter is Player) {
-                val capability = shooter.getData(ModAttachments.PLAYER_VARIABLE).watch()
+                val capability = shooter.getData(ModDataAttachments.PLAYER_VARIABLE).watch()
                 if (data.selectedAmmoConsumer().type == AmmoConsumer.AmmoConsumeType.PLAYER_AMMO) {
                     val ammoType = data.selectedAmmoConsumer().playerAmmoType
                     ammoType?.add(capability, count)
                 }
-                shooter.setData(ModAttachments.PLAYER_VARIABLE, capability)
+                shooter.setData(ModDataAttachments.PLAYER_VARIABLE, capability)
                 capability.sync(shooter)
             }
 
@@ -359,8 +359,8 @@ object GunEventHandler {
             // Reduce remaining reload timer
             data.reload.reduce()
 
-            // Execute extra behaviors during reload duration
-            data.item.reloadTimeBehaviors[data.reload.time()]?.accept(data)
+            // Execute data-driven reload timeline behaviors
+            GunActionStepExecutor.tickReload(data)
 
             // Reload complete
             if (data.reload.time() == 1) {
@@ -376,7 +376,7 @@ object GunEventHandler {
                 data.hideBulletChain.set(true)
             }
             if (!data.hasEnoughAmmoToShoot(shooter)) {
-                data.item.whenNoAmmo(data)
+                GunActionStepExecutor.triggerNoAmmo(data)
             }
         }
 
@@ -390,18 +390,18 @@ object GunEventHandler {
 
         data.nbtVersion.invalidateStructural()
 
-        if (data.item.isOpenBolt(data)) {
+        if (data.item.hasBulletInBarrel(data)) {
             if (!data.hasEnoughAmmoToShoot(shooter)) {
-                reload.setTime(data.get(GunProp.EMPTY_RELOAD_TIME) + 1)
+                reload.setTime(data.get(GunProp.EMPTY_RELOAD_TIME))
                 reload.setState(ReloadState.EMPTY_RELOADING)
                 playGunEmptyReloadSounds(shooter, data)
             } else {
-                reload.setTime(data.get(GunProp.NORMAL_RELOAD_TIME) + 1)
+                reload.setTime(data.get(GunProp.NORMAL_RELOAD_TIME))
                 reload.setState(ReloadState.NORMAL_RELOADING)
                 playGunNormalReloadSounds(shooter, data)
             }
         } else {
-            reload.setTime(data.get(GunProp.EMPTY_RELOAD_TIME) + 2)
+            reload.setTime(data.get(GunProp.EMPTY_RELOAD_TIME))
             reload.setState(ReloadState.EMPTY_RELOADING)
             playGunEmptyReloadSounds(shooter, data)
         }
@@ -462,16 +462,16 @@ object GunEventHandler {
                 // 此处判断空仓换弹的时候，是否在准备阶段就需要装填一发，如M870
                 playGunPrepareLoadReloadSounds(shooter, data)
                 val prepareLoadTime = data.get(GunProp.PREPARE_LOAD_TIME)
-                reload.prepareLoadTimer.set(prepareLoadTime + 1)
+                reload.prepareLoadTimer.set(prepareLoadTime)
             } else if (data.get(GunProp.PREPARE_EMPTY_TIME) != 0 && !data.hasEnoughAmmoToShoot(shooter)) {
                 // 此处判断空仓换弹，如莫辛纳甘
                 playGunEmptyPrepareSounds(shooter, data)
                 val prepareEmptyTime = data.get(GunProp.PREPARE_EMPTY_TIME)
-                reload.prepareTimer.set(prepareEmptyTime + 1)
+                reload.prepareTimer.set(prepareEmptyTime)
             } else {
                 playGunPrepareReloadSounds(shooter, data)
                 val prepareTime = data.get(GunProp.PREPARE_TIME)
-                reload.prepareTimer.set(prepareTime + 1)
+                reload.prepareTimer.set(prepareTime)
             }
 
             data.forceStop.set(false)
@@ -540,15 +540,12 @@ object GunEventHandler {
             reload.stage3Starter.finish()
 
             val finishTime = data.get(GunProp.FINISH_TIME)
-            reload.finishTimer.set(finishTime + 2)
+            reload.setFinishTime(finishTime + 2)
 
             playGunEndReloadSounds(shooter, data)
         }
 
-        if (stack.item === ModItems.MARLIN.get() && reload.finishTimer.get() == 10) {
-            data.isEmpty.set(false)
-            data.closeStrike.set(false)
-        }
+        GunActionStepExecutor.tickReloadFinish(data)
 
         // 三阶段结束
         if (reload.finishTimer.get() == 1) {
@@ -586,8 +583,8 @@ object GunEventHandler {
 
         if (!InventoryTool.hasCreativeAmmoBox(shooter)) {
             if (shooter != null) {
-                val cap = shooter.getData(ModAttachments.PLAYER_VARIABLE)
-                shooter.setData(ModAttachments.PLAYER_VARIABLE, cap)
+                val cap = shooter.getData(ModDataAttachments.PLAYER_VARIABLE)
+                shooter.setData(ModDataAttachments.PLAYER_VARIABLE, cap)
             }
             data.consumeBackupAmmo(shooter, available)
         }

@@ -41,6 +41,7 @@ class DefaultVehicleResource : IDBasedData<DefaultVehicleResource> {
     @SerialName("LODDistance")
     var lodDistance: ObjectToList<Double> = ObjectToList(48.0, 96.0)
 
+    @JvmField
     @SerialName("Animation")
     val animation: SerializedResourceLocation? = null
 
@@ -50,6 +51,7 @@ class DefaultVehicleResource : IDBasedData<DefaultVehicleResource> {
     @SerialName("Script")
     private val script: SerializedResourceLocation? = null
 
+    @JvmField
     @SerialName("Sponsor")
     val sponsor: SponsorInfo? = null
 

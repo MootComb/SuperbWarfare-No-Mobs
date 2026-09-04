@@ -9,5 +9,6 @@
     "Texture": "superbwarfare:textures/item/super_star_shooter.png"
   },
   "FlarePosition": [0, 0, 0.59375],
-  "FlareSize": 1
+  "FlareSize": 1,
+  "MovingTilt": false
 }
