@@ -11,11 +11,15 @@ import net.minecraft.core.HolderLookup
 import net.minecraft.data.PackOutput
 import net.minecraft.data.tags.ItemTagsProvider
 import net.minecraft.tags.ItemTags
+import net.minecraft.world.item.Item
 import net.minecraft.world.item.Items
 import net.minecraft.world.level.block.Block
 import net.neoforged.neoforge.common.Tags
 import net.neoforged.neoforge.common.data.ExistingFileHelper
+import net.neoforged.neoforge.registries.DeferredHolder
 import java.util.concurrent.CompletableFuture
+
+private typealias PerkRegistry = DeferredHolder<Perk, out Perk>
 
 class ModItemTagProvider(
     packOutput: PackOutput,
@@ -236,6 +240,7 @@ class ModItemTagProvider(
         this.tag(ModTags.Items.ANIMATED_SHOTGUN).add(
             ModItems.HOMEMADE_SHOTGUN.get(),
             ModItems.M_870.get(),
+            ModItems.M_1897.get(),
             ModItems.AA_12.get(),
             ModItems.M_79.get(),
             ModItems.SECONDARY_CATACLYSM.get()
@@ -286,7 +291,8 @@ class ModItemTagProvider(
             ModItems.AWM.get(),
             ModItems.QL_1031.get()
         )
-        this.tag(ModTags.Items.SHOTGUN).add(ModItems.HOMEMADE_SHOTGUN.get(), ModItems.M_870.get(), ModItems.AA_12.get())
+        this.tag(ModTags.Items.SHOTGUN)
+            .add(ModItems.HOMEMADE_SHOTGUN.get(), ModItems.M_870.get(), ModItems.M_1897.get(), ModItems.AA_12.get())
         this.tag(ModTags.Items.MACHINE_GUN).add(ModItems.MINIGUN.get(), ModItems.M_2_HB.get())
         this.tag(ModTags.Items.LAUNCHER).add(
             ModItems.RPG.get(), ModItems.JAVELIN.get(), ModItems.IGLA_9K38.get(),
@@ -319,7 +325,7 @@ class ModItemTagProvider(
             ModItems.AK_12_BLUEPRINT.get(),
             ModItems.QBZ_95_BLUEPRINT.get(),
             ModItems.RPG_BLUEPRINT.get(),
-            ModItems.HUNTING_RIFLE_BLUEPRINT.get()
+            ModItems.M_1897_BLUEPRINT.get()
         )
 
         this.tag(ModTags.Items.EPIC_BLUEPRINT).add(
@@ -335,7 +341,8 @@ class ModItemTagProvider(
             ModItems.QBZ_191_BLUEPRINT.get(),
             ModItems.AWM_BLUEPRINT.get(),
             ModItems.IGLA_BLUEPRINT.get(),
-            ModItems.SENTINEL_BLUEPRINT.get()
+            ModItems.SENTINEL_BLUEPRINT.get(),
+            ModItems.HUNTING_RIFLE_BLUEPRINT.get()
         )
 
         this.tag(ModTags.Items.LEGENDARY_BLUEPRINT).add(
@@ -419,6 +426,10 @@ class ModItemTagProvider(
             ModItems.CEMENTED_CARBIDE_SWORD.get()
         )
 
+        this.addPerkTags()
+    }
+
+    private fun addPerkTags() {
         ModItems.PERKS.entries.forEach {
             val item = it.get()
             if (item is PerkItem) {
@@ -442,5 +453,82 @@ class ModItemTagProvider(
                 }
             }
         }
+
+        this.tag(ModTags.Items.RESEARCHABLE_AMMO_PERK_COMMON).add(
+            perkItem(ModPerks.AQUA_BULLET),
+            perkItem(ModPerks.POISONOUS_BULLET),
+            perkItem(ModPerks.INCENDIARY_BULLET),
+            perkItem(ModPerks.JHP_BULLET),
+            perkItem(ModPerks.LONGER_WIRE),
+            perkItem(ModPerks.RIOT_BULLET),
+            perkItem(ModPerks.SILVER_BULLET)
+        )
+        this.tag(ModTags.Items.RESEARCHABLE_AMMO_PERK_RARE).add(
+            perkItem(ModPerks.BLADE_BULLET),
+            perkItem(ModPerks.CUPID_ARROW),
+            perkItem(ModPerks.HE_BULLET),
+            perkItem(ModPerks.MICRO_MISSILE),
+            perkItem(ModPerks.AP_BULLET)
+        )
+        this.tag(ModTags.Items.RESEARCHABLE_AMMO_PERK_EPIC).add(
+            perkItem(ModPerks.PHASE_PENETRATING_BULLET),
+            perkItem(ModPerks.PHOSPHORUS_FLAME_BULLET)
+        )
+
+        this.tag(ModTags.Items.RESEARCHABLE_FUNCTIONAL_PERK_COMMON).add(
+            perkItem(ModPerks.CAST_NO_SHADOWS),
+            perkItem(ModPerks.EAGER_EDGE),
+            perkItem(ModPerks.FIELD_DOCTOR),
+            perkItem(ModPerks.TRIPLE_TAP),
+            perkItem(ModPerks.POWERFUL_ATTRACTION),
+            perkItem(ModPerks.QUICKDRAW),
+            perkItem(ModPerks.SNAPSHOT_SIGHTS)
+        )
+        this.tag(ModTags.Items.RESEARCHABLE_FUNCTIONAL_PERK_RARE).add(
+            perkItem(ModPerks.POWERFUL_COOLER),
+            perkItem(ModPerks.SUBSISTENCE),
+            perkItem(ModPerks.FOURTH_TIMES_CHARM),
+            perkItem(ModPerks.HEAL_CLIP),
+            perkItem(ModPerks.REGENERATION)
+        )
+        this.tag(ModTags.Items.RESEARCHABLE_FUNCTIONAL_PERK_EPIC).add(
+            perkItem(ModPerks.BACKPACK_LINKED_MAGAZINE),
+            perkItem(ModPerks.ADRENALINE_RUSH),
+            perkItem(ModPerks.TURBO_CHARGER)
+        )
+        this.tag(ModTags.Items.RESEARCHABLE_FUNCTIONAL_PERK_LEGENDARY).add(
+            perkItem(ModPerks.INTELLIGENT_CHIP)
+        )
+
+        this.tag(ModTags.Items.RESEARCHABLE_DAMAGE_PERK_COMMON).add(
+            perkItem(ModPerks.BRAIN_STORM),
+            perkItem(ModPerks.DESPERADO),
+            perkItem(ModPerks.FIREFLY),
+            perkItem(ModPerks.GUTSHOT_STRAIGHT),
+            perkItem(ModPerks.HEAD_SEEKER),
+            perkItem(ModPerks.HIGH_IMPACT_RESERVES),
+            perkItem(ModPerks.MAGNIFICENT_HOWL),
+            perkItem(ModPerks.VOLT_OVERLOAD)
+        )
+        this.tag(ModTags.Items.RESEARCHABLE_DAMAGE_PERK_RARE).add(
+            perkItem(ModPerks.KILLING_TALLY),
+            perkItem(ModPerks.KILL_CLIP),
+            perkItem(ModPerks.MONSTER_HUNTER),
+            perkItem(ModPerks.ONE_TWO_PUNCH),
+            perkItem(ModPerks.STEADY_RESOLVE),
+            perkItem(ModPerks.VORPAL_WEAPON)
+        )
+        this.tag(ModTags.Items.RESEARCHABLE_DAMAGE_PERK_EPIC).add(
+            perkItem(ModPerks.FAIR_MEANS),
+            perkItem(ModPerks.TARGET_LOCK),
+            perkItem(ModPerks.BATTLE_OF_WITS)
+        )
+        this.tag(ModTags.Items.RESEARCHABLE_DAMAGE_PERK_LEGENDARY).add(
+            perkItem(ModPerks.SOUL_REAVER)
+        )
+    }
+
+    private fun perkItem(perk: PerkRegistry): Item {
+        return ModItems.PERK_ITEMS[perk]!!.get()
     }
 }

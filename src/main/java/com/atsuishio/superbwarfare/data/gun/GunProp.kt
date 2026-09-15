@@ -147,6 +147,9 @@ class GunProp<T, R>(
         val PROJECTILE_AMOUNT = plainProp(DefaultGunData::projectileAmount)
 
         @JvmField
+        val SPREAD_PATTERN = plainProp(DefaultGunData::spreadPattern)
+
+        @JvmField
         val WEIGHT = plainProp(DefaultGunData::weight)
 
         @JvmField
@@ -155,7 +158,9 @@ class GunProp<T, R>(
 
         @JvmField
         val AVAILABLE_FIRE_MODES =
-            complexProp(DefaultGunData::availableFireModes) { it.list.map { l -> l.value } }
+            complexProp(DefaultGunData::availableFireModes) {
+                it.list.map { l -> l.value.also { fireMode -> fireMode.init() } }
+            }
 
         @JvmField
         val MAGAZINE = GunProp(
@@ -369,7 +374,7 @@ class GunProp<T, R>(
         }
 
         @JvmField
-        val ICON = complexProp(DefaultGunData::icon) { it }
+        val ICON = plainProp(DefaultGunData::icon)
 
         @JvmField
         val CROSSHAIR = complexProp(DefaultGunData::crosshair) { it.ifEmpty { "@GunDefault" } }
@@ -378,14 +383,14 @@ class GunProp<T, R>(
         val CROSSHAIR_ZOOMING = complexProp(DefaultGunData::crosshairZooming) { it.ifEmpty { "@Empty" } }
 
         @JvmField
-        val CROSSHAIR_COLOR = complexProp(DefaultGunData::crosshairColor) { it }
+        val CROSSHAIR_COLOR = plainProp(DefaultGunData::crosshairColor)
 
         // 注意Nullable
         @JvmField
         val NAME = plainProp(DefaultGunData::name)
 
         @JvmField
-        val SHOOT_POS = complexProp(DefaultGunData::shootPos) { it }
+        val SHOOT_POS = plainProp(DefaultGunData::shootPos)
 
         @JvmField
         val SEEK_WEAPON_INFO = plainProp(DefaultGunData::seekWeaponInfo)
@@ -394,7 +399,7 @@ class GunProp<T, R>(
         val PROJECTILE_DUMMY_INFO = plainProp(DefaultGunData::projectileDummyInfo)
 
         @JvmField
-        val SOUND_INFO = complexProp(DefaultGunData::soundInfo) { it }
+        val SOUND_INFO = plainProp(DefaultGunData::soundInfo)
 
         @JvmField
         val SHOOT_ANIMATION_TIME = plainProp(DefaultGunData::shootAnimationTime)

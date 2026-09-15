@@ -1,11 +1,11 @@
 {
-  "Spread": 3,
+  "Spread": 2.5,
   "RecoilX": 0.003,
   "RecoilY": 0.04,
   "Damage": 3,
   "Headshot": 1.5,
   "MeleeDamage": 15,
-  "MeleeDuration": 18,
+  "MeleeDuration": 16,
   "MeleeAngle": 100,
   "Velocity": 10,
   "Magazine": 8,
@@ -17,12 +17,12 @@
   "ReloadTypes": [
     "Iterative"
   ],
-  "PrepareTime": 6,
-  "PrepareLoadTime": 34,
+  "PrepareTime": 9,
+  "PrepareLoadTime": 33,
   "PrepareAmmoLoadTime": 10,
-  "IterativeTime": 12,
+  "IterativeTime": 11,
   "IterativeAmmoLoadTime": 3,
-  "FinishTime": 12,
+  "FinishTime": 10,
   "BypassesArmor": 0.05,
   "SoundRadius": 16,
   "BoltActionTime": 10,
@@ -54,21 +54,46 @@
     "!superbwarfare:longer_wire",
     "!superbwarfare:cupid_arrow"
   ],
+  "AvailableAttachments": {
+    "Scope": [
+      "superbwarfare:scope_coyote",
+      "superbwarfare:scope_aimpoint_t2",
+      "superbwarfare:scope_eotech_551",
+      "superbwarfare:scope_okp_7",
+      "superbwarfare:scope_pkas",
+      "superbwarfare:scope_bruiser",
+      "superbwarfare:scope_ranger",
+      "superbwarfare:scope_1p_78",
+      "superbwarfare:scope_pk_a",
+      "superbwarfare:scope_acog",
+      "superbwarfare:scope_qmk171",
+      "superbwarfare:scope_hamr",
+      "superbwarfare:scope_lpvo",
+      "superbwarfare:scope_sniper"
+    ],
+    "Grip": [
+      "superbwarfare:vertical_grip",
+      "superbwarfare:triangle_grip"
+    ],
+    "Barrel": [
+      "superbwarfare:meowlencer",
+      "superbwarfare:hissilencer",
+      "superbwarfare:silaowuncer",
+      "superbwarfare:silencer_superb_12",
+      "superbwarfare:loudspeaker",
+      "superbwarfare:triangular_muzzle",
+      "superbwarfare:love_muzzle",
+      "superbwarfare:star_muzzle",
+      "superbwarfare:linear_muzzle",
+      "superbwarfare:cross_muzzle"
+    ]
+  },
   "SoundInfo": {
     "Fire1P": "superbwarfare:m_870_fire_1p",
     "Fire3P": "superbwarfare:m_870_fire_3p",
     "Fire3PFar": "superbwarfare:m_870_far",
     "Fire3PVeryFar": "superbwarfare:m_870_veryfar",
     "Fire1PSilent": "superbwarfare:m_870_fire_1p_s",
-    "Fire3PSilent": "superbwarfare:m_870_fire_3p_s",
-    "Fire3PFarSilent": "superbwarfare:m_870_far_s",
-    "ReloadPrepareLoad": "superbwarfare:m_870_prepare_load",
-    "ReloadLoop": "superbwarfare:m_870_loop",
-    "Bolt": "superbwarfare:m_870_bolt",
-    "CancellableSounds": [
-      "superbwarfare:m_870_prepare_load",
-      "superbwarfare:m_870_loop",
-      "superbwarfare:m_870_bolt"
-    ]
+    "Fire3PSilent": "superbwarfare:m_870_fire_3p_s"
   }
 }

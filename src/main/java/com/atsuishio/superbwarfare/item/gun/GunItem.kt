@@ -20,7 +20,6 @@ import com.atsuishio.superbwarfare.entity.projectile.*
 import com.atsuishio.superbwarfare.entity.vehicle.base.VehicleEntity
 import com.atsuishio.superbwarfare.event.ClientEventHandler
 import com.atsuishio.superbwarfare.init.ModDamageTypes
-import com.atsuishio.superbwarfare.init.ModItems
 import com.atsuishio.superbwarfare.init.ModPerks
 import com.atsuishio.superbwarfare.init.ModSounds
 import com.atsuishio.superbwarfare.item.EnergyStorageItem
@@ -146,10 +145,15 @@ abstract class GunItem(properties: Properties) : Item(properties.stacksTo(1)), I
     open fun init(data: GunData) {
         if (isInitialized(data)) return
 
-        data.gunDataTag.putUUID("UUID", UUID.randomUUID())
+        data.update { it.copy(uuid = UUID.randomUUID()) }
     }
 
-    open fun isInitialized(data: GunData) = data.gunDataTag.hasUUID("UUID")
+    /**
+     * 是否已完成初始化
+     *
+     * 读取 [GunData.state] 而不是 tag：批量写入期间 tag 可能还没落盘，而 state 始终是最新的。
+     */
+    open fun isInitialized(data: GunData) = data.uuid != null
 
     override fun canAttackBlock(pState: BlockState, pLevel: Level, pPos: BlockPos, pPlayer: Player) = false
 
@@ -250,42 +254,32 @@ abstract class GunItem(properties: Properties) : Item(properties.stacksTo(1)), I
     /**
      * 武器是否能更换枪管配件
      */
-    open fun hasCustomBarrel(data: GunData) = false
-
-    open val validBarrels: IntArray
-        get() = intArrayOf(0, 1, 2)
+    open fun hasCustomBarrel(data: GunData) =
+        data.availableAttachments(AttachmentType.BARREL).isNotEmpty()
 
     /**
      * 武器是否能更换枪托配件
      */
-    open fun hasCustomGrip(data: GunData) = false
-
-    open val validGrips: IntArray
-        get() = intArrayOf(0, 1, 2, 3)
+    open fun hasCustomGrip(data: GunData) =
+        data.availableAttachments(AttachmentType.GRIP).isNotEmpty()
 
     /**
      * 武器是否能更换弹匣配件
      */
-    open fun hasCustomMagazine(data: GunData) = false
-
-    open val validMagazines: IntArray
-        get() = intArrayOf(0, 1, 2)
+    open fun hasCustomMagazine(data: GunData) =
+        data.availableAttachments(AttachmentType.MAGAZINE).isNotEmpty()
 
     /**
      * 武器是否能更换瞄具配件
      */
-    open fun hasCustomScope(data: GunData) = false
-
-    open val validScopes: IntArray
-        get() = intArrayOf(0, 1, 2, 3)
+    open fun hasCustomScope(data: GunData) =
+        data.availableAttachments(AttachmentType.SCOPE).isNotEmpty()
 
     /**
      * 武器是否能更换枪托配件
      */
-    open fun hasCustomStock(data: GunData) = false
-
-    open val validStocks: IntArray
-        get() = intArrayOf(0, 1, 2)
+    open fun hasCustomStock(data: GunData) =
+        data.availableAttachments(AttachmentType.STOCK).isNotEmpty()
 
     /**
      * 武器是否有脚架
@@ -335,42 +329,7 @@ abstract class GunItem(properties: Properties) : Item(properties.stacksTo(1)), I
     /**
      * 获取额外总重量加成
      */
-    open fun getCustomWeight(data: GunData): Double {
-        val attachment = data.attachment
-
-        val scopeWeight = when (attachment.get(AttachmentType.SCOPE)) {
-            1 -> 0.5
-            2 -> 1.0
-            3 -> 1.5
-            else -> 0.0
-        }
-
-        val barrelWeight = when (attachment.get(AttachmentType.BARREL)) {
-            1 -> 0.5
-            2 -> 1.0
-            else -> 0.0
-        }
-
-        val magazineWeight = when (attachment.get(AttachmentType.MAGAZINE)) {
-            1 -> 1.0
-            2 -> 2.0
-            else -> 0.0
-        }
-
-        val stockWeight = when (attachment.get(AttachmentType.STOCK)) {
-            1 -> -2.0
-            2 -> 1.5
-            else -> 0.0
-        }
-
-        val gripWeight = when (attachment.get(AttachmentType.GRIP)) {
-            1, 2 -> 0.25
-            3 -> 1.0
-            else -> 0.0
-        }
-
-        return scopeWeight + barrelWeight + magazineWeight + stockWeight + gripWeight
-    }
+    open fun getCustomWeight(data: GunData) = 0.0
 
     /**
      * 获取额外弹速加成
@@ -520,6 +479,26 @@ abstract class GunItem(properties: Properties) : Item(properties.stacksTo(1)), I
         )
     }
 
+    fun shoot(data: GunData, shooter: Entity, spread: Double, zoom: Boolean, uuid: UUID?, power: Double) {
+        val server = shooter.level() as? ServerLevel ?: return
+
+        shoot(
+            ShootParameters(
+                shooter,
+                shooter,
+                server,
+                Vec3(shooter.x, shooter.eyeY, shooter.z),
+                shooter.lookAngle,
+                data,
+                spread,
+                zoom,
+                uuid,
+                null,
+                power
+            )
+        )
+    }
+
     fun shoot(data: GunData, shooter: Entity, spread: Double, zoom: Boolean, uuid: UUID?, pos: Vec3?) {
         val server = shooter.level() as? ServerLevel ?: return
 
@@ -539,12 +518,40 @@ abstract class GunItem(properties: Properties) : Item(properties.stacksTo(1)), I
         )
     }
 
+    fun shoot(data: GunData, shooter: Entity, spread: Double, zoom: Boolean, uuid: UUID?, pos: Vec3?, power: Double) {
+        val server = shooter.level() as? ServerLevel ?: return
+
+        shoot(
+            ShootParameters(
+                shooter,
+                shooter,
+                server,
+                Vec3(shooter.x, shooter.eyeY, shooter.z),
+                shooter.lookAngle,
+                data,
+                spread,
+                zoom,
+                uuid,
+                pos,
+                power
+            )
+        )
+    }
+
     /**
      * 服务端处理单次开火
      *
      * @param parameters 开火参数
      */
     open fun shoot(parameters: ShootParameters) {
+        // One shot writes ammo, bolt/close-strike state, the burst counter and the fire index; batching
+        // them into a single gun-stack write. Reads stay immediate (they go through GunData.state).
+        parameters.data.batch {
+            shootInternal(parameters)
+        }
+    }
+
+    private fun shootInternal(parameters: ShootParameters) {
         val data = parameters.data
         val shooter = parameters.shooter
         val ammoSupplier = parameters.ammoSupplier
@@ -558,8 +565,19 @@ abstract class GunItem(properties: Properties) : Item(properties.stacksTo(1)), I
         val projectileAmount = data.get(GunProp.PROJECTILE_AMOUNT)
 
         // 生成所有子弹
-        repeat(projectileAmount) {
-            if (!shootBullet(parameters)) return
+        val spreadPattern = data.get(GunProp.SPREAD_PATTERN)
+        val spreadRotation = data.attachment.getRotation(AttachmentType.BARREL)
+        val spreadDirections = ProjectileSpreadTool.generateDirections(
+            this.random,
+            parameters.shootDirection,
+            parameters.spread,
+            projectileAmount,
+            spreadPattern,
+            spreadRotation
+        )
+
+        repeat(projectileAmount) { index ->
+            if (!shootBullet(parameters.copy(shootDirection = spreadDirections[index]))) return
         }
 
         // n连发模式开火数据设置
@@ -634,8 +652,13 @@ abstract class GunItem(properties: Properties) : Item(properties.stacksTo(1)), I
         if (data.reload.prepareTimer.get() == 0 && data.reloading() && data.hasEnoughAmmoToShoot(player)) {
             data.forceStop.set(true)
         }
-        if (player is ServerPlayer && data.stack.`is`(ModItems.QL_1031.get()) && data.selectedFireModeInfo().name == "Hold") {
-            player.connection.send(ClientboundStopSoundPacket(loc("ql_1031_discharge"), SoundSource.PLAYERS))
+        if (player is ServerPlayer) {
+            val dischargeSound = GunResource.compute(data.stack).dischargeSound
+            if (dischargeSound != null) {
+                player.connection.send(
+                    ClientboundStopSoundPacket(dischargeSound.location, SoundSource.PLAYERS)
+                )
+            }
         }
     }
 
@@ -649,8 +672,13 @@ abstract class GunItem(properties: Properties) : Item(properties.stacksTo(1)), I
             val name = origin.substring(origin.lastIndexOf(".") + 1)
             player.connection.send(ClientboundStopSoundPacket(loc(name + "_lock"), SoundSource.PLAYERS))
         }
-        if (player is ServerPlayer && data.stack.`is`(ModItems.QL_1031.get()) && data.selectedFireModeInfo().name == "Hold") {
-            player.connection.send(ClientboundStopSoundPacket(loc("ql_1031_charge"), SoundSource.PLAYERS))
+        if (player is ServerPlayer && data.selectedFireModeInfo().isChargeMode()) {
+            val chargeSound = GunResource.compute(data.stack).chargeSound
+            if (chargeSound != null) {
+                player.connection.send(
+                    ClientboundStopSoundPacket(chargeSound.location, SoundSource.PLAYERS)
+                )
+            }
         }
     }
 
@@ -664,7 +692,6 @@ abstract class GunItem(properties: Properties) : Item(properties.stacksTo(1)), I
         val shootDirection = parameters.shootDirection
         val shooter = parameters.shooter
         val zoom = parameters.zoom
-        val spread = parameters.spread
         val uuid = parameters.targetEntityUUID
         val targetPos = parameters.targetPos
 
@@ -681,8 +708,8 @@ abstract class GunItem(properties: Properties) : Item(properties.stacksTo(1)), I
         }
 
         val headshot = data.get(GunProp.HEADSHOT)
-        val damage = data.get(GunProp.DAMAGE)
-        var velocity = data.get(GunProp.VELOCITY).toFloat()
+        val damage = data.get(GunProp.DAMAGE) * parameters.power.coerceAtLeast(0.0)
+        var velocity = (data.get(GunProp.VELOCITY) * parameters.power.coerceAtLeast(0.0)).toFloat()
         val bypassArmorRate = data.get(GunProp.BYPASSES_ARMOR)
 
         if (isInLiquid(level, shootPosition)) {
@@ -852,9 +879,7 @@ abstract class GunItem(properties: Properties) : Item(properties.stacksTo(1)), I
         }
 
         // 发射任意实体
-        val x = shootDirection.x
-        val y = shootDirection.y
-        val z = shootDirection.z
+        val direction = Vec3(shootDirection.x, shootDirection.y, shootDirection.z).normalize()
 
         entity.setPos(
             shootPosition.x,
@@ -863,17 +888,9 @@ abstract class GunItem(properties: Properties) : Item(properties.stacksTo(1)), I
         )
 
         if (entity is Projectile) {
-            entity.shoot(x, y, z, velocity, spread.toFloat())
+            entity.shoot(direction.x, direction.y, direction.z, velocity, 0f)
         } else {
-            val random = RandomSource.create()
-            val vec3 = Vec3(x, y, z)
-                .normalize()
-                .add(
-                    random.triangle(0.0, 0.0172275 * spread),
-                    random.triangle(0.0, 0.0172275 * spread),
-                    random.triangle(0.0, 0.0172275 * spread)
-                )
-                .scale(velocity.toDouble())
+            val vec3 = direction.scale(velocity.toDouble())
 
             entity.deltaMovement = vec3
             entity.hasImpulse = true
@@ -1116,7 +1133,7 @@ abstract class GunItem(properties: Properties) : Item(properties.stacksTo(1)), I
     protected fun randomVec(vec3: Vec3, spread: Double): Vec3 =
         randomSpreadVec(this.random, vec3, spread)
 
-    open fun canEditAttachments(data: GunData) = data.get(GunProp.AMMO_CONSUMER).size > 1
+    open fun canEditAttachments(data: GunData) = true
 
     open fun enableShootTimer() = false
 

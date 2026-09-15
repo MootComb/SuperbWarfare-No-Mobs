@@ -30,7 +30,7 @@ object GunEventHandler {
         if (data.item.useSpecialFireProcedure(data)) return
 
         if (data.bolt.actionTimer.get() > 0) {
-            data.nbtVersion.invalidateStructural()
+            data.invalidateProperties()
         }
 
         data.bolt.actionTimer.reduce()
@@ -121,7 +121,7 @@ object GunEventHandler {
 
         data.reload.reloadStarter.finish()
 
-        data.nbtVersion.invalidateStructural()
+        data.invalidateProperties()
     }
 
     /**
@@ -191,7 +191,7 @@ object GunEventHandler {
             } else if (canSingleReload && data.ammo.get() < data.get(GunProp.MAGAZINE)) {
                 data.reload.singleReloadStarter.markStart()
 
-                data.nbtVersion.invalidateStructural()
+                data.invalidateProperties()
             } else {
                 return
             }
@@ -227,7 +227,7 @@ object GunEventHandler {
         val heatO = data.heat.get()
         val heat = max(heatO - data.get(GunProp.NATURAL_COOLDOWN) * rate, 0.0)
         if (heat != heatO) {
-            data.nbtVersion.invalidateStructural()
+            data.invalidateProperties()
             data.heat.set(heat)
         }
 
@@ -272,13 +272,12 @@ object GunEventHandler {
             val count = ammoCount - magazine - (if (hasBulletInBarrel) 1 else 0)
 
             if (shooter is Player) {
-                val capability = shooter.getData(ModDataAttachments.PLAYER_VARIABLE).watch()
+                val capability = shooter.getData(ModDataAttachments.PLAYER_VARIABLE)
                 if (data.selectedAmmoConsumer().type == AmmoConsumer.AmmoConsumeType.PLAYER_AMMO) {
                     val ammoType = data.selectedAmmoConsumer().playerAmmoType
                     ammoType?.add(capability, count)
                 }
                 shooter.setData(ModDataAttachments.PLAYER_VARIABLE, capability)
-                capability.sync(shooter)
             }
 
             data.ammo.set(magazine + (if (hasBulletInBarrel) 1 else 0))
@@ -313,6 +312,15 @@ object GunEventHandler {
      * @param environmentRate pre-computed environmental cooldown rate multiplier.
      */
     fun gunTick(shooter: Entity?, data: GunData, inMainHand: Boolean, environmentRate: Double) {
+        // A single tick touches several timers, heat, ammo and reload state; batching turns those into
+        // one write to the gun stack instead of one per field. All reads inside stay immediate, because
+        // they go through GunData.state rather than the tag.
+        data.batch {
+            gunTickInternal(shooter, data, inMainHand, environmentRate)
+        }
+    }
+
+    private fun gunTickInternal(shooter: Entity?, data: GunData, inMainHand: Boolean, environmentRate: Double) {
         init(shooter, data)
         autoReload(shooter, data, inMainHand)
         tickPerk(shooter, data)
@@ -354,7 +362,7 @@ object GunEventHandler {
             }
 
             if (data.reload.time() > 0) {
-                data.nbtVersion.invalidateStructural()
+                data.invalidateProperties()
             }
             // Reduce remaining reload timer
             data.reload.reduce()
@@ -388,7 +396,7 @@ object GunEventHandler {
     private fun startReload(shooter: Entity?, data: GunData) {
         val reload = data.reload
 
-        data.nbtVersion.invalidateStructural()
+        data.invalidateProperties()
 
         if (data.item.hasBulletInBarrel(data)) {
             if (!data.hasEnoughAmmoToShoot(shooter)) {
@@ -479,12 +487,15 @@ object GunEventHandler {
             reload.setStage(1)
             reload.setState(ReloadState.NORMAL_RELOADING)
 
-            data.nbtVersion.invalidateStructural()
+            data.invalidateProperties()
         }
 
         if (reload.prepareLoadTimer.get() == data.get(GunProp.PREPARE_AMMO_LOAD_TIME)) {
             prepareLoad(shooter, data)
         }
+
+        // 执行数据驱动的 PrepareLoad 阶段时间线行为
+        GunActionStepExecutor.tickReloadPrepareLoad(data)
 
         // 一阶段结束，检查备弹，如果有则二阶段启动，无则直接跳到三阶段
         if ((reload.prepareTimer.get() == 1 || reload.prepareLoadTimer.get() == 1)) {
@@ -511,7 +522,7 @@ object GunEventHandler {
 
             // 动画播放nbt
             data.loadIndex.set(if (data.loadIndex.get() == 1) 0 else 1)
-            data.nbtVersion.invalidateStructural()
+            data.invalidateProperties()
         }
 
         // 装填
@@ -552,7 +563,7 @@ object GunEventHandler {
             reload.setStage(0)
             if (data.get(GunProp.BOLT_ACTION_TIME) > 0) {
                 data.bolt.needed.set(false)
-                data.nbtVersion.invalidateStructural()
+                data.invalidateProperties()
             }
             reload.setState(ReloadState.NOT_RELOADING)
             reload.singleReloadStarter.finish()
@@ -565,7 +576,7 @@ object GunEventHandler {
         val required = min(data.get(GunProp.MAGAZINE) - data.ammo.get(), 1)
         val available = min(required, data.countBackupAmmo(shooter))
         data.ammo.add(available)
-        data.nbtVersion.invalidateStructural()
+        data.invalidateProperties()
 
         if (!InventoryTool.hasCreativeAmmoBox(shooter)) {
             data.consumeBackupAmmo(shooter, available)
@@ -579,14 +590,10 @@ object GunEventHandler {
         )
         val available = min(required, data.countBackupAmmo(shooter))
         data.ammo.add(available)
-        data.nbtVersion.invalidateStructural()
+        data.invalidateProperties()
 
         if (!InventoryTool.hasCreativeAmmoBox(shooter)) {
-            if (shooter != null) {
-                val cap = shooter.getData(ModDataAttachments.PLAYER_VARIABLE)
-                shooter.setData(ModDataAttachments.PLAYER_VARIABLE, cap)
-            }
-            data.consumeBackupAmmo(shooter, available)
+             data.consumeBackupAmmo(shooter, available)
         }
     }
 

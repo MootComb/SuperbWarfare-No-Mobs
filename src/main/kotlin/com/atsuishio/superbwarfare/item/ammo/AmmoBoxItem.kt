@@ -4,6 +4,7 @@ import com.atsuishio.superbwarfare.data.gun.Ammo
 import com.atsuishio.superbwarfare.init.ModDataAttachments
 import com.atsuishio.superbwarfare.init.ModDataComponents
 import com.atsuishio.superbwarfare.init.ModSounds
+import com.atsuishio.superbwarfare.init.RegistryName
 import com.atsuishio.superbwarfare.tools.FormatTool.format0D
 import com.atsuishio.superbwarfare.tools.SoundTool
 import com.atsuishio.superbwarfare.tools.plus
@@ -47,6 +48,7 @@ var ItemStack.ammoBoxData: AmmoBoxItem.AmmoBoxData
         }
     }
 
+@RegistryName("ammo_box")
 open class AmmoBoxItem : Item(Properties().stacksTo(1)) {
     data class AmmoBoxData(
         val selectedType: Ammo? = null,
@@ -85,7 +87,7 @@ open class AmmoBoxItem : Item(Properties().stacksTo(1)) {
 
         val info = stack.ammoBoxData
 
-        val cap = player.getData(ModDataAttachments.PLAYER_VARIABLE).watch()
+        val cap = player.getData(ModDataAttachments.PLAYER_VARIABLE)
         if (!level.isClientSide()) {
             for (type in info.selectedTypes) {
                 if (player.isCrouching && !info.isDrop) {
@@ -105,7 +107,6 @@ open class AmmoBoxItem : Item(Properties().stacksTo(1)) {
                 }
             }
             player.setData(ModDataAttachments.PLAYER_VARIABLE, cap)
-            cap.sync(player)
             level.playSound(null, player.blockPosition(), SoundEvents.ARROW_HIT_PLAYER, SoundSource.PLAYERS, 1f, 1f)
 
             // 取出弹药时，若弹药盒为掉落物版本，则移除弹药盒物品

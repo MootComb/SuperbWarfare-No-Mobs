@@ -4,6 +4,7 @@ import com.atsuishio.superbwarfare.client.renderer.gun.Qbz191ItemRenderer;
 import com.atsuishio.superbwarfare.data.gun.GunData;
 import com.atsuishio.superbwarfare.data.gun.value.AttachmentType;
 import com.atsuishio.superbwarfare.event.ClientEventHandler;
+import com.atsuishio.superbwarfare.init.RegistryName;
 import com.atsuishio.superbwarfare.item.gun.GunGeoItem;
 import com.atsuishio.superbwarfare.item.gun.GunItem;
 import com.atsuishio.superbwarfare.tools.GunsTool;
@@ -24,6 +25,7 @@ import software.bernie.geckolib.renderer.GeoItemRenderer;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.function.Supplier;
 
+@RegistryName("qbz_191")
 public class Qbz191Item extends GunGeoItem {
 
     public Qbz191Item() {
@@ -129,16 +131,6 @@ public class Qbz191Item extends GunGeoItem {
     }
 
     @Override
-    public int[] getValidMagazines() {
-        return new int[]{0, 2};
-    }
-
-    @Override
-    public int[] getValidGrips() {
-        return new int[]{0, 1, 2};
-    }
-
-    @Override
     public int getCustomMagazine(GunData data) {
         int magType = data.attachment.get(AttachmentType.MAGAZINE);
         return magType == 2 ? 45 : 0;
@@ -158,39 +150,8 @@ public class Qbz191Item extends GunGeoItem {
     public boolean canAdjustZoom(GunData data) {
         return data.attachment.get(AttachmentType.SCOPE) == 3;
     }
-
-    @Override
-    public boolean hasCustomBarrel(GunData data) {
-        return true;
-    }
-
-    @Override
-    public boolean hasCustomGrip(GunData data) {
-        return true;
-    }
-
-    @Override
-    public boolean hasCustomMagazine(GunData data) {
-        return true;
-    }
-
-    @Override
-    public boolean hasCustomScope(GunData data) {
-        return true;
-    }
-
-    @Override
-    public boolean hasCustomStock(GunData data) {
-        return true;
-    }
-
     @Override
     public boolean hasBipod(GunData data) {
         return data.attachment.get(AttachmentType.GRIP) == 1;
-    }
-
-    @Override
-    public boolean canEditAttachments(GunData data) {
-        return true;
     }
 }

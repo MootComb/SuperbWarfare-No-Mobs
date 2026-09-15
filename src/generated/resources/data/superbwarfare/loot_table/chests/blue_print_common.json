@@ -71,6 +71,11 @@
         },
         {
           "type": "minecraft:item",
+          "name": "superbwarfare:m_1897_blueprint",
+          "weight": 15
+        },
+        {
+          "type": "minecraft:item",
           "name": "superbwarfare:hk_416_blueprint",
           "weight": 15
         },

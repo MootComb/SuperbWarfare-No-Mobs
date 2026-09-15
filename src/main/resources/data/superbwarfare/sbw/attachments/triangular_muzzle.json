@@ -1,0 +1,27 @@
+{
+  "Slot": "Barrel",
+  "Level": 1,
+  "Bone": "muzzle_pos",
+  "Modifiers": [
+    {
+      "Prop": "ProjectileAmount",
+      "Op": "Set",
+      "Value": 10
+    },
+    {
+      "Prop": "Damage",
+      "Op": "Mul",
+      "Value": {
+        "Ref": "ProjectileAmount",
+        "Scale": 0.1
+      }
+    }
+  ],
+  "Override": {
+    "SpreadPattern": {
+      "Type": "Triangle"
+    }
+  },
+  "Model": "superbwarfare:models/bedrock/attachment/triangular_muzzle.geo.json",
+  "Texture": "superbwarfare:textures/bedrock/attachment/triangular_muzzle.png"
+}

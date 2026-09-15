@@ -65,8 +65,7 @@
   ],
   "AvailableAttachments": {
     "Scope": [
-      "superbwarfare:iron_sight",
-      "superbwarfare:acog_4x"
+      "superbwarfare:scope_handgun_red_dot"
     ],
     "Magazine": [
       "superbwarfare:magazine_extend",

@@ -4,6 +4,7 @@ import com.atsuishio.superbwarfare.client.renderer.gun.Mk14ItemRenderer;
 import com.atsuishio.superbwarfare.data.gun.GunData;
 import com.atsuishio.superbwarfare.data.gun.value.AttachmentType;
 import com.atsuishio.superbwarfare.event.ClientEventHandler;
+import com.atsuishio.superbwarfare.init.RegistryName;
 import com.atsuishio.superbwarfare.item.gun.GunGeoItem;
 import com.atsuishio.superbwarfare.item.gun.GunItem;
 import com.atsuishio.superbwarfare.tools.GunsTool;
@@ -20,6 +21,7 @@ import software.bernie.geckolib.renderer.GeoItemRenderer;
 
 import java.util.function.Supplier;
 
+@RegistryName("mk_14")
 public class Mk14Item extends GunGeoItem {
 
     public Mk14Item() {
@@ -128,35 +130,5 @@ public class Mk14Item extends GunGeoItem {
     @Override
     public boolean canAdjustZoom(GunData data) {
         return data.attachment.get(AttachmentType.SCOPE) == 3;
-    }
-
-    @Override
-    public boolean hasCustomBarrel(GunData data) {
-        return true;
-    }
-
-    @Override
-    public boolean hasCustomGrip(GunData data) {
-        return true;
-    }
-
-    @Override
-    public boolean hasCustomMagazine(GunData data) {
-        return true;
-    }
-
-    @Override
-    public boolean hasCustomScope(GunData data) {
-        return true;
-    }
-
-    @Override
-    public boolean hasCustomStock(GunData data) {
-        return true;
-    }
-
-    @Override
-    public boolean canEditAttachments(GunData data) {
-        return true;
     }
 }

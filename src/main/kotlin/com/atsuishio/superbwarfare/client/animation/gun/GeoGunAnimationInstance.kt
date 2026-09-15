@@ -20,6 +20,7 @@ import com.maydaymemory.mae.blend.EulerAdditiveBlender
 import com.maydaymemory.mae.blend.NoAllocMergeBlender
 import com.maydaymemory.mae.blend.SimpleEulerAdditiveBlender
 import com.maydaymemory.mae.control.runner.*
+import net.minecraft.client.Minecraft
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.sounds.SoundEvent
 import net.minecraft.sounds.SoundSource
@@ -31,7 +32,7 @@ import java.util.*
 
 open class GeoGunAnimationInstance(
     private var stack: ItemStack,
-    entity: Entity,
+    entity: Entity?,
     hand: InteractionHand
 ) : IFPAnimationInstance {
     private val animations = hashMapOf<String, BedrockAnimation>()
@@ -78,6 +79,7 @@ open class GeoGunAnimationInstance(
 
         if (data.reloading()) {
             when {
+                data.reload.stage() == 1 && animation.prepareLoad != null && data.reload.prepareLoadTimer.get() > 0 -> return GunAnimationState.PREPARE_LOAD
                 data.reload.stage() == 1 && animation.prepare != null -> return GunAnimationState.PREPARE
                 data.reload.stage() == 2 && animation.iterative != null -> {
                     return if (data.loadIndex.get() == 1) {
@@ -117,7 +119,9 @@ open class GeoGunAnimationInstance(
         }
 
         fireSerial++
-        pendingShellEjects += 0
+        if (isFirstPerson()) {
+            pendingShellEjects += 0
+        }
     }
 
     fun consumePendingShellEjects(): List<Int> {
@@ -166,6 +170,7 @@ open class GeoGunAnimationInstance(
             GunAnimationState.RELOAD_NORMAL -> normalReloadName(animation)
             GunAnimationState.RELOAD_EMPTY -> emptyReloadName(animation)
             GunAnimationState.PREPARE -> animation.prepare
+            GunAnimationState.PREPARE_LOAD -> animation.prepareLoad
             GunAnimationState.ITERATIVE -> animation.iterative
             GunAnimationState.ITERATIVE_2 -> animation.iterative
             GunAnimationState.FINISH -> animation.finish
@@ -180,6 +185,7 @@ open class GeoGunAnimationInstance(
                 this == GunAnimationState.RELOAD_NORMAL ||
                 this == GunAnimationState.RELOAD_EMPTY ||
                 this == GunAnimationState.PREPARE ||
+                this == GunAnimationState.PREPARE_LOAD ||
                 this == GunAnimationState.ITERATIVE ||
                 this == GunAnimationState.ITERATIVE_2 ||
                 this == GunAnimationState.FINISH
@@ -193,6 +199,7 @@ open class GeoGunAnimationInstance(
                 if (data.reload.empty()) data.get(GunProp.EMPTY_RELOAD_TIME)
                 else data.get(GunProp.NORMAL_RELOAD_TIME)
 
+            GunAnimationState.PREPARE_LOAD -> data.get(GunProp.PREPARE_LOAD_TIME)
             GunAnimationState.PREPARE -> data.get(GunProp.PREPARE_TIME)
             GunAnimationState.ITERATIVE, GunAnimationState.ITERATIVE_2 -> data.get(GunProp.ITERATIVE_TIME)
             GunAnimationState.FINISH -> data.get(GunProp.FINISH_TIME)
@@ -217,6 +224,15 @@ open class GeoGunAnimationInstance(
         }
     }
 
+    private fun meleePlaybackSpeed(animation: BedrockAnimation): Float {
+        val targetSeconds = GunData.from(stack).get(GunProp.MELEE_DURATION).coerceAtLeast(1) / 20.0f
+        return if (animation.specifiedEndTimeS > 0f) {
+            animation.specifiedEndTimeS / targetSeconds
+        } else {
+            1f
+        }
+    }
+
     private fun setAnimationSpeed(state: IAnimationState?, speed: Float) {
         when (state) {
             is PlayingState -> state.speed = speed
@@ -231,6 +247,8 @@ open class GeoGunAnimationInstance(
         val playState = state.playType.state()
         if (state.isReload()) {
             setAnimationSpeed(playState, reloadPlaybackSpeed(state, animation))
+        } else if (state == GunAnimationState.MELEE) {
+            setAnimationSpeed(playState, meleePlaybackSpeed(animation))
         }
         val newRunner = AnimationRunner(animation, AnimationContext(animation.specifiedEndTimeS))
         newRunner.state = playState
@@ -367,15 +385,17 @@ open class GeoGunAnimationInstance(
             fireRunner = null
         }
 
-        cachedPose = combineFireModeSwitch(
-            combineLayers(
-                exitRunner.evaluate(),
-                fireModeRunner?.evaluate() ?: DummyPose.INSTANCE,
-                holdOpenRunner?.evaluate() ?: DummyPose.INSTANCE,
-                closeStrikeRunner?.evaluate() ?: DummyPose.INSTANCE
+        cachedPose = combineHoldOpen(
+            combineFireModeSwitch(
+                combineLayers(
+                    exitRunner.evaluate(),
+                    fireModeRunner?.evaluate() ?: DummyPose.INSTANCE,
+                    closeStrikeRunner?.evaluate() ?: DummyPose.INSTANCE
+                ),
+                fireModeSwitchRunner?.evaluate() ?: DummyPose.INSTANCE,
+                fireRunner?.evaluate() ?: DummyPose.INSTANCE
             ),
-            fireModeSwitchRunner?.evaluate() ?: DummyPose.INSTANCE,
-            fireRunner?.evaluate() ?: DummyPose.INSTANCE
+            holdOpenRunner?.evaluate() ?: DummyPose.INSTANCE
         )
     }
 
@@ -383,8 +403,9 @@ open class GeoGunAnimationInstance(
         data: GunData,
         animation: GunAnimation?
     ): Pair<Boolean, Boolean> {
+        // The bolt must be held open as soon as the magazine runs dry, even while the
+        // fire animation is still playing, so this is not gated on fireRunner.
         val shouldHoldOpen = data.holdOpen.get()
-                && fireRunner == null
         val holdOpenStarted = updateHoldOpen(if (shouldHoldOpen) animation?.holdOpen else null)
         val shouldCloseStrike = data.closeStrike.get()
         val closeStrikeStarted = updateCloseStrike(if (shouldCloseStrike) animation?.closeStrike else null)
@@ -422,6 +443,16 @@ open class GeoGunAnimationInstance(
             MERGE_BLENDER.blend(listOf(lowerPose, switchPose))
         }
         return combineLayers(pose, upperPose)
+    }
+
+    private fun combineHoldOpen(pose: Pose, holdOpenPose: Pose): Pose {
+        // hold_open drives the same bolt/slide bones that the fire animation cycles,
+        // and both are authored around the closed position, so adding them would send
+        // the bolt twice as far back. Merge instead: the hold-open pose wins over the
+        // fire animation, keeping the bolt back the moment the magazine runs dry.
+        if (holdOpenPose == DummyPose.INSTANCE) return pose
+        if (pose == DummyPose.INSTANCE) return holdOpenPose
+        return MERGE_BLENDER.blend(listOf(pose, holdOpenPose))
     }
 
     private fun updateHoldOpen(name: String?): Boolean {
@@ -497,15 +528,17 @@ open class GeoGunAnimationInstance(
         ) {
             startEditExit()
             if (editExitRunner != null) {
-                cachedPose = combineFireModeSwitch(
-                    combineLayers(
-                        editExitRunner!!.evaluate(),
-                        fireModeRunner?.evaluate() ?: DummyPose.INSTANCE,
-                        holdOpenRunner?.evaluate() ?: DummyPose.INSTANCE,
-                        closeStrikeRunner?.evaluate() ?: DummyPose.INSTANCE
+                cachedPose = combineHoldOpen(
+                    combineFireModeSwitch(
+                        combineLayers(
+                            editExitRunner!!.evaluate(),
+                            fireModeRunner?.evaluate() ?: DummyPose.INSTANCE,
+                            closeStrikeRunner?.evaluate() ?: DummyPose.INSTANCE
+                        ),
+                        fireModeSwitchRunner?.evaluate() ?: DummyPose.INSTANCE,
+                        fireRunner?.evaluate() ?: DummyPose.INSTANCE
                     ),
-                    fireModeSwitchRunner?.evaluate() ?: DummyPose.INSTANCE,
-                    fireRunner?.evaluate() ?: DummyPose.INSTANCE
+                    holdOpenRunner?.evaluate() ?: DummyPose.INSTANCE
                 )
                 return
             }
@@ -540,6 +573,13 @@ open class GeoGunAnimationInstance(
                 setAnimationSpeed(runner?.state, reloadPlaybackSpeed(currentState!!, runnerAnimation))
             }
         }
+        // Melee duration can be changed by properties such as ammo type or perks.
+        if (currentState == GunAnimationState.MELEE) {
+            val runnerAnimation = runner?.animation as? BedrockAnimation
+            if (runnerAnimation != null) {
+                setAnimationSpeed(runner?.state, meleePlaybackSpeed(runnerAnimation))
+            }
+        }
 
         if (!editing && fireSerial > consumedFireSerial) {
             playFire()
@@ -566,23 +606,31 @@ open class GeoGunAnimationInstance(
             fireRunner = null
         }
 
-        cachedPose = combineFireModeSwitch(
-            combineLayers(
-                runner?.evaluate() ?: DummyPose.INSTANCE,
-                fireModeRunner?.evaluate() ?: DummyPose.INSTANCE,
-                holdOpenRunner?.evaluate() ?: DummyPose.INSTANCE,
-                closeStrikeRunner?.evaluate() ?: DummyPose.INSTANCE
+        cachedPose = combineHoldOpen(
+            combineFireModeSwitch(
+                combineLayers(
+                    runner?.evaluate() ?: DummyPose.INSTANCE,
+                    fireModeRunner?.evaluate() ?: DummyPose.INSTANCE,
+                    closeStrikeRunner?.evaluate() ?: DummyPose.INSTANCE
+                ),
+                fireModeSwitchRunner?.evaluate() ?: DummyPose.INSTANCE,
+                fireRunner?.evaluate() ?: DummyPose.INSTANCE
             ),
-            fireModeSwitchRunner?.evaluate() ?: DummyPose.INSTANCE,
-            fireRunner?.evaluate() ?: DummyPose.INSTANCE
+            holdOpenRunner?.evaluate() ?: DummyPose.INSTANCE
         )
     }
 
     private fun collectParticleEvents(animationRunner: AnimationRunner?) {
+        if (!isFirstPerson()) return
+
         val particles = animationRunner?.clip<ParticleEffectData>(BedrockAnimation.PARTICLE_CHANNEL_NAME) ?: return
         for (keyframe in particles) {
             keyframe?.value?.let { pendingParticles += it }
         }
+    }
+
+    private fun isFirstPerson(): Boolean {
+        return Minecraft.getInstance().options.cameraType.isFirstPerson
     }
 
     private fun collectSoundEvents(animationRunner: AnimationRunner?) {

@@ -241,6 +241,15 @@ object ClientEventHandler {
     var bowPull: Boolean = false
 
     @JvmField
+    var chargeActive: Boolean = false
+
+    @JvmField
+    var chargeProgress: Double = 0.0
+
+    @JvmField
+    var chargePower: Double = 1.0
+
+    @JvmField
     var zoom: Boolean = false
 
     @JvmField
@@ -520,16 +529,19 @@ object ClientEventHandler {
     @JvmField
     var missileLockingPos: BlockPos? = null
 
+    @JvmField
+    var movingZoom: Double = 1.25
+
     @SubscribeEvent
-    fun handleWeaponTurn(event: RenderHandEvent) {
+    fun handleWeaponTurn(event: ViewportEvent.ComputeFov) {
         val player = localPlayer ?: return
-        val xRotOffset = Mth.lerp(event.partialTick, player.xBobO, player.xBob)
-        val yRotOffset = Mth.lerp(event.partialTick, player.yBobO, player.yBob)
-        val xRot = player.getViewXRot(event.partialTick) - xRotOffset
-        val yRot = player.getViewYRot(event.partialTick) - yRotOffset
-        turnRot[0] = (0.05 * xRot).coerceIn(-5.0, 5.0) * (1 - 0.75 * zoomTime)
-        turnRot[1] = (0.05 * yRot).coerceIn(-10.0, 10.0) * (1 - 0.75 * zoomTime)
-        turnRot[2] = (0.1 * yRot).coerceIn(-10.0, 10.0) * (1 - zoomTime)
+        val xRotOffset = Mth.lerp(event.partialTick.toFloat(), player.xBobO, player.xBob)
+        val yRotOffset = Mth.lerp(event.partialTick.toFloat(), player.yBobO, player.yBob)
+        val xRot = player.getViewXRot(event.partialTick.toFloat()) - xRotOffset
+        val yRot = player.getViewYRot(event.partialTick.toFloat()) - yRotOffset
+        turnRot[0] = (0.05 * xRot).coerceIn(-20.0, 20.0) * (1 - 0.05 * zoomTime)
+        turnRot[1] = (0.025 * yRot).coerceIn(-20.0, 20.0) * (1 - 0.05 * zoomTime)
+        turnRot[2] = (0.05 * yRot).coerceIn(-20.0, 20.0) * (1 - 0.5 * zoomTime)
     }
 
     @JvmStatic
@@ -706,7 +718,9 @@ object ClientEventHandler {
             lastOperatingGunUUID = uuid
 
             if ((holdingFireKey || (zoom && stack.`is`(ModItems.MINIGUN.get()))) && item.canShoot(data, player)) {
-                holdingFireKeyTicks = (holdingFireKeyTicks + 1).coerceAtMost(data.get(GunProp.SHOOT_DELAY) + 1)
+                val maxHoldTicks = data.selectedFireModeInfo().chargeConfig()?.duration
+                    ?: data.get(GunProp.SHOOT_DELAY)
+                holdingFireKeyTicks = (holdingFireKeyTicks + 1).coerceAtMost(maxHoldTicks + 1)
 
                 // Spawn light flashes for raycast tools (RepairTool / Taser) when holding fire key
                 MuzzleFlashHelper.spawnToolFlash(player, stack)
@@ -1581,14 +1595,20 @@ object ClientEventHandler {
 
         val data = GunData.from(stack)
         val resource = GunResource.compute(stack)
-        val mode = data.selectedFireModeInfo().mode
+        val fireModeInfo = data.selectedFireModeInfo()
+        val mode = fireModeInfo.mode
+        val chargeConfig = fireModeInfo.chargeConfig()
+        val singleShotMode = mode == FireMode.SEMI
+
+        val chargeDelay = chargeConfig?.duration?.toDouble()
+            ?: data.get(GunProp.SHOOT_DELAY).toDouble()
 
         val partialHoldingFireKeyTicks =
             Mth.lerp(getDelta().toDouble(), holdingFireKeyTicks0.toDouble(), holdingFireKeyTicks.toDouble())
         holdingFireKeyTicks0 = holdingFireKeyTicks.toFloat()
 
         if (partialHoldingFireKeyTicks > holdingFireKeyTicks
-            && partialHoldingFireKeyTicks > data.get(GunProp.SHOOT_DELAY) * 0.25 && shouldPlayDischargeSound
+            && partialHoldingFireKeyTicks > chargeDelay * 0.25 && shouldPlayDischargeSound
         ) {
             val dischargeSound = resource.dischargeSound
             if (dischargeSound != null) {
@@ -1601,6 +1621,11 @@ object ClientEventHandler {
 
             shouldPlayDischargeSound = false
             burstFireAmount = 0
+        }
+
+        if (fireModeInfo.isChargeMode()) {
+            updateChargeFireState(player, data, fireModeInfo)
+            return
         }
 
         if (!item.canShoot(data, player)) {
@@ -1665,7 +1690,7 @@ object ClientEventHandler {
             && !notInGame
             && !isEditing
         ) {
-            if (mode == FireMode.SEMI) {
+            if (singleShotMode) {
                 if (clientTimer.progress == 0L) {
                     clientTimer.start()
                     shootClient(player)
@@ -1693,26 +1718,59 @@ object ClientEventHandler {
             if (notInGame) {
                 clientTimer.stop()
             }
-
         } else {
-            if (mode != FireMode.SEMI && clientTimer.progress >= cooldown) {
+            if (!singleShotMode && clientTimer.progress >= cooldown) {
                 clientTimer.stop()
             }
             fireSpread = 0.0
         }
 
-        if (mode == FireMode.SEMI && clientTimer.progress >= cooldown) {
+        if (singleShotMode && clientTimer.progress >= cooldown) {
             clientTimer.stop()
         }
 
         if (GunData.from(stack).reload.normal() || GunData.from(stack).reload.empty()) {
             customRpm = 0
         }
-
-        data.save()
     }
 
-    fun shootClient(player: Player) {
+    private fun updateChargeFireState(player: Player, data: GunData, fireModeInfo: FireModeInfo) {
+        val chargeConfig = fireModeInfo.chargeConfig() ?: return
+        val item = data.item
+        val vehicle = player.vehicle
+        chargeActive = holdingFireKey
+                && !notInGame
+                && !isEditing
+                && !holdFireVehicle
+                && !(vehicle is VehicleEntity && vehicle.banHand(player))
+                && item.canShoot(data, player)
+
+        if (!chargeActive) {
+            chargeProgress = 0.0
+            chargePower = 0.0
+            return
+        }
+
+        val progress = (holdingFireKeyTicks.toDouble() / chargeConfig.duration.toDouble()).coerceIn(0.0, 1.0)
+        chargeProgress = progress
+        chargePower = chargeConfig.powerForProgress(progress)
+
+        if (chargeConfig.trigger == ChargeTrigger.AUTO_AT_FULL
+            && progress >= 1.0
+            && clientTimer.progress == 0L
+            && fireCooldown == 0.0
+            && drawTime < 0.01
+        ) {
+            clientTimer.start()
+            shootClient(player, chargePower)
+            clientTimer.stop()
+            chargeActive = false
+            chargeProgress = 0.0
+            chargePower = 0.0
+        }
+    }
+
+    fun shootClient(player: Player, chargePower: Double = 1.0) {
         val stack = player.mainHandItem
         val item = stack.item as? GunItem ?: return
 
@@ -1746,18 +1804,20 @@ object ClientEventHandler {
         }
 
         // 判断是否为栓动武器（BoltActionTime > 0），并在开火后给一个需要上膛的状态
+        // 这是纯客户端预测：用 updateLocal 只改内存，不写 stack、也不 bump revision。枪械数据由服务端
+        // 权威修改后同步（GunItem.beforeShoot 会在服务端设同一个字段），本地预测会在下一次同步被覆盖。
         if (data.get(GunProp.BOLT_ACTION_TIME) > 0 && data.hasEnoughAmmoToShoot(player)) {
-            data.bolt.needed.set(true)
+            data.updateLocal { it.copy(needBoltAction = true) }
         }
 
         revolverPreTime = 0.0
         revolverWheelPreTime = 0.0
 
         playGunClientSounds(player)
-        handleClientShoot()
+        handleClientShoot(chargePower)
     }
 
-    fun handleClientShoot() {
+    fun handleClientShoot(chargePower: Double = 1.0) {
         val player = localPlayer ?: return
         val stack = player.mainHandItem
         if (stack.item !is GunItem) return
@@ -1767,7 +1827,9 @@ object ClientEventHandler {
             ShootMessage(
                 gunSpread,
                 zoom,
-                if (lockedEntity != null) lockedEntity!!.getUUID() else null, null
+                if (lockedEntity != null) lockedEntity!!.getUUID() else null,
+                null,
+                chargePower
             )
         )
         fireRecoilTime = 10.0
@@ -1852,7 +1914,11 @@ object ClientEventHandler {
         val volumeMultiplier = item.getCustomSoundRadius(data).coerceAtLeast(1.0)
 
         if (fire1p != null) {
-            player.playSound(fire1p, 0.5f * volumeMultiplier.toFloat(), ((2 * Math.random() - 1) * 0.05f + pitch).toFloat())
+            player.playSound(
+                fire1p,
+                0.5f * volumeMultiplier.toFloat(),
+                ((2 * Math.random() - 1) * 0.05f + pitch).toFloat()
+            )
         }
 
         val shooterHeight = player.eyePosition.distanceTo(
@@ -2232,7 +2298,7 @@ object ClientEventHandler {
                     Mth.lerp(0.2 * times, moveRotZ, 0.0) * (1 - zoomTime)
                 }
 
-            if (entity.isSprinting && !data.reloading() && (firePosTimer == 0.0 || firePosTimer > 1.0) && !ModKeyMappings.FIRE.isDown && zoomTime < 0.99) {
+            if (entity.isSprinting && !data.reloading() && (firePosTimer == 0.0 || firePosTimer > 1.0) && !ModKeyMappings.FIRE.isDown && zoomTime < 0.99 && gunMelee == 0) {
                 sprintBasicRotX = Mth.lerp(0.3f * times / (customWeight + 4), sprintBasicRotX, 1.0).coerceIn(0.0, 1.0)
                 sprintBasicRotY = Mth.lerp(0.18f * times / (customWeight + 4), sprintBasicRotY, 1.0).coerceIn(0.0, 1.0)
                 sprintBasicRotZ = Mth.lerp(0.3f * times / (customWeight + 4), sprintBasicRotZ, 1.0).coerceIn(0.0, 1.0)
@@ -2259,7 +2325,7 @@ object ClientEventHandler {
             moveFadeTime = Mth.lerp(0.1 * times, moveFadeTime, 0.0)
         }
 
-        if (entity.isSprinting && !data.reloading() && (firePosTimer == 0.0 || firePosTimer > 1.0) && !ModKeyMappings.FIRE.isDown && zoomTime < 0.99) {
+        if (entity.isSprinting && !data.reloading() && (firePosTimer == 0.0 || firePosTimer > 1.0) && !ModKeyMappings.FIRE.isDown && zoomTime < 0.99 && gunMelee == 0) {
             sprintFadeTime = if (entity.onGround()) {
                 Mth.lerp(0.08 * times, sprintFadeTime, 1.0)
             } else {
@@ -2277,8 +2343,8 @@ object ClientEventHandler {
         movePosX = 0.2 * sin(1 * PI * moveTime) * (1 - 0.4 * zoomTime) * moveFadeTime
         movePosY = -0.135 * sin(2 * PI * (moveTime - 0.25)) * (1 - 0.4 * zoomTime) * moveFadeTime
 
-        val left = mc.options.keyLeft.isDown()
-        val right = mc.options.keyRight.isDown()
+        val left = mc.options.keyLeft.isDown
+        val right = mc.options.keyRight.isDown
         var pos = 0.0
         if (left) {
             pos = -0.04
@@ -2370,7 +2436,7 @@ object ClientEventHandler {
         val basicSprintRotZ = (sprintBasicRotZ * 14.7 * Mth.DEG_TO_RAD).toFloat() * i
 
         val gunPosX =
-            (walkPosX + basicSprintPosX + sprintPosX * i + 20 * drawTime + 9.3f * movePosHorizon).toFloat() * (1 - 0.5 * zoomTime).toFloat()
+            (walkPosX + basicSprintPosX + sprintPosX * i + 20 * drawTime + 9.3f * movePosHorizon - 0.5 * turnRot[1]).toFloat() * (1 - 0.5 * zoomTime).toFloat()
         val gunPosY =
             (walkPosY + basicSprintPosY + sprintPosY * i - 40 * drawTime - 2f * velocityY).toFloat() * (1 - 0.5 * zoomTime).toFloat()
         val gunPosZ = (walkPosZ + basicSprintPosZ) * (1 - 1 * zoomTime).toFloat()
@@ -2421,7 +2487,7 @@ object ClientEventHandler {
     }
 
     private fun handleWeaponFire(event: ViewportEvent.ComputeCameraAngles, entity: LivingEntity) {
-        val times = (1.65f * customAnimSpeed * mc.deltaFrameTime.coerceAtMost(0.48f)).toFloat()
+        val times = (1.25f * customAnimSpeed * mc.deltaFrameTime.coerceAtMost(0.48f)).toFloat()
         val stack = entity.mainHandItem
         val data = GunData.from(stack)
         val amplitude = 25000.0 * data.get(GunProp.RECOIL_Y) * data.get(GunProp.RECOIL_X)
@@ -2633,8 +2699,9 @@ object ClientEventHandler {
         val zoom = (1 - (1 - zoomMultiply) * zoomTime).toFloat() * pose
 
         val gunPosX = zoom * x * (recoilHorizon * (0.5f * firePosZ)).toFloat()
-        val gunPosY = zoom * y * (getBoneMoveY(firePosTimer.toFloat()) * -0.05 * (1 - 0.25 * zoomTime)).toFloat()
-        val gunPosZ = zoom * z * (getBoneMoveZ(firePosTimer.toFloat()) * 0.03 + 1.1f * firePosZ).toFloat() * (1 - 0.75 * zoomTime).toFloat()
+        val gunPosY = zoom * y * ((getBoneMoveY(firePosTimer.toFloat()) * 0.1 + 0.07f * firePosZ) * (1 - 0.25 * zoomTime)).toFloat()
+        val gunPosZ =
+            zoom * z * (getBoneMoveZ(firePosTimer.toFloat()) * 0.03 + 1.1f * firePosZ).toFloat() * (1 - 0.75 * zoomTime).toFloat()
 
         val gunRotX =
             zoom * rotX * (-getBoneRotX(fireRotTimer.toFloat()) * Mth.DEG_TO_RAD * 0.5f + 0.01f * firePosZ).toFloat() * gripRecoilX * recoil *
@@ -2893,42 +2960,37 @@ object ClientEventHandler {
                 0.0
             }
 
-        var r = 1
 
-        if (mc.options.cameraType != CameraType.FIRST_PERSON) {
-            r = 0
-        }
 
-        event.pitch = (pitch + cameraRot[0] + (if (DisplayConfig.CAMERA_ROTATE.get()) 0.2 else 0.0) * turnRot[0]
-                + 3 * velocityY).toFloat()
+        event.pitch = (pitch + cameraRot[0] + 3 * velocityY).toFloat()
         if (mc.options.cameraType == CameraType.THIRD_PERSON_BACK) {
             event.yaw =
-                (yaw + cameraRot[1] + (if (DisplayConfig.CAMERA_ROTATE.get()) 0.8 else 0.0) * turnRot[1] * r - angle * zoomPos).toFloat()
+                (yaw + cameraRot[1] - angle * zoomPos).toFloat()
         } else {
             event.yaw =
-                (yaw + cameraRot[1] + (if (DisplayConfig.CAMERA_ROTATE.get()) 0.8 else 0.0) * turnRot[1]).toFloat()
+                (yaw + cameraRot[1]).toFloat()
         }
 
         cameraRoll =
-            (roll + cameraRot[2] + (if (DisplayConfig.CAMERA_ROTATE.get()) 0.35 else 0.0) * turnRot[2]).toFloat()
+            (roll + cameraRot[2]).toFloat()
     }
 
     private fun handleBowPullAnimation(entity: LivingEntity, stack: ItemStack) {
         val times = 4 * getDelta().coerceAtMost(0.8f)
         val data = GunData.from(stack)
+        val fireModeInfo = data.selectedFireModeInfo()
+        if (!fireModeInfo.isChargeMode()) return
 
-        if (holdingFireKey && data.hasEnoughAmmoToShoot(entity) && !bowPull && stack.`is`(ModItems.BOCEK.get())) {
-            entity.playSound(ModSounds.BOCEK_PULL_1P.get(), 1f, 1f)
+        if (chargeActive && fireModeInfo.mode == FireMode.CHARGE) {
             bowPull = true
-        }
-
-        if (bowPull) {
-            bowPullTimer = (bowPullTimer + 0.024 * times).coerceAtMost(1.4)
-            bowPower = (bowPower + 0.018 * times).coerceAtMost(1.0)
+            bowPower = chargePower
+            bowPullTimer = chargeProgress * 1.4
         } else {
+            bowPull = false
             bowPullTimer = (bowPullTimer - 0.021 * times).coerceAtLeast(0.0)
             bowPower = (bowPower - 0.04 * times).coerceAtLeast(0.0)
         }
+
         bowPullPos = 0.5 * cos(PI * (bowPullTimer.coerceIn(0.0, 1.0).pow(2) - 1).pow(2)) + 0.5
     }
 
@@ -2980,8 +3042,11 @@ object ClientEventHandler {
             }
 
             val data = GunData.from(stack)
+            val baseZoom = data.zoom()
+            val movingZoom = data.movingZoom()
 
-            customZoom = Mth.lerp(0.6 * times, customZoom, data.zoom() + if (breath) 0.75 else 0.0)
+            this.movingZoom = if (movingZoom != null && !player.isShiftKeyDown) Mth.lerp(0.1 * times, this.movingZoom, if (isMoving() || abs(turnRot[1]) > 0.1 || abs(turnRot[0]) > 0.1) movingZoom else baseZoom) else baseZoom
+            customZoom = Mth.lerp(0.6 * times, customZoom, this.movingZoom + if (breath) 0.75 else 0.0)
 
             if (mc.options.cameraType.isFirstPerson) {
                 event.fov /= (1 + p * (customZoom - 1))
@@ -3150,8 +3215,13 @@ object ClientEventHandler {
         holdingFireKeyTicks0 = 0f
         ClickEventHandler.switchZoom = false
         burstFireAmount = 0
+        bowPull = false
         bowPullTimer = 0.0
         bowPower = 0.0
+        bowPullPos = 0.0
+        chargeActive = false
+        chargeProgress = 0.0
+        chargePower = 0.0
         noSprintTicks = 10f
         seekingTime = 0
         lockOn = false

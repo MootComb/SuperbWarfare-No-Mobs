@@ -52,8 +52,9 @@ class DefaultGunResource : IDBasedData<DefaultGunResource> {
         return if (modelValue == null) ModelResource() else modelValue!!
     }
 
+    @JvmField
     @SerialName("Script")
-    private val script: SerializedResourceLocation? = null
+    var script: SerializedResourceLocation? = null
 
     @Transient
     @kotlin.jvm.Transient
@@ -129,6 +130,10 @@ class DefaultGunResource : IDBasedData<DefaultGunResource> {
     var triggerSound: SerializedSoundEvent? = ModSounds.TRIGGER_CLICK.get()
 
     @JvmField
+    @SerialName("ChargeSound")
+    var chargeSound: SerializedSoundEvent? = null
+
+    @JvmField
     @SerialName("DischargeSound")
     var dischargeSound: SerializedSoundEvent? = null
 
@@ -156,6 +161,11 @@ class DefaultGunResource : IDBasedData<DefaultGunResource> {
     @JvmField
     @SerialName("MovingTilt")
     var movingTilt: Boolean = true
+
+    // 是否使用自定义奔跑奔跑动画
+    @JvmField
+    @SerialName("UseCustomSprintAnimation")
+    var useCustomSprintAnimation: Boolean = false
 
     @JvmField
     @SerialName("Attachments")

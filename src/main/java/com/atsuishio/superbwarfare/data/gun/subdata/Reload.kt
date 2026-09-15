@@ -1,45 +1,70 @@
 package com.atsuishio.superbwarfare.data.gun.subdata
 
 import com.atsuishio.superbwarfare.data.gun.GunData
-import com.atsuishio.superbwarfare.data.gun.value.IntValue
-import com.atsuishio.superbwarfare.data.gun.value.ReloadState
-import com.atsuishio.superbwarfare.data.gun.value.Starter
-import com.atsuishio.superbwarfare.data.gun.value.Timer
+import com.atsuishio.superbwarfare.data.gun.GunProp
+import com.atsuishio.superbwarfare.data.gun.value.*
 
-class Reload(data: GunData) {
-    private val data = data.data()
-
-    @JvmField
-    val reloadTimer = Timer(this.data, "Reload")
-
-    @JvmField
-    val totalTicks = IntValue(this.data, "ReloadTotalTime", 0)
+/**
+ * Reload state.
+ *
+ * Backed by [com.atsuishio.superbwarfare.data.gun.GunState] instead of the gun tag: every field keeps
+ * its old type and name, but reads come from the immutable state snapshot and writes persist through
+ * `GunData.update`.
+ */
+class Reload(private val gun: GunData) {
 
     @JvmField
-    val prepareTimer = Timer(this.data, "Prepare")
+    val reloadTimer: Timer = StateTimer(
+        gun, { it.reloadTime }, { state, value -> state.copy(reloadTime = value) }, "Reload"
+    )
 
     @JvmField
-    val prepareLoadTimer = Timer(this.data, "PrepareLoad")
+    val totalTicks: IntValue = StateIntValue(
+        gun, { it.reloadTotalTime }, { state, value -> state.copy(reloadTotalTime = value) }
+    )
 
     @JvmField
-    val iterativeLoadTimer = Timer(this.data, "IterativeLoad")
+    val prepareTimer: Timer = StateTimer(
+        gun, { it.prepareTime }, { state, value -> state.copy(prepareTime = value) }, "Prepare"
+    )
 
     @JvmField
-    val finishTimer = Timer(this.data, "Finish")
+    val prepareLoadTimer: Timer = StateTimer(
+        gun, { it.prepareLoadTime }, { state, value -> state.copy(prepareLoadTime = value) }, "PrepareLoad"
+    )
 
     @JvmField
-    val finishTotalTicks = IntValue(this.data, "ReloadFinishTotalTime", 0)
+    val iterativeLoadTimer: Timer = StateTimer(
+        gun, { it.iterativeLoadTime }, { state, value -> state.copy(iterativeLoadTime = value) }, "IterativeLoad"
+    )
 
     @JvmField
-    val reloadStarter = Starter(this.data, "Reload")
+    val finishTimer: Timer = StateTimer(
+        gun, { it.finishTime }, { state, value -> state.copy(finishTime = value) }, "Finish"
+    )
 
     @JvmField
-    val singleReloadStarter = Starter(this.data, "SingleReload")
+    val finishTotalTicks: IntValue = StateIntValue(
+        gun, { it.reloadFinishTotalTime }, { state, value -> state.copy(reloadFinishTotalTime = value) }
+    )
 
     @JvmField
-    val stage3Starter = Starter(this.data, "Stage3Forcefully")
+    val reloadStarter: Starter = StateStarter(
+        gun, { it.startReload }, { state, value -> state.copy(startReload = value) }, "Reload"
+    )
 
-    fun state() = when (data.getInt("ReloadState")) {
+    @JvmField
+    val singleReloadStarter: Starter = StateStarter(
+        gun, { it.startSingleReload }, { state, value -> state.copy(startSingleReload = value) }, "SingleReload"
+    )
+
+    @JvmField
+    val stage3Starter: Starter = StateStarter(
+        gun, { it.startStage3Forcefully }, { state, value -> state.copy(startStage3Forcefully = value) },
+        "Stage3Forcefully"
+    )
+
+    fun state() = when (gun.state.reloadState) {
         1 -> ReloadState.NORMAL_RELOADING
         2 -> ReloadState.EMPTY_RELOADING
         else -> ReloadState.NOT_RELOADING
@@ -50,14 +75,15 @@ class Reload(data: GunData) {
     fun empty() = state() == ReloadState.EMPTY_RELOADING
 
     fun setState(state: ReloadState) {
-        if (state == ReloadState.NOT_RELOADING) {
-            data.remove("ReloadState")
-        } else {
-            data.putInt("ReloadState", state.ordinal)
-        }
+        // NOT_RELOADING is the field default, so the key disappears exactly like the old remove().
+        val value = if (state == ReloadState.NOT_RELOADING) 0 else state.ordinal
+        if (gun.state.reloadState == value) return
+        gun.update { it.copy(reloadState = value) }
     }
 
-    val stage = IntValue(this.data, "ReloadStage", 0)
+    val stage: IntValue = StateIntValue(
+        gun, { it.reloadStage }, { state, value -> state.copy(reloadStage = value) }
+    )
 
     fun stage() = stage.get()
 
@@ -88,6 +114,27 @@ class Reload(data: GunData) {
     fun finishCurrentProgress(): Float = finishProgress(finishTimer.get())
 
     fun finishPreviousProgress(): Float = finishProgress(finishTimer.get() + 1)
+
+    /**
+     * `PrepareLoad` 阶段的进度，用于逐发换弹中"准备阶段先装一发"的时间线。
+     *
+     * 与 [finishCurrentProgress] 不同，[prepareLoadTimer] 没有把总时长存进
+     * [com.atsuishio.superbwarfare.data.gun.GunState]，而是直接取自枪械的 `PrepareLoadTime`
+     * 属性——这也正是阶段开始时给计时器设置的值。
+     */
+    fun prepareLoadCurrentProgress(): Float = prepareLoadProgress(prepareLoadTimer.get())
+
+    fun prepareLoadPreviousProgress(): Float = prepareLoadProgress(prepareLoadTimer.get() + 1)
+
+    /**
+     * 计时器为 0 时返回 0，因为阶段未运行时 [prepareLoadTimer] 一直是 0，
+     * 而总时长仍是枪械属性值（不像 [finishProgress] 那样会跟着归零），不特判就会在空闲时误触发。
+     */
+    private fun prepareLoadProgress(remaining: Int): Float {
+        val total = gun.get(GunProp.PREPARE_LOAD_TIME)
+        if (total <= 0 || remaining <= 0) return 0f
+        return 1f - remaining.toFloat() / total.toFloat()
+    }
 
     private fun progress(remaining: Int): Float {
         val total = totalTicks.get()

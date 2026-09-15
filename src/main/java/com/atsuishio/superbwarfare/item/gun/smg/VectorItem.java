@@ -4,6 +4,7 @@ import com.atsuishio.superbwarfare.client.renderer.gun.VectorItemRenderer;
 import com.atsuishio.superbwarfare.data.gun.GunData;
 import com.atsuishio.superbwarfare.data.gun.value.AttachmentType;
 import com.atsuishio.superbwarfare.event.ClientEventHandler;
+import com.atsuishio.superbwarfare.init.RegistryName;
 import com.atsuishio.superbwarfare.item.gun.GunGeoItem;
 import com.atsuishio.superbwarfare.item.gun.GunItem;
 import net.minecraft.client.Minecraft;
@@ -18,6 +19,7 @@ import software.bernie.geckolib.renderer.GeoItemRenderer;
 
 import java.util.function.Supplier;
 
+@RegistryName("vector")
 public class VectorItem extends GunGeoItem {
 
     public VectorItem() {
@@ -83,16 +85,6 @@ public class VectorItem extends GunGeoItem {
     }
 
     @Override
-    public int[] getValidScopes() {
-        return new int[]{0, 1, 2};
-    }
-
-    @Override
-    public int[] getValidGrips() {
-        return new int[]{0, 1, 2};
-    }
-
-    @Override
     public double getCustomZoom(GunData data) {
         int scopeType = data.attachment.get(AttachmentType.SCOPE);
         return scopeType == 2 ? 0.75 : 0;
@@ -106,35 +98,5 @@ public class VectorItem extends GunGeoItem {
             case 2 -> 57;
             default -> 0;
         };
-    }
-
-    @Override
-    public boolean hasCustomBarrel(GunData data) {
-        return true;
-    }
-
-    @Override
-    public boolean hasCustomGrip(GunData data) {
-        return true;
-    }
-
-    @Override
-    public boolean hasCustomMagazine(GunData data) {
-        return true;
-    }
-
-    @Override
-    public boolean hasCustomScope(GunData data) {
-        return true;
-    }
-
-    @Override
-    public boolean hasCustomStock(GunData data) {
-        return true;
-    }
-
-    @Override
-    public boolean canEditAttachments(GunData data) {
-        return true;
     }
 }

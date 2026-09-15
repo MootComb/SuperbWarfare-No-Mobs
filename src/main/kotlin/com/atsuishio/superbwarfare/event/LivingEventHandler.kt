@@ -21,6 +21,7 @@ import com.atsuishio.superbwarfare.network.message.receive.ClientIndicatorMessag
 import com.atsuishio.superbwarfare.network.message.receive.DrawClientMessage
 import com.atsuishio.superbwarfare.network.message.receive.LivingGunKillMessage
 import com.atsuishio.superbwarfare.perk.Perk
+import com.atsuishio.superbwarfare.resource.gun.GunResource
 import com.atsuishio.superbwarfare.tools.*
 import com.atsuishio.superbwarfare.tools.DamageTypeTool.isGunDamage
 import com.atsuishio.superbwarfare.tools.DamageTypeTool.isHeadshotDamage
@@ -346,6 +347,7 @@ object LivingEventHandler {
                         val oldData = GunData.from(oldStack)
 
                         stopGunReloadSound(entity, oldData)
+                        stopGunChargeSound(entity, oldData)
 
                         if (oldData.get(GunProp.BOLT_ACTION_TIME) > 0) {
                             oldData.bolt.actionTimer.reset()
@@ -419,16 +421,14 @@ object LivingEventHandler {
     private fun checkCopyGuns(stack: ItemStack, player: Player) {
         val data = GunData.from(stack)
         if (!data.initialized()) return
-        val uuid = data.gunDataTag.getUUID("UUID")
+        val uuid = data.uuid ?: return
 
         for (item in player.getInventory().items) {
             if (item == stack) continue
             if (item.item is GunItem) {
                 val itemData = GunData.from(item)
-                val dataTag = itemData.gunDataTag
-                if (!dataTag.hasUUID("UUID")) continue
-                if (dataTag.getUUID("UUID") == uuid) {
-                    data.gunDataTag.putUUID("UUID", UUID.randomUUID())
+                if (itemData.uuid == uuid) {
+                    data.update { it.copy(uuid = UUID.randomUUID()) }
                     return
                 }
             }
@@ -445,6 +445,19 @@ object LivingEventHandler {
                     player.connection.send(ClientboundStopSoundPacket(location, SoundSource.PLAYERS))
                 }
             }
+    }
+
+    fun stopGunChargeSound(player: ServerPlayer, data: GunData) {
+        val resource = GunResource.compute(data.stack)
+        val chargeSound = resource.chargeSound
+        if (chargeSound != null) {
+            player.sendPacket(ClientboundStopSoundPacket(chargeSound.location, SoundSource.PLAYERS))
+        }
+
+        val dischargeSound = resource.dischargeSound
+        if (dischargeSound != null) {
+            player.sendPacket(ClientboundStopSoundPacket(dischargeSound.location, SoundSource.PLAYERS))
+        }
     }
 
     /**
@@ -619,7 +632,7 @@ object LivingEventHandler {
         val player = event.entity as? Player ?: return
         if (!MiscConfig.DROP_AMMO_BOX.get()) return
 
-        val cap = player.getData(ModDataAttachments.PLAYER_VARIABLE).watch()
+        val cap = player.getData(ModDataAttachments.PLAYER_VARIABLE)
 
         val drop = Ammo.entries.sumOf { it.get(cap) } > 0
         if (!drop) return
@@ -634,7 +647,6 @@ object LivingEventHandler {
         stack.ammoBoxData = stack.ammoBoxData.asDrop()
 
         player.setData(ModDataAttachments.PLAYER_VARIABLE, cap)
-        cap.sync(player)
 
         event.drops += ItemEntity(player.level(), player.x, player.y + 1, player.z, stack)
     }

@@ -149,6 +149,9 @@ class DefaultGunData : IDBasedData<DefaultGunData> {
     @SerialName("ProjectileAmount")
     var projectileAmount = 1
 
+    @SerialName("SpreadPattern")
+    var spreadPattern: ProjectileSpreadPattern? = null
+
     @SerialName("Weight")
     var weight = 1.0
 
@@ -179,6 +182,7 @@ class DefaultGunData : IDBasedData<DefaultGunData> {
     @SerialName("ZoomReload")
     var zoomReload = true
 
+    // TODO(fire-mode): Keep this as legacy compatibility until HOLD uses ChargeInfo reset semantics.
     @SerialName("ClearHoldProgressAfterShoot")
     var clearHoldProgressAfterShoot = false
 
@@ -306,7 +310,7 @@ class DefaultGunData : IDBasedData<DefaultGunData> {
     var explosionRadius = 0.0
 
     @SerialName("Gravity")
-    var gravity = 0.05
+    var gravity = 0.03
 
     @SerialName("ShootDelay")
     var shootDelay = 0

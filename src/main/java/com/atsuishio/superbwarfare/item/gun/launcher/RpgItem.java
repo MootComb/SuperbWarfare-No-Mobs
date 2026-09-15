@@ -1,8 +1,8 @@
 package com.atsuishio.superbwarfare.item.gun.launcher;
 
 import com.atsuishio.superbwarfare.client.renderer.gun.RpgItemRenderer;
-import com.atsuishio.superbwarfare.data.gun.GunData;
 import com.atsuishio.superbwarfare.data.gun.ShootParameters;
+import com.atsuishio.superbwarfare.init.RegistryName;
 import com.atsuishio.superbwarfare.item.gun.GunGeoItem;
 import com.atsuishio.superbwarfare.tools.ParticleTool;
 import net.minecraft.core.particles.ParticleTypes;
@@ -13,6 +13,7 @@ import software.bernie.geckolib.renderer.GeoItemRenderer;
 
 import java.util.function.Supplier;
 
+@RegistryName("rpg")
 public class RpgItem extends GunGeoItem {
 
     public RpgItem() {
@@ -38,11 +39,6 @@ public class RpgItem extends GunGeoItem {
                     30, 0.4, 0.4, 0.4, 0.005, true);
         }
 
-        return true;
-    }
-
-    @Override
-    public boolean canEditAttachments(GunData data) {
         return true;
     }
 }

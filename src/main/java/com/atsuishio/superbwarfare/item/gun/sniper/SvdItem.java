@@ -3,6 +3,7 @@ package com.atsuishio.superbwarfare.item.gun.sniper;
 import com.atsuishio.superbwarfare.client.renderer.gun.SvdItemRenderer;
 import com.atsuishio.superbwarfare.data.gun.GunData;
 import com.atsuishio.superbwarfare.data.gun.value.AttachmentType;
+import com.atsuishio.superbwarfare.init.RegistryName;
 import com.atsuishio.superbwarfare.item.gun.GunGeoItem;
 import com.atsuishio.superbwarfare.tools.GunsTool;
 import com.atsuishio.superbwarfare.tools.NBTTool;
@@ -12,6 +13,7 @@ import software.bernie.geckolib.renderer.GeoItemRenderer;
 
 import java.util.function.Supplier;
 
+@RegistryName("svd")
 public class SvdItem extends GunGeoItem {
 
     public SvdItem() {
@@ -47,29 +49,8 @@ public class SvdItem extends GunGeoItem {
     public boolean canAdjustZoom(GunData data) {
         return data.attachment.get(AttachmentType.SCOPE) == 3;
     }
-
-    @Override
-    public boolean hasCustomBarrel(GunData data) {
-        return true;
-    }
-
-    @Override
-    public boolean hasCustomScope(GunData data) {
-        return true;
-    }
-
-    @Override
-    public boolean hasCustomMagazine(GunData data) {
-        return true;
-    }
-
     @Override
     public boolean hasBipod(GunData data) {
-        return true;
-    }
-
-    @Override
-    public boolean canEditAttachments(GunData data) {
         return true;
     }
 }

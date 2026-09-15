@@ -2413,7 +2413,7 @@ class ModRecipeProvider(output: PackOutput, registries: CompletableFuture<Holder
             gunSmithing(
                 writer,
                 ModItems.HUNTING_RIFLE_BLUEPRINT.get(),
-                GunRarity.RARE,
+                GunRarity.EPIC,
                 ItemTags.LOGS,
                 ModItems.HUNTING_RIFLE.get()
             )
@@ -2494,6 +2494,7 @@ class ModRecipeProvider(output: PackOutput, registries: CompletableFuture<Holder
                 ModItems.SVD.get()
             )
             gunSmithing(writer, ModItems.MARLIN_BLUEPRINT.get(), GunRarity.COMMON, ItemTags.LOGS, ModItems.MARLIN.get())
+            gunSmithing(writer, ModItems.M_1897_BLUEPRINT.get(), GunRarity.RARE, ItemTags.LOGS, ModItems.M_1897.get())
             gunSmithing(
                 writer,
                 ModItems.M_870_BLUEPRINT.get(),
@@ -2640,6 +2641,7 @@ class ModRecipeProvider(output: PackOutput, registries: CompletableFuture<Holder
             copyBlueprint(writer, ModItems.SVD_BLUEPRINT.get())
             copyBlueprint(writer, ModItems.MARLIN_BLUEPRINT.get())
             copyBlueprint(writer, ModItems.M_870_BLUEPRINT.get())
+            copyBlueprint(writer, ModItems.M_1897_BLUEPRINT.get())
             copyBlueprint(writer, ModItems.AWM_BLUEPRINT.get())
             copyBlueprint(writer, ModItems.M_98B_BLUEPRINT.get())
             copyBlueprint(writer, ModItems.AK_47_BLUEPRINT.get())
@@ -3202,7 +3204,14 @@ class ModRecipeProvider(output: PackOutput, registries: CompletableFuture<Holder
             this.generateBlueprintResearchingRecipe(writer, ModRarities.SUPERB)
             this.generateBlueprintResearchingRecipe(writer, ModRarities.VIRTUAL)
 
-            Perk.Type.entries.forEach { this.generatePerkResearchingRecipe(writer, it) }
+            val rarities = listOf(Rarity.COMMON, Rarity.RARE, Rarity.EPIC, ModRarities.LEGENDARY, ModRarities.SUPERB)
+            Perk.Type.entries.forEach {
+                rarities.forEach { rarity ->
+                    this.generatePerkResearchingRecipe(writer, it, rarity)
+                }
+
+                this.generatePerkRecycleResearchingRecipe(writer, it)
+            }
         }
 
         fun copyBlueprint(writer: RecipeOutput, result: ItemLike) {
@@ -3535,7 +3544,102 @@ class ModRecipeProvider(output: PackOutput, registries: CompletableFuture<Holder
                 .save(writer, loc(getItemName(input) + "_from_blueprint_boost"))
         }
 
-        fun generatePerkResearchingRecipe(writer: RecipeOutput, type: Perk.Type) {
+        fun generatePerkResearchingRecipe(writer: RecipeOutput, type: Perk.Type, rarity: Rarity) {
+            val inputPerk: Item
+            val resTag: TagKey<Item>
+            when (type) {
+                Perk.Type.AMMO -> {
+                    inputPerk = ModItems.AMMO_PERK_DATA_CHIP.get()
+                    resTag = when (rarity) {
+                        Rarity.RARE -> ModTags.Items.RESEARCHABLE_AMMO_PERK_RARE
+                        Rarity.EPIC -> ModTags.Items.RESEARCHABLE_AMMO_PERK_EPIC
+                        ModRarities.LEGENDARY -> ModTags.Items.RESEARCHABLE_AMMO_PERK_LEGENDARY
+                        ModRarities.SUPERB -> ModTags.Items.RESEARCHABLE_AMMO_PERK_SUPERB
+                        else -> ModTags.Items.RESEARCHABLE_AMMO_PERK_COMMON
+                    }
+                }
+
+                Perk.Type.FUNCTIONAL -> {
+                    inputPerk = ModItems.FUNCTIONAL_PERK_DATA_CHIP.get()
+                    resTag = when (rarity) {
+                        Rarity.RARE -> ModTags.Items.RESEARCHABLE_FUNCTIONAL_PERK_RARE
+                        Rarity.EPIC -> ModTags.Items.RESEARCHABLE_FUNCTIONAL_PERK_EPIC
+                        ModRarities.LEGENDARY -> ModTags.Items.RESEARCHABLE_FUNCTIONAL_PERK_LEGENDARY
+                        ModRarities.SUPERB -> ModTags.Items.RESEARCHABLE_FUNCTIONAL_PERK_SUPERB
+                        else -> ModTags.Items.RESEARCHABLE_FUNCTIONAL_PERK_COMMON
+                    }
+                }
+
+                Perk.Type.DAMAGE -> {
+                    inputPerk = ModItems.DAMAGE_PERK_DATA_CHIP.get()
+                    resTag = when (rarity) {
+                        Rarity.RARE -> ModTags.Items.RESEARCHABLE_DAMAGE_PERK_RARE
+                        Rarity.EPIC -> ModTags.Items.RESEARCHABLE_DAMAGE_PERK_EPIC
+                        ModRarities.LEGENDARY -> ModTags.Items.RESEARCHABLE_DAMAGE_PERK_LEGENDARY
+                        ModRarities.SUPERB -> ModTags.Items.RESEARCHABLE_DAMAGE_PERK_SUPERB
+                        else -> ModTags.Items.RESEARCHABLE_DAMAGE_PERK_COMMON
+                    }
+                }
+            }
+            val additional = when (rarity) {
+                Rarity.RARE -> ModItems.RARE_ACCESSORY_KIT.get()
+                Rarity.EPIC -> ModItems.EPIC_ACCESSORY_KIT.get()
+                ModRarities.LEGENDARY -> ModItems.LEGENDARY_ACCESSORY_KIT.get()
+                ModRarities.SUPERB -> ModItems.SUPERB_ACCESSORY_KIT.get()
+                else -> ModItems.COMMON_ACCESSORY_KIT.get()
+            }
+            val rarityName = when (rarity) {
+                Rarity.RARE -> "rare"
+                Rarity.EPIC -> "epic"
+                ModRarities.LEGENDARY -> "legendary"
+                ModRarities.SUPERB -> "superb"
+                else -> "common"
+            }
+            val id = "${type.name.lowercase()}_perk_${rarityName}"
+
+            ResearchingRecipeBuilder.tag(resTag, 1, inputPerk)
+                .base(ModItems.EMPTY_PERK.get())
+                .addition(additional)
+                .time(600)
+                .unlockedBy(getHasName(inputPerk), has(inputPerk))
+                .save(writer, loc("${id}_researching"))
+            ResearchingRecipeBuilder.tag(resTag, 2, inputPerk)
+                .base(ModItems.EMPTY_PERK.get())
+                .addition(additional)
+                .special(ModItems.BOOST_RESEARCH_MODULE.get())
+                .time(600)
+                .color(1)
+                .unlockedBy(getHasName(inputPerk), has(inputPerk))
+                .unlockedBy(getHasName(ModItems.BOOST_RESEARCH_MODULE.get()), has(ModItems.BOOST_RESEARCH_MODULE.get()))
+                .save(writer, loc("${id}_researching_boost"))
+            ResearchingRecipeBuilder.tag(resTag, 1, inputPerk)
+                .base(ModItems.EMPTY_PERK.get())
+                .addition(additional)
+                .special(ModItems.DIRECTIONAL_RESEARCH_MODULE.get())
+                .time(600)
+                .color(2)
+                .selectable()
+                .unlockedBy(getHasName(inputPerk), has(inputPerk))
+                .unlockedBy(
+                    getHasName(ModItems.DIRECTIONAL_RESEARCH_MODULE.get()),
+                    has(ModItems.DIRECTIONAL_RESEARCH_MODULE.get())
+                )
+                .save(writer, loc("${id}_researching_directional"))
+            ResearchingRecipeBuilder.tag(resTag, 1, inputPerk)
+                .base(ModItems.EMPTY_PERK.get())
+                .addition(additional)
+                .special(ModItems.EFFECTIVE_RESEARCH_MODULE.get())
+                .time(120)
+                .color(3)
+                .unlockedBy(getHasName(inputPerk), has(inputPerk))
+                .unlockedBy(
+                    getHasName(ModItems.EFFECTIVE_RESEARCH_MODULE.get()),
+                    has(ModItems.EFFECTIVE_RESEARCH_MODULE.get())
+                )
+                .save(writer, loc("${id}_researching_effective"))
+        }
+
+        fun generatePerkRecycleResearchingRecipe(writer: RecipeOutput, type: Perk.Type) {
             val inputPerk: Item
             val resTag: TagKey<Item>
             when (type) {
@@ -3554,43 +3658,6 @@ class ModRecipeProvider(output: PackOutput, registries: CompletableFuture<Holder
                     resTag = ModTags.Items.RESEARCHABLE_DAMAGE_PERK
                 }
             }
-
-            ResearchingRecipeBuilder.tag(resTag, 1, inputPerk)
-                .base(ModItems.EMPTY_PERK.get())
-                .time(600)
-                .unlockedBy(getHasName(inputPerk), has(inputPerk))
-                .save(writer, loc(getItemName(inputPerk) + "_researching"))
-            ResearchingRecipeBuilder.tag(resTag, 2, inputPerk)
-                .base(ModItems.EMPTY_PERK.get())
-                .special(ModItems.BOOST_RESEARCH_MODULE.get())
-                .time(600)
-                .color(1)
-                .unlockedBy(getHasName(inputPerk), has(inputPerk))
-                .unlockedBy(getHasName(ModItems.BOOST_RESEARCH_MODULE.get()), has(ModItems.BOOST_RESEARCH_MODULE.get()))
-                .save(writer, loc(getItemName(inputPerk) + "_researching_boost"))
-            ResearchingRecipeBuilder.tag(resTag, 1, inputPerk)
-                .base(ModItems.EMPTY_PERK.get())
-                .special(ModItems.DIRECTIONAL_RESEARCH_MODULE.get())
-                .time(600)
-                .color(2)
-                .selectable()
-                .unlockedBy(getHasName(inputPerk), has(inputPerk))
-                .unlockedBy(
-                    getHasName(ModItems.DIRECTIONAL_RESEARCH_MODULE.get()),
-                    has(ModItems.DIRECTIONAL_RESEARCH_MODULE.get())
-                )
-                .save(writer, loc(getItemName(inputPerk) + "_researching_directional"))
-            ResearchingRecipeBuilder.tag(resTag, 1, inputPerk)
-                .base(ModItems.EMPTY_PERK.get())
-                .special(ModItems.EFFECTIVE_RESEARCH_MODULE.get())
-                .time(120)
-                .color(3)
-                .unlockedBy(getHasName(inputPerk), has(inputPerk))
-                .unlockedBy(
-                    getHasName(ModItems.EFFECTIVE_RESEARCH_MODULE.get()),
-                    has(ModItems.EFFECTIVE_RESEARCH_MODULE.get())
-                )
-                .save(writer, loc(getItemName(inputPerk) + "_researching_effective"))
 
             ResearchingRecipeBuilder.item(inputPerk, 1, resTag)
                 .base(ModItems.DATA_CHIP_SUBSTRATE.get())
