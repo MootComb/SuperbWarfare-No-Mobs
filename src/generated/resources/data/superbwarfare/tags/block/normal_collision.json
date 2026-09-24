@@ -1,5 +1,6 @@
 {
   "values": [
+<<<<<<<< HEAD:src/generated/resources/data/superbwarfare/tags/block/normal_collision.json
     "#minecraft:fences",
     "#minecraft:fence_gates",
     "#minecraft:doors",
@@ -19,5 +20,12 @@
     "minecraft:mushroom_stem",
     "minecraft:brown_mushroom_block",
     "minecraft:red_mushroom_block"
+========
+    "#minecraft:leaves",
+    "minecraft:lily_pad",
+    "minecraft:cobweb",
+    "minecraft:cactus",
+    "minecraft:mangrove_roots"
+>>>>>>>> upstream/superbwarfare:src/generated/resources/data/superbwarfare/tags/blocks/soft_collision.json
   ]
 }

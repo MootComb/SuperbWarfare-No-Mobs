@@ -1,0 +1,97 @@
+package com.atsuishio.superbwarfare.capability
+
+import com.atsuishio.superbwarfare.capability.entity.InfiniteAmmoCapability
+import com.atsuishio.superbwarfare.capability.living.PhosphorusFireCapability
+import com.atsuishio.superbwarfare.capability.player.PlayerVariable
+import com.atsuishio.superbwarfare.data.gun.Ammo
+import net.minecraft.core.Direction
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.world.entity.Entity
+import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.entity.player.Player
+import net.minecraftforge.common.capabilities.Capability
+import net.minecraftforge.common.capabilities.ICapabilitySerializable
+import net.minecraftforge.common.util.FakePlayer
+import net.minecraftforge.common.util.INBTSerializable
+import net.minecraftforge.common.util.LazyOptional
+import net.minecraftforge.event.AttachCapabilitiesEvent
+import net.minecraftforge.event.entity.player.PlayerEvent
+import net.minecraftforge.eventbus.api.SubscribeEvent
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber
+
+@EventBusSubscriber
+object CapabilityHandler {
+    @SubscribeEvent
+    fun registerCapabilities(event: AttachCapabilitiesEvent<Entity>) {
+        val entity = event.getObject()
+        event.addCapability(
+            InfiniteAmmoCapability.ID,
+            createProvider(
+                LazyOptional.of { InfiniteAmmoCapability() },
+                ModCapabilities.INFINITE_AMMO_CAPABILITY
+            )
+        )
+
+        if (entity is LivingEntity) {
+            event.addCapability(
+                PhosphorusFireCapability.ID,
+                createProvider(
+                    LazyOptional.of { PhosphorusFireCapability() },
+                    ModCapabilities.PHOSPHORUS_FIRE_CAPABILITY
+                )
+            )
+        }
+
+        if (entity !is Player) return
+
+        if (entity !is FakePlayer) {
+            event.addCapability(
+                PlayerVariable.ID,
+                createProvider(
+                    LazyOptional.of { PlayerVariable() },
+                    ModCapabilities.PLAYER_VARIABLE
+                )
+            )
+        }
+    }
+
+    @SubscribeEvent
+    fun clonePlayer(event: PlayerEvent.Clone) {
+        event.original.revive()
+        if (event.entity.level().isClientSide()) return
+
+        val original = PlayerVariable.getOrDefault(event.original)
+        val clone = event.entity.getCapability(ModCapabilities.PLAYER_VARIABLE, null)
+            .orElse(PlayerVariable())
+
+        for (type in Ammo.entries) {
+            type.set(clone, type.get(original))
+        }
+
+        clone.activeThermalImaging = original.activeThermalImaging
+
+        // 重生时客户端不会重建本地玩家实体，向客户端重推由 CapabilitySync 的
+        // PlayerRespawnEvent 处理，这里只需要标记数据已变化
+        PlayerVariable.markDirty(event.entity)
+    }
+
+    fun <T : INBTSerializable<CompoundTag>> createProvider(
+        instance: LazyOptional<T>,
+        capability: Capability<T>,
+    ): ICapabilitySerializable<CompoundTag> {
+        return object : ICapabilitySerializable<CompoundTag> {
+            override fun <C> getCapability(cap: Capability<C>, side: Direction?) =
+                capability.orEmpty(cap, instance.cast())
+
+            override fun serializeNBT(): CompoundTag {
+                return instance.orElseThrow { NullPointerException() }
+                    .serializeNBT()
+            }
+
+            override fun deserializeNBT(nbt: CompoundTag) {
+                instance.orElseThrow { NullPointerException() }
+                    .deserializeNBT(nbt)
+            }
+        }
+    }
+}

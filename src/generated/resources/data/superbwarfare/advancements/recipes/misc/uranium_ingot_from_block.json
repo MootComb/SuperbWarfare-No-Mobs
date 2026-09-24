@@ -1,0 +1,33 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "superbwarfare:uranium_ingot_from_block"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    },
+    "has_uranium_block": {
+      "conditions": {
+        "items": [
+          {
+            "tag": "forge:storage_blocks/uranium"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "requirements": [
+    [
+      "has_uranium_block",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "superbwarfare:uranium_ingot_from_block"
+    ]
+  },
+  "sends_telemetry_event": false
+}

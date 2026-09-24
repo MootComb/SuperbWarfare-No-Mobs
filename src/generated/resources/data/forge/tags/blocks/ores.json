@@ -1,0 +1,10 @@
+{
+  "values": [
+    "#forge:ores/lead",
+    "#forge:ores/tungsten",
+    "#forge:ores/silver",
+    "#forge:ores/uranium",
+    "#forge:ores/sulfur",
+    "#forge:ores/niter"
+  ]
+}
