@@ -10717,7 +10717,7 @@
 				{
 					"name": "grip_pos",
 					"parent": "root",
-					"pivot": [0, 1.31172, -10.92969]
+					"pivot": [0, 1.31172, -11.92969]
 				},
 				{
 					"name": "righthand",
@@ -10756,6 +10756,11 @@
 					"name": "idle_view",
 					"parent": "positioning",
 					"pivot": [2.4535, 5.7332, 7.7333]
+				},
+				{
+					"name": "bipod_view",
+					"parent": "positioning",
+					"pivot": [0, 7.2332, 7.7333]
 				},
 				{
 					"name": "iron_view",

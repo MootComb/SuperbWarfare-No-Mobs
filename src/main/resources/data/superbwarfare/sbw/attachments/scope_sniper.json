@@ -5,7 +5,12 @@
     {
       "Prop": "Weight",
       "Op": "Add",
-      "Value": 1.2
+      "Value": 1.8
+    },
+    {
+      "Prop": "ZoomTime",
+      "Op": "Mul",
+      "Value": 1.05
     }
   ],
   "Bone": "scope_pos",
@@ -13,12 +18,12 @@
   "Texture": "superbwarfare:textures/bedrock/attachment/scope_sniper.png",
   "ScopeInfo": {
     "Type": "Scope",
-    "ZoomLengthScale": 0.3
-  },
-  "Zoom": {
-    "Min": 4,
-    "Max": 12,
-    "Default": 8,
-    "Step": 0.15
+    "ZoomLengthScale": 0.3,
+    "Zoom": {
+      "Min": 4,
+      "Max": 12,
+      "Default": 8,
+      "Step": 0.15
+    }
   }
 }

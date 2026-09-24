@@ -1,18 +1,18 @@
 package com.atsuishio.superbwarfare.data.gun
 
 import com.atsuishio.superbwarfare.Mod
-import com.atsuishio.superbwarfare.data.ObjectToList
 import com.atsuishio.superbwarfare.data.PMC
 import com.atsuishio.superbwarfare.data.Prop
+import com.atsuishio.superbwarfare.data.SingleOrList
 import com.atsuishio.superbwarfare.data.gun.GunData.Companion.getPerkPriority
 import com.atsuishio.superbwarfare.init.ModPerks
 import com.atsuishio.superbwarfare.perk.Perk
 import kotlin.math.min
-import kotlin.reflect.KMutableProperty1
+import kotlin.reflect.KProperty1
 
 @Suppress("UNUSED")
 class GunProp<T, R>(
-    prop: KMutableProperty1<DefaultGunData, T>,
+    prop: KProperty1<DefaultGunData, T>,
     transform: (T) -> R,
     contextTransform: ((GunData, T) -> R)? = null,
 ) : Prop<GunData, DefaultGunData, T, R, GunProp<T, R>>(prop, transform, contextTransform) {
@@ -23,21 +23,21 @@ class GunProp<T, R>(
         val entries = mutableListOf<GunProp<*, *>>()
 
         inline fun <reified T> plainProp(
-            prop: KMutableProperty1<DefaultGunData, T>,
+            prop: KProperty1<DefaultGunData, T>,
         ): GunProp<T, T> {
             return GunProp(prop = prop, transform = { it }).also { entries.add(it) }
         }
 
         inline fun <reified T, R> complexProp(
-            prop: KMutableProperty1<DefaultGunData, T>,
+            prop: KProperty1<DefaultGunData, T>,
             noinline transform: (T) -> R
         ): GunProp<T, R> {
             return GunProp(prop = prop, transform = transform).also { entries.add(it) }
         }
 
         fun leveledIntProp(
-            prop: KMutableProperty1<DefaultGunData, ObjectToList<Int>>,
-        ): GunProp<ObjectToList<Int>, Int> {
+            prop: KProperty1<DefaultGunData, SingleOrList<Int>>,
+        ): GunProp<SingleOrList<Int>, Int> {
             return GunProp(
                 prop,
                 { it.firstOrNull() ?: 0 },
@@ -141,7 +141,14 @@ class GunProp<T, R>(
         val PROJECTILE = complexProp(DefaultGunData::projectile) { it.value }
 
         @JvmField
+        val PROJECTILE_BONE = plainProp(DefaultGunData::projectileBone)
+
+        @JvmField
         val AMMO_COST_PER_SHOOT = plainProp(DefaultGunData::ammoCostPerShoot)
+
+        /** 「其他类型弹药 → 弹药」换算比例：多少外部资源（如 FE）折算成 1 发弹匣弹药 */
+        @JvmField
+        val FUEL_PER_AMMO = plainProp(DefaultGunData::fuelPerAmmo)
 
         @JvmField
         val PROJECTILE_AMOUNT = plainProp(DefaultGunData::projectileAmount)
@@ -158,9 +165,7 @@ class GunProp<T, R>(
 
         @JvmField
         val AVAILABLE_FIRE_MODES =
-            complexProp(DefaultGunData::availableFireModes) {
-                it.list.map { l -> l.value.also { fireMode -> fireMode.init() } }
-            }
+            complexProp(DefaultGunData::availableFireModes) { it.list.map { l -> l.value } }
 
         @JvmField
         val MAGAZINE = GunProp(
@@ -174,6 +179,10 @@ class GunProp<T, R>(
                 }
             }
         ).also { entries.add(it) }
+
+        /** 弹鼓等级列表，供 `GunData.isDrumLevel()` 判断当前等级是否为弹鼓。 */
+        @JvmField
+        val DRUM_LEVELS = complexProp(DefaultGunData::drumLevels) { it }
 
         @JvmField
         val RELOAD_TYPES = complexProp(DefaultGunData::reloadTypes) { it }
@@ -224,7 +233,7 @@ class GunProp<T, R>(
         @JvmField
         val AMMO_CONSUMER = complexProp(
             DefaultGunData::ammoConsumers
-        ) { it.list.map { l -> l.value.also { consumer -> consumer.init() } } }
+        ) { it.list.map { l -> l.value } }
 
         @JvmField
         val NORMAL_RELOAD_TIME = leveledIntProp(DefaultGunData::normalReloadTime)
@@ -263,10 +272,28 @@ class GunProp<T, R>(
         val BURST_COOLDOWN = plainProp(DefaultGunData::burstCooldown)
 
         @JvmField
+        val RPM_ADD_AFTER_SHOOT = plainProp(DefaultGunData::rpmAddAfterShoot)
+
+        @JvmField
+        val CUSTOM_RPM_MIN = plainProp(DefaultGunData::minCustomRpm)
+
+        @JvmField
+        val CUSTOM_RPM_MAX = plainProp(DefaultGunData::maxCustomRpm)
+
+        @JvmField
         val SOUND_RADIUS = plainProp(DefaultGunData::soundRadius)
 
         @JvmField
         val RPM = plainProp(DefaultGunData::rpm)
+
+        /**
+         * 全局射速倍率。
+         *
+         * 作用于**最终射速**（`基础 RPM + 每发累加值`），而不是基础 RPM——
+         * 否则乘法类效果会被 RpmAddAfterShoot 那套加法累加值稀释。
+         */
+        @JvmField
+        val RPM_MULTIPLIER = plainProp(DefaultGunData::rpmMultiplier)
 
         @JvmField
         val EXPLOSION_DAMAGE = plainProp(DefaultGunData::explosionDamage)
@@ -311,7 +338,13 @@ class GunProp<T, R>(
         val HAS_BARREL_BULLET = plainProp(DefaultGunData::hasBarrelBullet)
 
         @JvmField
+        val TACTICAL_RELOAD = plainProp(DefaultGunData::tacticalReload)
+
+        @JvmField
         val DRAW_TIME = plainProp(DefaultGunData::drawTime)
+
+        @JvmField
+        val HAS_BIPOD = plainProp(DefaultGunData::hasBipod)
 
         /**
          * 武器进入瞄准的时间，单位是tick
@@ -451,6 +484,7 @@ class GunProp<T, R>(
             modify(RANGE) { it.coerceAtLeast(1) }
             modify(MELEE_DAMAGE_TIME) { min(modifier[MELEE_DURATION] - 1, it) }
             modify(AMMO_COST_PER_SHOOT) { it.coerceAtLeast(0) }
+            modify(FUEL_PER_AMMO) { it.coerceAtLeast(0) }
             modify(PROJECTILE_AMOUNT) { it.coerceAtLeast(0) }
             modify(WEIGHT) { it.coerceAtLeast(1.0) }
 
@@ -460,6 +494,7 @@ class GunProp<T, R>(
 
             modify(BURST_AMOUNT) { it.coerceAtLeast(0) }
             modify(RPM) { it.coerceIn(1, 114514) }
+            modify(RPM_MULTIPLIER) { it.coerceAtLeast(0.0) }
             modify(UNDERWATER_MOTION_SCALE) { it.coerceIn(0.0f, 1.0f) }
 
             modify(DRAW_TIME) { it.coerceAtLeast(1) }

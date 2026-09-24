@@ -1,5 +1,5 @@
 {
-  "Spread": 5,
+  "Spread": 8,
   "RecoilX": 0.002,
   "RecoilY": 0.063,
   "Damage": 35,
@@ -8,6 +8,9 @@
   "Magazine": 5,
   "BoltActionTime": 22,
   "Weight": 5,
+  "MeleeDamage": 15,
+  "MeleeDuration": 16,
+  "MeleeAngle": 100,
   "DrawTime": 12,
   "ZoomTime": 7,
   "ZoomSpreadRate": 0.005,
@@ -88,14 +91,22 @@
       "superbwarfare:scope_acog",
       "superbwarfare:scope_qmk171",
       "superbwarfare:scope_hamr",
+      "superbwarfare:scope_elcan_4x",
       "superbwarfare:scope_lpvo",
-      "superbwarfare:scope_sniper"
+      "superbwarfare:scope_sniper",
+      "superbwarfare:scope_winefox",
+      "superbwarfare:steel_pipe_scope",
+      "superbwarfare:scope_spyglass"
     ],
     "Barrel": [
       "superbwarfare:meowlencer",
       "superbwarfare:hissilencer",
       "superbwarfare:silaowuncer",
       "superbwarfare:ru_silencer",
+      "superbwarfare:muzzle_brake_ru",
+      "superbwarfare:muzzle_brake_ar",
+      "superbwarfare:muzzle_zenit_dtk_1",
+      "superbwarfare:muzzle_compensator_r_17",
       "superbwarfare:ar_silencer",
       "superbwarfare:loudspeaker"
     ]

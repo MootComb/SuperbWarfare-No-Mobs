@@ -10,12 +10,12 @@
     {
       "Prop": "Spread",
       "Op": "Mul",
-      "Value": 0.6
+      "Value": 0.85
     },
     {
       "Prop": "Weight",
       "Op": "Add",
-      "Value": 0.4
+      "Value": 0.8
     },
     {
       "Prop": "RPM",

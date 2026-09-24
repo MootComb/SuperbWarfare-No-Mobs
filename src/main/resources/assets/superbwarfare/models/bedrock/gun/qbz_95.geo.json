@@ -10678,7 +10678,7 @@
 				{
 					"name": "grip_pos",
 					"parent": "root",
-					"pivot": [0, 0.25945, -6.99965]
+					"pivot": [0, 0.25945, -7.99965]
 				},
 				{
 					"name": "muzzle_pos",
@@ -10742,6 +10742,11 @@
 					"name": "idle_view",
 					"parent": "positioning",
 					"pivot": [2.9535, 6.7332, 11.9833]
+				},
+				{
+					"name": "bipod_view",
+					"parent": "positioning",
+					"pivot": [0, 9.2332, 11.9833]
 				},
 				{
 					"name": "iron_view",

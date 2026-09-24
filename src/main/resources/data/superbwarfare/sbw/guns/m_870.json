@@ -68,12 +68,18 @@
       "superbwarfare:scope_acog",
       "superbwarfare:scope_qmk171",
       "superbwarfare:scope_hamr",
+      "superbwarfare:scope_elcan_4x",
       "superbwarfare:scope_lpvo",
-      "superbwarfare:scope_sniper"
+      "superbwarfare:scope_sniper",
+      "superbwarfare:scope_winefox",
+      "superbwarfare:scope_spyglass"
     ],
     "Grip": [
       "superbwarfare:vertical_grip",
-      "superbwarfare:triangle_grip"
+      "superbwarfare:grip_vertical_bipod",
+      "superbwarfare:grip_rectangle_vertical",
+      "superbwarfare:triangle_grip",
+      "superbwarfare:grip_cqr_gen2"
     ],
     "Barrel": [
       "superbwarfare:meowlencer",

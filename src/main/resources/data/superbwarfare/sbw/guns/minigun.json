@@ -1,5 +1,6 @@
 {
-  "Spread": 1.5,
+  "Spread": 4.5,
+  "ZoomSpreadRate": 0.5,
   "RecoilX": 0.003,
   "RecoilY": 0.02,
   "Damage": 8,
@@ -9,13 +10,43 @@
   "DrawTime": 18,
   "ZoomTime": 12,
   "BypassesArmor": 0.3,
-  "ZoomSpreadRate": 0.75,
   "SoundRadius": 14,
   "RPM": 1200,
-  "DefaultFireMode": "Auto",
+  "DefaultFireMode": "RPM1200",
   "GunType": "MachineGun",
   "AvailableFireModes": [
-    "Auto"
+    {
+      "Mode": "Auto",
+      "Name": "RPM600",
+      "Override": {
+        "RPM": 600
+      }
+    },
+    {
+      "Mode": "Auto",
+      "Name": "RPM1145",
+      "Override": {
+        "RPM": 1145
+      }
+    },
+    {
+      "Mode": "Auto",
+      "Name": "RPM1200"
+    },
+    {
+      "Mode": "Auto",
+      "Name": "RPM1800",
+      "Override": {
+        "RPM": 1800
+      }
+    },
+    {
+      "Mode": "Auto",
+      "Name": "RPM2400",
+      "Override": {
+        "RPM": 2400
+      }
+    }
   ],
   "AmmoType": "@RifleAmmo",
   "ShootDelay": 10,

@@ -9,9 +9,9 @@
     "ReloadEmpty": "animation.aa_12.reload_empty",
     "Edit": "animation.aa_12.edit",
     "ReloadNormalDrum": "animation.aa_12.reload_normal_drum",
-    "ReloadEmptyDrum": "animation.aa_12.reload_empty_drum"
+    "ReloadEmptyDrum": "animation.aa_12.reload_empty_drum",
+    "Melee": "animation.aa_12.hit"
   },
-  "DrumLevels": 2,
   "ShootRecoil": {
     "Offset": [0.75, 0.35, 0.65],
     "Rotation": [0.6, 0.6, 0.5],

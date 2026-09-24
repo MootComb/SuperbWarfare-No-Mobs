@@ -2,6 +2,7 @@
   "Spread": 4,
   "OpenBolt": true,
   "HasBarrelBullet": true,
+  "TacticalReload": true,
   "RecoilX": 0.002,
   "RecoilY": 0.02,
   "Damage": 5.5,
@@ -65,7 +66,8 @@
   ],
   "AvailableAttachments": {
     "Scope": [
-      "superbwarfare:scope_handgun_red_dot"
+      "superbwarfare:scope_handgun_red_dot",
+      "superbwarfare:scope_winefox"
     ],
     "Magazine": [
       "superbwarfare:magazine_extend",

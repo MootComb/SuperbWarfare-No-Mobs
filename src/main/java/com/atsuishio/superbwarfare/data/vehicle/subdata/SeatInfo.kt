@@ -1,7 +1,6 @@
 package com.atsuishio.superbwarfare.data.vehicle.subdata
 
-import com.atsuishio.superbwarfare.annotation.ServerOnly
-import com.atsuishio.superbwarfare.data.ObjectToList
+import com.atsuishio.superbwarfare.data.SingleOrList
 import com.atsuishio.superbwarfare.serialization.kserializer.SerializedVec3
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -13,7 +12,6 @@ class SeatInfo {
     var hidePassenger: Boolean = false
 
     @SerialName("IsEnclosed")
-    @ServerOnly
     var isEnclosed: Boolean? = null
 
     @JvmField
@@ -56,7 +54,7 @@ class SeatInfo {
     var maxYaw: Float = 514f
 
     @SerialName("Weapons")
-    private var weapons: ObjectToList<String>? = ObjectToList()
+    private var weapons: SingleOrList<String>? = SingleOrList()
 
     fun weapons() = weapons?.list ?: mutableListOf()
 

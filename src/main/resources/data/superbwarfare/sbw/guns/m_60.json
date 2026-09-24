@@ -1,6 +1,6 @@
 {
   "Spread": 5,
-  "OpenBolt": true,
+  "TacticalReload": true,
   "RecoilX": 0.004,
   "RecoilY": 0.014,
   "Damage": 10,
@@ -46,6 +46,7 @@
     "superbwarfare:powerful_attraction",
     "superbwarfare:intelligent_chip",
     "superbwarfare:backpack_linked_magazine",
+    "superbwarfare:turbo_charger",
     "superbwarfare:killing_tally",
     "superbwarfare:desperado",
     "superbwarfare:monster_hunter",
@@ -54,6 +55,7 @@
     "superbwarfare:high_impact_reserves",
     "superbwarfare:brain_storm",
     "superbwarfare:target_lock",
+    "superbwarfare:stop_gap",
     "!superbwarfare:micro_missile",
     "!superbwarfare:longer_wire",
     "!superbwarfare:cupid_arrow"

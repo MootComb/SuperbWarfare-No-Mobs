@@ -1,5 +1,6 @@
 {
   "Spread": 6,
+  "TacticalReload": true,
   "HasBarrelBullet": true,
   "RecoilX": 0.0022,
   "RecoilY": 0.022,
@@ -7,6 +8,10 @@
   "Headshot": 2,
   "Velocity": 18,
   "Magazine": [30, 40, 70],
+  "DrumLevels": 2,
+  "MeleeDamage": 15,
+  "MeleeDuration": 16,
+  "MeleeAngle": 100,
   "Weight": 5,
   "DrawTime": 12,
   "ZoomTime": 7,
@@ -35,6 +40,7 @@
     "superbwarfare:powerful_attraction",
     "superbwarfare:intelligent_chip",
     "superbwarfare:backpack_linked_magazine",
+    "superbwarfare:turbo_charger",
     "superbwarfare:adrenaline_rush",
     "superbwarfare:quickdraw",
     "superbwarfare:snapshot_sights",
@@ -52,6 +58,7 @@
     "superbwarfare:target_lock",
     "superbwarfare:soul_reaver",
     "superbwarfare:steady_resolve",
+    "superbwarfare:stop_gap",
     "!superbwarfare:micro_missile",
     "!superbwarfare:longer_wire",
     "!superbwarfare:cupid_arrow"
@@ -68,10 +75,14 @@
       "superbwarfare:scope_1p_78",
       "superbwarfare:scope_pk_a",
       "superbwarfare:scope_acog",
+      "superbwarfare:scope_pso_1",
       "superbwarfare:scope_qmk171",
       "superbwarfare:scope_hamr",
+      "superbwarfare:scope_elcan_4x",
       "superbwarfare:scope_lpvo",
-      "superbwarfare:scope_sniper"
+      "superbwarfare:scope_sniper",
+      "superbwarfare:scope_winefox",
+      "superbwarfare:scope_spyglass"
     ],
     "Magazine": [
       "superbwarfare:magazine_extend",
@@ -79,7 +90,11 @@
     ],
     "Grip": [
       "superbwarfare:vertical_grip",
-      "superbwarfare:triangle_grip"
+      "superbwarfare:grip_vertical_bipod",
+      "superbwarfare:grip_rectangle_vertical",
+      "superbwarfare:triangle_grip",
+      "superbwarfare:grip_cqr_gen2",
+      "superbwarfare:steel_pipe_grip"
     ],
     "Stock": [
       "superbwarfare:oem_stock_light",
@@ -87,21 +102,24 @@
       "superbwarfare:stock_ubr",
       "superbwarfare:stock_prs",
       "superbwarfare:stock_ar_tactical",
-      "superbwarfare:stock_zenit_pt_1"
+      "superbwarfare:stock_str",
+      "superbwarfare:stock_elite",
+      "superbwarfare:stock_zenit_pt_1",
+      "superbwarfare:steel_pipe_stock"
     ],
     "Barrel": [
       "superbwarfare:meowlencer",
       "superbwarfare:hissilencer",
       "superbwarfare:silaowuncer",
       "superbwarfare:ru_silencer",
+      "superbwarfare:muzzle_brake_ru",
+      "superbwarfare:muzzle_brake_ar",
+      "superbwarfare:muzzle_zenit_dtk_1",
+      "superbwarfare:muzzle_compensator_r_17",
       "superbwarfare:ar_silencer",
       "superbwarfare:loudspeaker",
       "superbwarfare:silencer_qinglan",
-      "superbwarfare:triangular_muzzle",
-      "superbwarfare:love_muzzle",
-      "superbwarfare:star_muzzle",
-      "superbwarfare:linear_muzzle",
-      "superbwarfare:cross_muzzle"
+      "superbwarfare:steel_pipe_silencer"
     ]
   },
   "SoundInfo": {

@@ -2,13 +2,18 @@
   "Spread": 6,
   "OpenBolt": true,
   "HasBarrelBullet": true,
+  "TacticalReload": true,
   "RecoilX": 0.0013,
-  "RecoilY": 0.009,
+  "RecoilY": 0.016,
   "Damage": 8.5,
   "Headshot": 2,
   "Velocity": 22,
-  "Magazine": [30, 40, 60],
+  "Magazine": [30, 40, 75],
+  "DrumLevels": 2,
   "Weight": 4,
+  "MeleeDamage": 15,
+  "MeleeDuration": 16,
+  "MeleeAngle": 100,
   "DrawTime": 11,
   "ZoomTime": 6,
   "DefaultFireMode": "Auto",
@@ -22,8 +27,20 @@
       "Value": false
     },
     {
+      "Timeline": "RELOAD_NORMAL_DRUM",
+      "Progress": 0.8018,
+      "Action": "HOLD_OPEN",
+      "Value": false
+    },
+    {
       "Timeline": "RELOAD_EMPTY",
       "Progress": 0.81081,
+      "Action": "HOLD_OPEN",
+      "Value": false
+    },
+    {
+      "Timeline": "RELOAD_EMPTY_DRUM",
+      "Progress": 0.8439,
       "Action": "HOLD_OPEN",
       "Value": false
     },
@@ -55,6 +72,7 @@
     "superbwarfare:powerful_attraction",
     "superbwarfare:intelligent_chip",
     "superbwarfare:backpack_linked_magazine",
+    "superbwarfare:turbo_charger",
     "superbwarfare:kill_clip",
     "superbwarfare:gutshot_straight",
     "superbwarfare:monster_hunter",
@@ -66,6 +84,7 @@
     "superbwarfare:high_impact_reserves",
     "superbwarfare:brain_storm",
     "superbwarfare:target_lock",
+    "superbwarfare:stop_gap",
     "!superbwarfare:micro_missile",
     "!superbwarfare:longer_wire",
     "!superbwarfare:cupid_arrow"
@@ -84,8 +103,11 @@
       "superbwarfare:scope_acog",
       "superbwarfare:scope_qmk171",
       "superbwarfare:scope_hamr",
+      "superbwarfare:scope_elcan_4x",
       "superbwarfare:scope_lpvo",
-      "superbwarfare:scope_sniper"
+      "superbwarfare:scope_sniper",
+      "superbwarfare:scope_winefox",
+      "superbwarfare:scope_spyglass"
     ],
     "Magazine": [
       "superbwarfare:magazine_extend",
@@ -93,13 +115,20 @@
     ],
     "Grip": [
       "superbwarfare:vertical_grip",
-      "superbwarfare:triangle_grip"
+      "superbwarfare:grip_vertical_bipod",
+      "superbwarfare:grip_rectangle_vertical",
+      "superbwarfare:triangle_grip",
+      "superbwarfare:grip_cqr_gen2"
     ],
     "Barrel": [
       "superbwarfare:meowlencer",
       "superbwarfare:hissilencer",
       "superbwarfare:silaowuncer",
       "superbwarfare:ru_silencer",
+      "superbwarfare:muzzle_brake_ru",
+      "superbwarfare:muzzle_brake_ar",
+      "superbwarfare:muzzle_zenit_dtk_1",
+      "superbwarfare:muzzle_compensator_r_17",
       "superbwarfare:ar_silencer",
       "superbwarfare:loudspeaker",
       "superbwarfare:silencer_qinglan"

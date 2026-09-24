@@ -23,11 +23,18 @@
   "AvailablePerks": [
     "superbwarfare:powerful_attraction",
     "superbwarfare:intelligent_chip",
+    "superbwarfare:turbo_charger",
     "superbwarfare:monster_hunter",
     "superbwarfare:vorpal_weapon",
     "superbwarfare:brain_storm",
-    "superbwarfare:target_lock"
+    "superbwarfare:target_lock",
+    "superbwarfare:stop_gap"
   ],
+  "AvailableAttachments": {
+    "Scope": [
+      "superbwarfare:scope_winefox"
+    ]
+  },
   "SoundInfo": {
     "Fire1P": "superbwarfare:star_shoot_1p",
     "Fire3P": "superbwarfare:star_shoot_3p"

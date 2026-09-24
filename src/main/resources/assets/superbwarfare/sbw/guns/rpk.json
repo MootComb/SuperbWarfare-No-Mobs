@@ -9,9 +9,9 @@
     "ReloadEmpty": "animation.rpk.reload_empty",
     "Edit": "animation.rpk.edit",
     "ReloadNormalDrum": "animation.rpk.reload_normal_drum",
-    "ReloadEmptyDrum": "animation.rpk.reload_empty_drum"
+    "ReloadEmptyDrum": "animation.rpk.reload_empty_drum",
+    "Melee": "animation.rpk.hit"
   },
-  "DrumLevels": 2,
   "ShootRecoil": {
     "Offset": [0.7, 1.0, 0.5],
     "Rotation": [0.2, 0.2, 0.5],

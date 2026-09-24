@@ -154,6 +154,7 @@ object ModItems {
     @JvmField val BOCEK = registerGun<BocekItem>()
     @JvmField val SUPER_STAR_SHOOTER = registerGun<SuperStarShooterItem>()
     @JvmField val REFORGING = registerGun<ReforgingItem>()
+    @JvmField val RAUBTIER = registerGun<RaubtierItem>()
 
     @JvmField val BEAST_GUN_TEST = registerGun<BeastGunTestItem>()
 
@@ -189,6 +190,7 @@ object ModItems {
     @JvmField val AMMO_BOX = registerAmmo<AmmoBoxItem>()
     @JvmField val TASER_ELECTRODE = registerAmmo("taser_electrode")
     @JvmField val GRENADE_40MM = registerAmmo("grenade_40mm")
+    @JvmField val SMOKE_GUN_GRENADE = registerAmmo("smoke_gun_grenade")
     @JvmField val FLYING_FLARE_AMMO = registerAmmo("flying_flare_ammo")
     @JvmField val VEHICLE_SMOKE_AMMO = registerAmmo("vehicle_smoke_ammo")
 
@@ -378,6 +380,7 @@ object ModItems {
     @JvmField val TRANSCRIPT = registerItem<TranscriptItem>()
     @JvmField val FIRING_PARAMETERS = registerItem<FiringParametersItem>()
     @JvmField val MEDICAL_KIT = registerItem<MedicalKitItem>()
+    @JvmField val RAD_AWAY = registerItem<RadAwayItem>()
     @JvmField val VEHICLE_DAMAGE_ANALYZER = registerItem<VehicleDamageAnalyzerItem>()
     @JvmField val VEHICLE_RESET_KIT = registerItem<VehicleResetKitItem>()
     @JvmField val SKIN_SPRAY = registerItem<SkinSprayItem>()
@@ -639,6 +642,9 @@ object ModItems {
     @JvmField val STOCK_PRS = registerAttachment("stock_prs")
     @JvmField val STOCK_AR_TACTICAL = registerAttachment("stock_ar_tactical")
     @JvmField val STOCK_ZENIT_PT_1 = registerAttachment("stock_zenit_pt_1")
+    @JvmField val STOCK_STR = registerAttachment("stock_str")
+    @JvmField val STOCK_ELITE = registerAttachment("stock_elite")
+    @JvmField val STEEL_PIPE_STOCK = registerAttachment("steel_pipe_stock", Rarity.RARE)
     // @formatter:on
 
     // Magazine
@@ -652,11 +658,16 @@ object ModItems {
     @JvmField val MEOWLENCER = registerAttachment("meowlencer", Rarity.RARE)
     @JvmField val HISSILENCER = registerAttachment("hissilencer", Rarity.RARE)
     @JvmField val SILAOWUNCER = registerAttachment("silaowuncer", Rarity.RARE)
+    @JvmField val MUZZLE_BRAKE_RU = registerAttachment("muzzle_brake_ru")
+    @JvmField val MUZZLE_BRAKE_AR = registerAttachment("muzzle_brake_ar")
+    @JvmField val MUZZLE_ZENIT_DTK_1 = registerAttachment("muzzle_zenit_dtk_1", Rarity.RARE)
+    @JvmField val MUZZLE_COMPENSATOR_R_17 = registerAttachment("muzzle_compensator_r_17")
     @JvmField val RU_SILENCER = registerAttachment("ru_silencer")
     @JvmField val SILENCER_SUPERB_12 = registerAttachment("silencer_superb_12")
     @JvmField val SILENCER_50_CAL = registerAttachment("silencer_50_cal")
     @JvmField val AR_SILENCER = registerAttachment("ar_silencer")
     @JvmField val HANDGUN_SILENCER = registerAttachment("handgun_silencer")
+    @JvmField val STEEL_PIPE_SILENCER = registerAttachment("steel_pipe_silencer", Rarity.RARE)
     @JvmField val OSPREY_SILENCER = registerAttachment("osprey_silencer", Rarity.RARE)
     @JvmField val LOUDSPEAKER = registerAttachment("loudspeaker", ModRarities.LEGENDARY)
     @JvmField val OSPREY_SILENCER_TRACHELIUM = registerAttachment("osprey_silencer_trachelium", ModRarities.VIRTUAL)
@@ -679,18 +690,28 @@ object ModItems {
     @JvmField val SCOPE_BRUISER = registerAttachment("scope_bruiser", Rarity.RARE)
     @JvmField val SCOPE_ACOG = registerAttachment("scope_acog", Rarity.RARE)
     @JvmField val SCOPE_1P_78 = registerAttachment("scope_1p_78", Rarity.RARE)
+    @JvmField val SCOPE_SPYGLASS = registerAttachment("scope_spyglass", Rarity.RARE)
+    @JvmField val SCOPE_PSO_1 = registerAttachment("scope_pso_1", Rarity.RARE)
+    @JvmField val SCOPE_PU = registerAttachment("scope_pu", Rarity.RARE)
     @JvmField val SCOPE_PK_A = registerAttachment("scope_pk_a", Rarity.RARE)
+    @JvmField val STEEL_PIPE_SCOPE = registerAttachment("steel_pipe_scope", Rarity.RARE)
     @JvmField val SCOPE_RANGER = registerAttachment("scope_ranger", Rarity.EPIC)
     @JvmField val SCOPE_QMK171 = registerAttachment("scope_qmk171", Rarity.EPIC)
     @JvmField val SCOPE_HAMR = registerAttachment("scope_hamr", Rarity.EPIC)
+    @JvmField val SCOPE_ELCAN_4X = registerAttachment("scope_elcan_4x", Rarity.EPIC)
     @JvmField val SCOPE_LPVO = registerAttachment("scope_lpvo", Rarity.EPIC)
     @JvmField val SCOPE_SNIPER = registerAttachment("scope_sniper", Rarity.EPIC)
+    @JvmField val SCOPE_WINEFOX = registerAttachment("scope_winefox", ModRarities.LEGENDARY)
     // @formatter:on
 
     // Grip
     // @formatter:off
     @JvmField val VERTICAL_GRIP = registerAttachment("vertical_grip")
+    @JvmField val GRIP_RECTANGLE_VERTICAL = registerAttachment("grip_rectangle_vertical")
     @JvmField val TRIANGLE_GRIP = registerAttachment("triangle_grip")
+    @JvmField val GRIP_CQR_GEN2 = registerAttachment("grip_cqr_gen2", Rarity.RARE)
+    @JvmField val GRIP_VERTICAL_BIPOD = registerAttachment("grip_vertical_bipod", Rarity.RARE)
+    @JvmField val STEEL_PIPE_GRIP = registerAttachment("steel_pipe_grip", Rarity.RARE)
     // @formatter:on
 
     fun registerDispenserBehavior() {

@@ -17,6 +17,7 @@ import com.atsuishio.superbwarfare.data.gun.GunProp.Companion.AVAILABLE_FIRE_MOD
 import com.atsuishio.superbwarfare.data.gun.GunProp.Companion.AVAILABLE_PERKS
 import com.atsuishio.superbwarfare.data.gun.GunProp.Companion.BOLT_ACTION_TIME
 import com.atsuishio.superbwarfare.data.gun.GunProp.Companion.DEFAULT_ZOOM
+import com.atsuishio.superbwarfare.data.gun.GunProp.Companion.FUEL_PER_AMMO
 import com.atsuishio.superbwarfare.data.gun.GunProp.Companion.MAGAZINE
 import com.atsuishio.superbwarfare.data.gun.GunProp.Companion.MAX_ZOOM
 import com.atsuishio.superbwarfare.data.gun.GunProp.Companion.MELEE_DAMAGE
@@ -63,7 +64,7 @@ import kotlin.math.min
  * Selects the magazine-level value, falling back to the last configured value
  * when the list is shorter than the requested level.
  */
-fun ObjectToList<Int>.atMagazineLevel(level: Int): Int {
+fun SingleOrList<Int>.atMagazineLevel(level: Int): Int {
     if (list.isEmpty()) return 0
     return list[level.coerceAtLeast(0).coerceAtMost(list.lastIndex)]
 }
@@ -75,6 +76,19 @@ fun ObjectToList<Int>.atMagazineLevel(level: Int): Int {
 fun GunData.magazineLevel(): Int {
     val id = attachment.id(AttachmentType.MAGAZINE) ?: return 0
     return AttachmentDefinition.from(id)?.level?.coerceAtLeast(0) ?: 0
+}
+
+/**
+ * Checks whether the current magazine level is one of the gun's configured `DrumLevels`.
+ *
+ * Drum magazines animate and reload differently from box magazines, so both the animation
+ * selection and the [GunActionTimeline] picker branch on this. It reads the `DrumLevels`
+ * gun property rather than the gun resource, because the resource is client-only and the
+ * reload timeline also ticks on the server.
+ */
+fun GunData.isDrumLevel(): Boolean {
+    val levels = get(GunProp.DRUM_LEVELS).list
+    return levels.isNotEmpty() && levels.contains(magazineLevel())
 }
 
 /**
@@ -349,10 +363,15 @@ class GunData private constructor(
         invalidateProperties()
     }
 
-    private val jsonPropModifier = JsonPropertyModifier(GunProp.entries)
-    private val attachmentJsonPropModifier = JsonPropertyModifier(GunProp.entries)
+    private val jsonPropModifier = JsonOverrideApplier(GunProp.entries)
+    private val attachmentJsonPropModifier = JsonOverrideApplier(GunProp.entries)
     private var tempModifications: Function<DefaultGunData, DefaultGunData>? = null
     private val pmcInstance: PMC<GunData, DefaultGunData> by lazy { PMC(this) }
+
+    /** 正在跑属性计算流水线；用于拦截层内部的重入读取（见 [rebuildProperties]） */
+    @Transient
+    @kotlinx.serialization.Transient
+    private var rebuilding = false
 
     /** [GunState] snapshot the cached properties in [pmcInstance] were derived from. */
     private var pmcState: GunState? = null
@@ -402,46 +421,73 @@ class GunData private constructor(
 
     /** Runs the property modification pipeline into [pmcInstance]. */
     private fun rebuildProperties() {
-        pmcInstance.reset()
+        // 重入保护：某一层（尤其是 JS perk，它会回调 GunData/PmcProxy 读属性）在计算过程中再次
+        // 触发 get() 时，上面的 pmcState/propertiesInvalidated 标记要到本方法返回后才更新，
+        // 于是会再次进入这里 → 无限递归（StackOverflowError）。
+        // 重入时直接返回，让嵌套读取拿到当前 PMC 里已有的（部分）结果。
+        if (rebuilding) return
+        rebuilding = true
+        try {
+            pmcInstance.reset()
 
-        // 1. Property override tag
-        jsonPropModifier.update(propertyOverrideString.get())
-        jsonPropModifier.modifyProperty(pmcInstance)
+            // 1. Property override tag
+            jsonPropModifier.update(propertyOverrideString.get())
+            jsonPropModifier.modifyProperty(pmcInstance)
 
-        // 2. Gun item level modifiers
-        item.modifyProperty(pmcInstance)
+            // 2. Gun item level modifiers
+            item.modifyProperty(pmcInstance)
 
-        // 3. Attachments
-        attachmentJsonPropModifier.update(`object` = null)
-        for (instance in attachment.installed()) {
-            attachmentOption(instance.slot, instance.id)?.let { option ->
-                attachmentJsonPropModifier.update(option.override)
-                attachmentJsonPropModifier.modifyProperty(pmcInstance)
+            // 3. Attachments
+            attachmentJsonPropModifier.update(null as kotlinx.serialization.json.JsonObject?)
+            for (instance in attachment.installed()) {
+                attachmentOption(instance.slot, instance.id)?.let { option ->
+                    attachmentJsonPropModifier.update(option.override)
+                    attachmentJsonPropModifier.modifyProperty(pmcInstance)
+                }
+                instance.definition.modifyProperty(pmcInstance)
             }
-            instance.definition.modifyProperty(pmcInstance)
-        }
 
-        // 4. FireMode modifiers
-        selectedFireModeInfo(pmcInstance[AVAILABLE_FIRE_MODES]).modifyProperty(pmcInstance)
+            // 4. FireMode modifiers
+            selectedFireModeInfo(pmcInstance[AVAILABLE_FIRE_MODES]).modifyProperty(pmcInstance)
 
-        // 5. AmmoConsumer modifiers
-        selectedAmmoConsumer(pmcInstance[AMMO_CONSUMER]).modifyProperty(pmcInstance)
+            // 5. AmmoConsumer modifiers
+            selectedAmmoConsumer(pmcInstance[AMMO_CONSUMER]).modifyProperty(pmcInstance)
 
-        // 6. Active Perks
-        for (type in PERK_TYPES) {
-            val list = perk.getInstances(type)
-            for (instance in list) {
-                instance.perk.modifyProperty(pmcInstance)
+            // 6. Active Perks
+            for (type in PERK_TYPES) {
+                val list = perk.getInstances(type)
+                for (instance in list) {
+                    instance.perk.modifyProperty(pmcInstance)
+                }
             }
-        }
 
-        // TODO Temporary property modifications
+            // TODO Temporary property modifications
 //        if (tempModifications != null) {
 //            rawData = tempModifications!!.apply(rawData)
 //        }
 
-        // 7. Global property bounds limit
-        GunProp.modifyProperty(pmcInstance)
+            // 7. Global property bounds limit
+            GunProp.modifyProperty(pmcInstance)
+
+            // 8. 把差量一次性写回一份数据值（一次 copy）。读取仍然优先 diff，所以这一步是行为中性的：
+            //    即使 withOverrides 漏了某个属性，行为也不变，只是这份 computed 值还不完整。
+            pmcInstance.computed = pmcInstance.computed.withOverrides(pmcInstance.diffSnapshot())
+
+            // 诊断（仅开发环境）：记录哪些 GunProp 真的被显式改写，
+            // 这份实测清单就是将来生成 DefaultGunData.withOverrides 的依据
+            if (DataValidator.ENABLED) {
+                for (p in pmcInstance.dirtyProps()) {
+                    if (MODIFIED_PROPS.add(p.serializationName)) {
+                        com.atsuishio.superbwarfare.Mod.LOGGER.info(
+                            "[PropDiag] GunProp modified: {}",
+                            p.serializationName
+                        )
+                    }
+                }
+            }
+        } finally {
+            rebuilding = false
+        }
     }
 
     /**
@@ -465,6 +511,23 @@ class GunData private constructor(
      */
     fun useBackpackAmmo(): Boolean {
         return get(MAGAZINE) <= 0
+    }
+
+    /**
+     * 是否为「能量弹匣」武器：有弹匣、弹种是能量类，且声明了换算比例 [FUEL_PER_AMMO]。
+     *
+     * 与背包型能量武器（`Magazine <= 0`，如 `ql_1031`）相对：
+     * - 开火只扣弹匣发数（`AmmoCostPerShoot`，通常为 1），不碰能量；
+     * - 换弹按 `FuelPerAmmo` 把能量折算成发数装进弹匣（见 `EnergyAmmoStrategy`）；
+     * - 退弹按当前发数乘 `FuelPerAmmo` 把能量还回去（见 [withdrawAmmo]）。
+     *
+     * `FuelPerAmmo` 必须 `> 0`：没有换算比例的「能量 + 弹匣」配置无法确定一发值多少能量，
+     * 会被当成普通弹匣武器（而不是把能量按 1:1 折算）。
+     */
+    fun isEnergyMagazine(): Boolean {
+        return !useBackpackAmmo()
+                && get(FUEL_PER_AMMO) > 0
+                && selectedAmmoConsumer().type == AmmoConsumer.AmmoConsumeType.ENERGY
     }
 
     /**
@@ -525,6 +588,25 @@ class GunData private constructor(
             return AmmoConsumer.INVALID
         }
         return consumers[this.selectedAmmoType.get().coerceIn(consumers.indices)]
+    }
+
+    /**
+     * Every model bone that could draw a loaded round: the weapon's own [GunProp.PROJECTILE_BONE]
+     * plus the ones each ammo consumer declares.
+     *
+     * The renderer hides all of them except the ones declared by the currently selected ammo type,
+     * so switching ammo types swaps the round drawn in the model. Guns that declare no projectile
+     * bone get an empty list.
+     */
+    fun projectileBoneNames(): List<String> {
+        val names = linkedSetOf<String>()
+        names.addAll(getDefault().projectileBone)
+
+        for (consumer in get(AMMO_CONSUMER)) {
+            names.addAll(consumer.projectileBone)
+        }
+
+        return names.toList()
     }
 
     /**
@@ -631,11 +713,14 @@ class GunData private constructor(
     /**
      * Checks if weapon should initiate reload sequence.
      *
+     * Only the primary source is considered: a weapon whose magazine is full but whose extra
+     * source (e.g. a taser's energy) is empty must not keep reloading — reloading cannot refill it.
+     *
      * @param entity the entity holding the weapon.
      * @return `true` if weapon is empty and backup ammo is available.
      */
     fun shouldStartReloading(entity: Entity?): Boolean {
-        return !reloading() && !useBackpackAmmo() && !hasEnoughAmmoToShoot(entity) && hasBackupAmmo(entity)
+        return !reloading() && !useBackpackAmmo() && !hasEnoughPrimaryAmmoToShoot(entity) && hasBackupAmmo(entity)
     }
 
     /**
@@ -810,13 +895,28 @@ class GunData private constructor(
     }
 
     /**
+     * 每次开火在**主来源口径**上消耗（或要求）的弹药量，即 `AmmoCostPerShoot`。
+     *
+     * 之所以单独开一个入口而不是到处直接读 prop：这个字段的口径必须始终是
+     * 「一次开火扣几个弹药单位」，所有比较/扣除的调用点共用它才不会各自跑偏。
+     *
+     * 能量类武器请按形态填写（见 [DefaultGunData.ammoCostPerShoot]）：
+     * - 背包型：每发直接扣这么多 FE；
+     * - 弹匣型（[isEnergyMagazine]）：每发扣这么多发弹匣弹药，写 `1`，
+     *   能量换发数的比例交给 [DefaultGunData.fuelPerAmmo]。
+     */
+    fun primaryAmmoCostPerShoot(): Int {
+        return get(AMMO_COST_PER_SHOOT)
+    }
+
+    /**
      * Calculates remaining shots possible before requiring a reload.
      *
      * @param entity the shooter entity.
      * @return total shot count.
      */
     fun currentAvailableShots(entity: Entity?): Int {
-        val ammoCost = get(AMMO_COST_PER_SHOOT)
+        val ammoCost = primaryAmmoCostPerShoot()
         if (ammoCost <= 0) return Int.MAX_VALUE
 
         return currentAvailableAmmo(entity) / ammoCost
@@ -833,13 +933,29 @@ class GunData private constructor(
     }
 
     /**
-     * Checks whether weapon has sufficient magazine/inventory ammo to execute one shot.
+     * Checks whether the primary ammo source (the magazine, or the inventory when the weapon
+     * uses backpack ammo) has enough ammo to execute one shot.
+     *
+     * Extra ammo sources such as a taser's energy are not considered, see [hasEnoughAmmoToShoot].
      *
      * @param entity shooter entity.
      * @return `true` if available ammo >= cost per shot.
      */
+    fun hasEnoughPrimaryAmmoToShoot(entity: Entity?): Boolean {
+        return primaryAmmoCostPerShoot() <= currentAvailableAmmo(entity)
+    }
+
+    /**
+     * Checks whether every ammo source has enough ammo to execute one shot: the primary source
+     * plus all extra sources declared by the selected ammo type (see
+     * [com.atsuishio.superbwarfare.data.gun.AmmoConsumer.hasEnoughExtraAmmo]).
+     *
+     * @param entity shooter entity.
+     * @return `true` if all ammo sources are sufficient.
+     */
     fun hasEnoughAmmoToShoot(entity: Entity?): Boolean {
-        return get(AMMO_COST_PER_SHOOT) <= currentAvailableAmmo(entity)
+        if (!hasEnoughPrimaryAmmoToShoot(entity)) return false
+        return selectedAmmoConsumer().hasEnoughExtraAmmo(this, entity)
     }
 
     /**
@@ -928,9 +1044,24 @@ class GunData private constructor(
     /**
      * Withdraws loaded rounds back to entity inventory during reload or attachment modification.
      *
+     * 弹匣型能量武器（[isEnergyMagazine]）没有实体弹药可退，改为按当前发数乘
+     * `AmmoCostPerShoot` 把能量还给枪械自身的能量存储。
+     *
      * @param ammoSupplier target entity receiving withdrawn ammo.
      */
     fun withdrawAmmo(ammoSupplier: Entity) {
+        // 背包弹药不进弹匣，没有可退的弹药：退弹会把整管能量原样「退回」自己/背包，成为刷能量途径
+        if (useBackpackAmmo()) {
+            this.virtualAmmo.reset()
+            this.ammo.reset()
+            return
+        }
+
+        if (isEnergyMagazine()) {
+            withdrawEnergy()
+            return
+        }
+
         val itemAmount = withdrawAmmoCount()
 
         this.virtualAmmo.reset()
@@ -947,9 +1078,22 @@ class GunData private constructor(
     /**
      * Withdraws loaded rounds back to item handler container during reload or attachment modification.
      *
+     * 弹匣型能量武器同 [withdrawAmmo]：能量回收到枪械自身，与容器无关。
+     *
      * @param handler target container handler.
      */
     fun withdrawAmmo(handler: IItemHandler) {
+        if (useBackpackAmmo()) {
+            this.virtualAmmo.reset()
+            this.ammo.reset()
+            return
+        }
+
+        if (isEnergyMagazine()) {
+            withdrawEnergy()
+            return
+        }
+
         val itemAmount = withdrawAmmoCount()
 
         this.virtualAmmo.reset()
@@ -957,6 +1101,26 @@ class GunData private constructor(
 
         // Discards remainder when withdrawing to item handler
         selectedAmmoConsumer().withdraw(handler, itemAmount)
+    }
+
+    /**
+     * 弹匣型能量武器退弹：弹匣发数按 [FUEL_PER_AMMO] 折回能量。
+     *
+     * 能量回收到枪械自身的能量存储（[getEnergyProvider]），容量满时多出来的部分丢弃。
+     * 虚拟弹药一并退还后清空，与物品类弹药的退弹行为保持一致。
+     */
+    private fun withdrawEnergy() {
+        val rounds = this.ammo.get() + this.virtualAmmo.get()
+        val perRound = get(FUEL_PER_AMMO)
+
+        this.virtualAmmo.reset()
+        this.ammo.reset()
+
+        if (rounds <= 0 || perRound <= 0) return
+
+        // 夹到 Int.MAX_VALUE：弹药数与换算比例都是玩家可控的数据，直接相乘可能溢出成负数
+        val energy = min(rounds.toLong() * perRound, Int.MAX_VALUE.toLong()).toInt()
+        getEnergyProvider(null)?.receiveEnergy(energy, false)
     }
 
     /** Gets list of available perks applicable to weapon. */
@@ -1399,8 +1563,12 @@ class GunData private constructor(
 
         this.stack = newStack
 
-        reloadTagFrom(incoming)
-        state = GunState.fromTag(gunDataTag)
+        // Reloading and re-decoding are one step: between the clear and the merge the tag is empty, and
+        // a reader on another thread must not observe that (see [GunState.locked]).
+        GunState.locked(gunDataTag) {
+            reloadTagFrom(incoming)
+            state = GunState.fromTag(gunDataTag)
+        }
 
         // The remote snapshot supersedes anything a batch was still holding back.
         persistPending = false
@@ -1574,6 +1742,10 @@ class GunData private constructor(
     }
 
     companion object {
+        /** 实测被显式改写过的 GunProp 名字（诊断用，见 rebuildProperties） */
+        @JvmField
+        val MODIFIED_PROPS: MutableSet<String> = Collections.synchronizedSet(mutableSetOf<String>())
+
         /** Tick interval between backup ammo inventory re-computations. */
         const val BACKUP_AMMO_CACHE_TICKS: Long = 10L
 

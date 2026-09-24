@@ -96,7 +96,8 @@ abstract class GunItem(properties: Properties) : Item(properties.stacksTo(1)), I
         modifier[BYPASSES_ARMOR] += getCustomBypassArmor(data)
         modifier[DEFAULT_ZOOM] += getCustomZoom(data)
         modifier[RPM] += getCustomRPM(data)
-        modifier[WEIGHT] += getCustomWeight(data)
+        // WEIGHT 不在这里累加：配件等来源的重量加成已经通过各自的 Modifier 进入总重，
+        // getCustomWeight 只用来读取「总重 - 枪身基础重量」的差值，加进来会重复计算
         modifier[VELOCITY] += getCustomVelocity(data)
         modifier[SOUND_RADIUS] *= getCustomSoundRadius(data)
         modifier[BOLT_ACTION_TIME] += getCustomBoltActionTime(data)
@@ -252,6 +253,11 @@ abstract class GunItem(properties: Properties) : Item(properties.stacksTo(1)), I
     open fun hasBulletInBarrel(data: GunData) = data.get(GunProp.HAS_BARREL_BULLET)
 
     /**
+     * 是否允许战术换弹
+     */
+    open fun allowTacticalReload(data: GunData) = data.get(GunProp.TACTICAL_RELOAD)
+
+    /**
      * 武器是否能更换枪管配件
      */
     open fun hasCustomBarrel(data: GunData) =
@@ -284,7 +290,7 @@ abstract class GunItem(properties: Properties) : Item(properties.stacksTo(1)), I
     /**
      * 武器是否有脚架
      */
-    open fun hasBipod(data: GunData) = false
+    open fun hasBipod(data: GunData) = data.get(GunProp.HAS_BIPOD)
 
     /**
      * 武器是否能进行近战攻击
@@ -327,9 +333,12 @@ abstract class GunItem(properties: Properties) : Item(properties.stacksTo(1)), I
     open fun getCustomRPM(data: GunData) = 0
 
     /**
-     * 获取额外总重量加成
+     * 获取额外变化的重量，即计算后的总重与枪身基础重量的差值（默认来自配件等的重量加成）
+     *
+     * 只用来读取差值（比如开镜/持枪展开的手感），不要再累加回 [GunProp.WEIGHT]，
+     * 也不能在 [modifyProperty] 里调用，否则会在 PMC 计算中递归读取属性
      */
-    open fun getCustomWeight(data: GunData) = 0.0
+    open fun getCustomWeight(data: GunData): Double = data.get(GunProp.WEIGHT) - data.getDefault().weight
 
     /**
      * 获取额外弹速加成
@@ -367,6 +376,7 @@ abstract class GunItem(properties: Properties) : Item(properties.stacksTo(1)), I
                 && !data.reloading()
                 && !data.charging()
                 && !data.bolt.needed.get()
+                // 含附加弹药来源（如泰瑟枪的电量）
                 && data.hasEnoughAmmoToShoot(shooter)
     }
 
@@ -403,11 +413,16 @@ abstract class GunItem(properties: Properties) : Item(properties.stacksTo(1)), I
 
         postEvent(ShootEvent.Post(parameters))
 
+        // 弹匣分支按主来源口径扣（弹匣型能量武器一发只扣 1 发，而不是 AmmoCostPerShoot 点 FE）；
+        // 背包分支没有弹匣，每发就是直接扣 AmmoCostPerShoot 点 FE
         if (!data.useBackpackAmmo()) {
-            data.ammo.set(data.ammo.get() - data.get(GunProp.AMMO_COST_PER_SHOOT))
+            data.ammo.set(data.ammo.get() - data.primaryAmmoCostPerShoot())
         } else {
-            data.consumeBackupAmmo(ammoSupplier, data.get(GunProp.AMMO_COST_PER_SHOOT))
+            data.consumeBackupAmmo(ammoSupplier, data.primaryAmmoCostPerShoot())
         }
+
+        // 消耗每发附加弹药来源（如泰瑟枪的电量）
+        data.selectedAmmoConsumer().consumeExtraAmmo(data, ammoSupplier)
 
         if (!data.hasEnoughAmmoToShoot(ammoSupplier)) {
             data.burstAmount.reset()
@@ -446,6 +461,14 @@ abstract class GunItem(properties: Properties) : Item(properties.stacksTo(1)), I
         // TODO 这样搞会在远程遥控火炮的时候，无论隔多远都会摇晃屏幕（恼
 //        data.shakePlayers(shooter);
         data.clearTempModifications()
+
+        // 通知所有已装备的 perk：这一发已经打出去了（"每发叠层"类 perk 用）
+        for (type in GunData.PERK_TYPES) {
+            val instance = data.perk.getInstances(type)
+            instance.forEach {
+                it.perk.afterShoot(data, it, shooter)
+            }
+        }
     }
 
     fun shoot(
@@ -839,9 +862,11 @@ abstract class GunItem(properties: Properties) : Item(properties.stacksTo(1)), I
                     entity.load(tag)
                 }
             } else if (CustomData.LAUNCHABLE_ENTITY.containsKey(projectileType)) {
-                val newInfo = ProjectileInfo()
-                newInfo.data = CustomData.LAUNCHABLE_ENTITY[projectileType]!!.data
-                newInfo.itemId = projectileType
+                val newInfo = ProjectileInfo(
+                    data = CustomData.LAUNCHABLE_ENTITY[projectileType]!!.data
+                ).apply {
+                    itemId = projectileType
+                }
 
                 val tag = LaunchableEntityTool.getModifiedTag(
                     newInfo,

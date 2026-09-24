@@ -3,12 +3,14 @@ package com.atsuishio.superbwarfare.resource.gun
 import com.atsuishio.superbwarfare.Mod
 import com.atsuishio.superbwarfare.data.IDBasedData
 import com.atsuishio.superbwarfare.data.ModColor
-import com.atsuishio.superbwarfare.data.ObjectToList
+import com.atsuishio.superbwarfare.data.attachment.AmmoBarEntry
+import com.atsuishio.superbwarfare.data.attachment.AmmoTextEntry
 import com.atsuishio.superbwarfare.init.ModSounds
 import com.atsuishio.superbwarfare.resource.ModelResource
 import com.atsuishio.superbwarfare.resource.gun.pojo.*
 import com.atsuishio.superbwarfare.script.GunScriptManager
 import com.atsuishio.superbwarfare.script.ScriptMath
+import com.atsuishio.superbwarfare.script.ScriptState
 import com.atsuishio.superbwarfare.serialization.kserializer.SerializedResourceLocation
 import com.atsuishio.superbwarfare.serialization.kserializer.SerializedSoundEvent
 import com.atsuishio.superbwarfare.serialization.kserializer.SerializedVec3
@@ -78,6 +80,9 @@ class DefaultGunResource : IDBasedData<DefaultGunResource> {
             scope.parentScope = GunScriptManager.SHARED_SCOPE
 
             ScriptableObject.putProperty(scope, "JsMath", ScriptMath)
+            // 需要跨帧记住某个值时用它，别用脚本顶层的 let：顶层变量是每个枪械 id 一份作用域，
+            // 会被世界上所有同型号的枪共用。
+            ScriptableObject.putProperty(scope, "JsState", ScriptState)
             compiled.exec(GunScriptManager.RHINO_CONTEXT, scope, scope)
 
             val func = GunScriptManager.ScriptFunction(compiled, scope)
@@ -92,10 +97,6 @@ class DefaultGunResource : IDBasedData<DefaultGunResource> {
     @JvmField
     @SerialName("Animation")
     var animation: GunAnimation? = GunAnimation()
-
-    @JvmField
-    @SerialName("DrumLevels")
-    var drumLevels: ObjectToList<Int> = ObjectToList()
 
     @JvmField
     @SerialName("UseOldHandRenderer")
@@ -170,6 +171,16 @@ class DefaultGunResource : IDBasedData<DefaultGunResource> {
     @JvmField
     @SerialName("Attachments")
     var attachmentInfo: AttachmentInfo = AttachmentInfo()
+
+    // 枪身自带的弹药显示：参与压缩的骨骼，空列表表示不启用
+    @JvmField
+    @SerialName("AmmoBar")
+    var ammoBar: List<AmmoBarEntry> = emptyList()
+
+    // 枪身弹药文字的锚点骨骼，空列表表示不启用；写法与瞄准镜的 TextShow 一致
+    @JvmField
+    @SerialName("TextShow")
+    var textShow: List<AmmoTextEntry> = emptyList()
 
     companion object {
         private val MARKER: Marker = MarkerManager.getMarker("GunResource")

@@ -22,5 +22,7 @@ object ModMobEffects {
     @JvmField val TRAUMA = register("trauma", TraumaMobEffect)
 
     @JvmField val PHOSPHORUS_FIRE = register("phosphorus_fire", PhosphorusFireMobEffect)
+    @JvmField val ACID_ETCHING = register("acid_etching", AcidEtchingMobEffect)
+    @JvmField val RADIATION = register("radiation", RadiationMobEffect)
     // @formatter:on
 }

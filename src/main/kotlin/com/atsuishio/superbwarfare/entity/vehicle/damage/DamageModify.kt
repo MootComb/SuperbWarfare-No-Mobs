@@ -2,10 +2,9 @@ package com.atsuishio.superbwarfare.entity.vehicle.damage
 
 import com.atsuishio.superbwarfare.Mod
 import com.atsuishio.superbwarfare.data.DeserializeFromString
-import com.atsuishio.superbwarfare.data.STOFactory
 import com.atsuishio.superbwarfare.data.StringInstanceBuilder
+import com.atsuishio.superbwarfare.data.StringOrObjectFactory
 import com.atsuishio.superbwarfare.script.ScriptManager
-import com.google.gson.annotations.SerializedName
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import net.minecraft.core.registries.Registries
@@ -21,7 +20,7 @@ import java.util.regex.Matcher
 import java.util.regex.Pattern
 import kotlin.math.max
 
-@STOFactory(DamageModify.DamageModifyInstanceBuilder::class)
+@StringOrObjectFactory(DamageModify.DamageModifyInstanceBuilder::class)
 @Serializable
 class DamageModify : DeserializeFromString {
     @kotlinx.serialization.Transient
@@ -128,36 +127,28 @@ class DamageModify : DeserializeFromString {
 
     @Serializable
     enum class ModifyType {
-        @SerializedName("Immunity")
         @SerialName("Immunity")
         IMMUNITY,  // 完全免疫
 
-        @SerializedName("Reduce")
         @SerialName("Reduce")
         REDUCE,  // 固定数值减伤
 
-        @SerializedName("Multiply")
         @SerialName("Multiply")
         MULTIPLY,  // 乘以指定倍数
 
-        @SerializedName("Custom")
         @SerialName("Custom")
         CUSTOM, // 脚本计算
 
-        @SerializedName("Invalid")
         @SerialName("Invalid")
         INVALID // 解析无效
     }
 
-    @SerializedName("Value")
     @SerialName("Value")
     var value: Float = 0f
 
-    @SerializedName("Type")
     @SerialName("Type")
     var type: ModifyType? = ModifyType.IMMUNITY
 
-    @SerializedName("Source")
     @SerialName("Source")
     var source: String = "All"
 

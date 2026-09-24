@@ -5,17 +5,17 @@
     {
       "Prop": "RecoilX",
       "Op": "Mul",
-      "Value": 0.65
+      "Value": 0.97
     },
     {
       "Prop": "RecoilY",
       "Op": "Mul",
-      "Value": 0.9
+      "Value": 0.82
     },
     {
       "Prop": "Weight",
       "Op": "Add",
-      "Value": 0.7
+      "Value": 0.5
     }
   ],
   "Bone": "grip_pos",

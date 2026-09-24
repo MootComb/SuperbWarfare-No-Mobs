@@ -4,8 +4,8 @@ import com.atsuishio.superbwarfare.client.animation.AnimationCurves
 import com.atsuishio.superbwarfare.client.animation.gun.GeoGunAnimationInstance
 import com.atsuishio.superbwarfare.client.model.attachment.BedrockAttachmentModel
 import com.atsuishio.superbwarfare.client.model.gun.GeoGunModel
+import com.atsuishio.superbwarfare.client.renderer.ammo.AmmoReadout
 import com.atsuishio.superbwarfare.client.renderer.gun.GeoGunRenderer.Companion.EDIT_FOCUS_Z_OFFSET
-import com.atsuishio.superbwarfare.client.renderer.scope.AmmoReadout
 import com.atsuishio.superbwarfare.client.renderer.scope.ScopeStencilRenderHelper
 import com.atsuishio.superbwarfare.config.client.DisplayConfig
 import com.atsuishio.superbwarfare.data.attachment.AmmoBarEntry
@@ -18,13 +18,16 @@ import com.atsuishio.superbwarfare.data.gun.GunProp
 import com.atsuishio.superbwarfare.data.gun.magazineLevel
 import com.atsuishio.superbwarfare.data.gun.value.AttachmentType
 import com.atsuishio.superbwarfare.event.ClientEventHandler
+import com.atsuishio.superbwarfare.item.gun.GunItem
 import com.atsuishio.superbwarfare.resource.ModelResource
+import com.atsuishio.superbwarfare.resource.gun.DefaultGunResource
 import com.atsuishio.superbwarfare.resource.gun.GunResource
 import com.atsuishio.superbwarfare.resource.gun.pojo.ItemDisplayInfo
 import com.atsuishio.superbwarfare.resource.model.AttachmentModelReloadListener
 import com.atsuishio.superbwarfare.script.GunScriptManager
 import com.atsuishio.superbwarfare.tools.RenderDistanceHelper
 import com.atsuishio.superbwarfare.tools.deltaFrameTime
+import com.atsuishio.superbwarfare.tools.localPlayer
 import com.github.mcmodderanchor.simplebedrockmodel.v1.client.animation.IFPAnimationInstance
 import com.github.mcmodderanchor.simplebedrockmodel.v1.client.handler.FirstPersonRenderHandler
 import com.github.mcmodderanchor.simplebedrockmodel.v1.common.resource.pojo.ParticleEffectData
@@ -72,6 +75,14 @@ open class GeoGunRenderer : AbstractGeoItemRendererV2() {
     private var gunStencilCulling = false
     private val scopeViewSmoothing = mutableMapOf<InteractionHand, ScopeViewSmoothState>()
 
+    /**
+     * 当前正在渲染的本地玩家第一人称手；不是第一人称渲染时为 `null`。
+     *
+     * 只有这个入口能确定"这一帧画的是本地玩家自己的手"：第三人称、掉落物、展示框、别人手里的枪
+     * 走的是普通物品渲染，画的是别人的枪。脚本需要区分这两者时用它，见 [scriptBipodProgress]。
+     */
+    private var localFirstPersonHand: InteractionHand? = null
+
     private data class ScopeViewSmoothState(
         var modeIndex: Int = -1,
         var source: Matrix4f = Matrix4f(),
@@ -94,7 +105,21 @@ open class GeoGunRenderer : AbstractGeoItemRendererV2() {
         val textShow: List<AmmoTextEntry> = emptyList()
     )
 
-    override fun createAnimationInstance(stack: ItemStack, entity: Entity?): IFPAnimationInstance {
+    /**
+     * A resolved attachment model ready to be drawn: the model and texture to use, plus the
+     * definition they came from, which the ammo display configuration is read off.
+     *
+     * The definition travels with the model so the render path does not have to look it up a second
+     * time — [AttachmentDefinition.from] is a map lookup, but the ammo readout needs the definition's
+     * `AmmoBar` / `TextShow` on every frame the attachment is visible.
+     */
+    data class AttachmentRenderData(
+        val model: BedrockAttachmentModel,
+        val texture: ResourceLocation,
+        val definition: AttachmentDefinition,
+    )
+
+    override fun createAnimationInstance(stack: ItemStack, entity: Entity): IFPAnimationInstance {
         return GeoGunAnimationInstance(stack, entity, InteractionHand.MAIN_HAND)
     }
 
@@ -186,7 +211,14 @@ open class GeoGunRenderer : AbstractGeoItemRendererV2() {
         packedLight: Int,
         partialTick: Float
     ) {
-        render(stack, transformType, poseStack, bufferSource, packedLight, OverlayTexture.NO_OVERLAY, partialTick)
+        // 这个入口只会被本地玩家自己的手调用（`FirstPersonRenderHandler` 挂在 `RenderHandEvent` 上），
+        // 所以在这里记下当前手，脚本就能把"自己手里那把枪"和世界上的同型号枪区分开。
+        localFirstPersonHand = handForContext(transformType)
+        try {
+            render(stack, transformType, poseStack, bufferSource, packedLight, OverlayTexture.NO_OVERLAY, partialTick)
+        } finally {
+            localFirstPersonHand = null
+        }
     }
 
     override fun beforeRender(
@@ -296,7 +328,12 @@ open class GeoGunRenderer : AbstractGeoItemRendererV2() {
                 poseStack.translate(zoomPivot.x, zoomPivot.y, zoomPivot.z)
             }
             val zoomLengthScale = scopeRender?.scopeMode?.zoomLengthScale ?: 0.75f
-            poseStack.scale(1f, 1f, 1f - (1f - zoomLengthScale) * ClientEventHandler.zoomTime.toFloat())
+            // 与定位点混合共用同一条曲线：以前这里直接用线性的 zoomTime，于是推进节奏和枪的位置对不上。
+            // 以 scope_ranger / scope_sniper（zoomLengthScale = 0.3）为例，zoomTime = 0.3 时长度已经缩掉
+            // 总压缩量的 30%（实际长度的 21%），而枪才刚走完 10.8% 的路程，看上去是先"缩一下"再"抬上来"；
+            // 反过来 zoomTime = 0.7 时枪已到位 89.2%，长度却只缩了 70%，收尾阶段长度还在慢慢变。
+            val zoom = aimingProgress(ClientEventHandler.zoomTime)
+            poseStack.scale(1f, 1f, 1f - (1f - zoomLengthScale) * zoom)
             if (zoomPivot != null) {
                 poseStack.translate(-zoomPivot.x, -zoomPivot.y, -zoomPivot.z)
             }
@@ -342,7 +379,10 @@ open class GeoGunRenderer : AbstractGeoItemRendererV2() {
         }
 
         renderAttachments(stack, model, transformType, poseStack, bufferSource, packedLight, packedOverlay)
-        model.renderToBuffer(poseStack, bufferSource, texture, packedLight, packedOverlay)
+        model.renderToBuffer(
+            poseStack, bufferSource, texture, packedLight, packedOverlay,
+            resolveGunAmmoReadout(stack, resource)
+        )
         if (transformType.firstPerson()) {
             MuzzleFlashRenderer.render(
                 poseStack,
@@ -377,6 +417,7 @@ open class GeoGunRenderer : AbstractGeoItemRendererV2() {
         packedOverlay: Int
     ) {
         renderMagazine(stack, model)
+        renderProjectileBone(stack, model)
         renderScopeMount(stack, model)
         renderScopeAttachment(stack, model, poseStack, bufferSource, packedLight, packedOverlay)
         renderStock(stack, model, poseStack, bufferSource, packedLight, packedOverlay)
@@ -389,6 +430,18 @@ open class GeoGunRenderer : AbstractGeoItemRendererV2() {
 
     open fun renderMagazine(stack: ItemStack, model: GeoGunModel) {
         model.showMagazineBone(resolveMagazineBone(stack))
+    }
+
+    /**
+     * Shows the model bones of the loaded ammo type and hides the ones belonging to the ammo types
+     * that are not selected, so the round drawn in the weapon follows the ammo switch.
+     */
+    open fun renderProjectileBone(stack: ItemStack, model: GeoGunModel) {
+        val data = GunData.from(stack)
+        val candidates = data.projectileBoneNames()
+        if (candidates.isEmpty()) return
+
+        model.showProjectileBone(data.get(GunProp.PROJECTILE_BONE), candidates)
     }
 
     open fun renderScopeMount(stack: ItemStack, model: GeoGunModel) {
@@ -444,31 +497,57 @@ open class GeoGunRenderer : AbstractGeoItemRendererV2() {
         val bindMountTransform = model.getBindGlobalTransform(boneName) ?: return null
         return ScopeRenderData(
             attachmentModel, texture, scopeMode, scopeModeIndex, companionSightMode, attachmentId,
-            Matrix4f(mountTransform), Matrix4f(bindMountTransform), scopeInfo.ammoBar, scopeInfo.textShow
+            Matrix4f(mountTransform), Matrix4f(bindMountTransform),
+            definition.effectiveAmmoBar(), definition.effectiveTextShow()
         )
     }
 
-    /**
-     * This frame's ammo readout for the scope described by [data]: the remaining magazine ratio used
-     * to squash its ammo bar bones, and the round count its text anchors display.
-     *
-     * Returns an empty readout when the scope declares no ammo display at all, which also keeps the
-     * [com.atsuishio.superbwarfare.data.gun.GunProp.MAGAZINE] lookup — a full property modifier chain
-     * resolve — off the render path of every other scope in the game.
-     */
+    /** This frame's ammo readout for the scope described by [data]. */
     protected open fun resolveAmmoReadout(stack: ItemStack, data: ScopeRenderData): AmmoReadout {
-        if (data.ammoBar.isEmpty() && data.textShow.isEmpty()) return AmmoReadout()
+        return resolveAmmoReadout(stack, data.ammoBar, data.textShow)
+    }
+
+    /**
+     * This frame's ammo readout for a model carrying [bars] and [texts]: the remaining magazine ratio
+     * used to squash its ammo bar bones, and the round count its text anchors display.
+     *
+     * Returns an empty readout when nothing is configured, which is what keeps the
+     * [com.atsuishio.superbwarfare.data.gun.GunProp.MAGAZINE] lookup — a full property modifier chain
+     * resolve, and one that can rebuild the whole property set after every vanilla stack resync — off
+     * the render path of every gun and attachment in the game that shows no ammo display. That is the
+     * overwhelming majority of them, so the early return has to stay ahead of [GunData.from].
+     */
+    protected open fun resolveAmmoReadout(
+        stack: ItemStack,
+        bars: List<AmmoBarEntry>,
+        texts: List<AmmoTextEntry>,
+    ): AmmoReadout {
+        if (bars.isEmpty() && texts.isEmpty()) return AmmoReadout()
 
         val gun = GunData.from(stack)
         val count = gun.ammo.get()
         val magazine = gun.get(GunProp.MAGAZINE)
-        if (magazine <= 0) return AmmoReadout(data.ammoBar, data.textShow, 1f, count)
+        // No usable magazine: the bar holds at full rather than dividing by zero. Guns whose
+        // effective count lives outside `ammo` — energy weapons, backpack-ammo guns, melee-only guns,
+        // all of which report MAGAZINE <= 0 — therefore read as a full bar showing "0", so an author
+        // should not configure a readout on those.
+        if (magazine <= 0) return AmmoReadout(bars, texts, 1f, count)
         return AmmoReadout(
-            data.ammoBar,
-            data.textShow,
+            bars,
+            texts,
             (count.toFloat() / magazine.toFloat()).coerceIn(0f, 1f),
             count
         )
+    }
+
+    /**
+     * This frame's ammo readout for the gun body itself, resolved from the assets-side gun resource.
+     *
+     * Like the attachment path this returns empty before touching [GunData] when the gun declares no
+     * ammo display, so a gun with no `AmmoBar` / `TextShow` never pays for a magazine resolve.
+     */
+    protected open fun resolveGunAmmoReadout(stack: ItemStack, resource: DefaultGunResource): AmmoReadout {
+        return resolveAmmoReadout(stack, resource.ammoBar, resource.textShow)
     }
 
     private fun findStencilScope(stack: ItemStack, model: GeoGunModel): ScopeRenderData? {
@@ -540,16 +619,19 @@ open class GeoGunRenderer : AbstractGeoItemRendererV2() {
         packedLight: Int,
         packedOverlay: Int
     ) {
-        val (attachmentModel, texture) = resolveStockAttachmentRender(stack) ?: return
+        val (attachmentModel, texture, definition) = resolveStockAttachmentRender(stack) ?: return
         val mountTransform = model.getGlobalTransform(GeoGunModel.CUSTOM_STOCK_ADAPTER_BONE) ?: return
 
         poseStack.pushPose()
         mulPoseWithNormal(poseStack, Matrix4f(mountTransform))
-        attachmentModel.renderToBuffer(poseStack, bufferSource, texture, packedLight, packedOverlay)
+        attachmentModel.renderToBuffer(
+            poseStack, bufferSource, texture, packedLight, packedOverlay,
+            null, resolveAmmoReadout(stack, definition.effectiveAmmoBar(), definition.effectiveTextShow())
+        )
         poseStack.popPose()
     }
 
-    open fun resolveStockAttachmentRender(stack: ItemStack): Pair<BedrockAttachmentModel, ResourceLocation>? {
+    open fun resolveStockAttachmentRender(stack: ItemStack): AttachmentRenderData? {
         val data = GunData.from(stack)
         val attachmentId = data.attachment.id(AttachmentType.STOCK) ?: return null
         val definition = AttachmentDefinition.from(attachmentId) ?: return null
@@ -557,7 +639,7 @@ open class GeoGunRenderer : AbstractGeoItemRendererV2() {
         val modelPath = definition.model ?: return null
         val texture = definition.texture ?: return null
         val attachmentModel = AttachmentModelReloadListener.getModel(modelPath) ?: return null
-        return Pair(attachmentModel, texture)
+        return AttachmentRenderData(attachmentModel, texture, definition)
     }
 
     open fun renderGripHandGuard(stack: ItemStack, model: GeoGunModel) {
@@ -576,7 +658,7 @@ open class GeoGunRenderer : AbstractGeoItemRendererV2() {
         packedLight: Int,
         packedOverlay: Int
     ) {
-        val (attachmentModel, texture) = resolveGripAttachmentRender(stack) ?: return
+        val (attachmentModel, texture, definition) = resolveGripAttachmentRender(stack) ?: return
         val boneName = resolveGripAttachmentBone(stack)
         val mountTransform = model.getGlobalTransform(boneName) ?: return
 
@@ -585,18 +667,21 @@ open class GeoGunRenderer : AbstractGeoItemRendererV2() {
             poseStack,
             Matrix4f(mountTransform).mul(resolveBarrelAttachmentLocalTransform(stack))
         )
-        attachmentModel.renderToBuffer(poseStack, bufferSource, texture, packedLight, packedOverlay)
+        attachmentModel.renderToBuffer(
+            poseStack, bufferSource, texture, packedLight, packedOverlay,
+            null, resolveAmmoReadout(stack, definition.effectiveAmmoBar(), definition.effectiveTextShow())
+        )
         poseStack.popPose()
     }
 
-    open fun resolveGripAttachmentRender(stack: ItemStack): Pair<BedrockAttachmentModel, ResourceLocation>? {
+    open fun resolveGripAttachmentRender(stack: ItemStack): AttachmentRenderData? {
         val data = GunData.from(stack)
         val attachmentId = data.attachment.id(AttachmentType.GRIP) ?: return null
         val definition = AttachmentDefinition.from(attachmentId) ?: return null
         val modelPath = definition.model ?: return null
         val texture = definition.texture ?: return null
         val attachmentModel = AttachmentModelReloadListener.getModel(modelPath) ?: return null
-        return Pair(attachmentModel, texture)
+        return AttachmentRenderData(attachmentModel, texture, definition)
     }
 
     open fun resolveGripAttachmentBone(stack: ItemStack): String {
@@ -627,24 +712,27 @@ open class GeoGunRenderer : AbstractGeoItemRendererV2() {
         packedLight: Int,
         packedOverlay: Int
     ) {
-        val (attachmentModel, texture) = resolveBarrelAttachmentRender(stack) ?: return
+        val (attachmentModel, texture, definition) = resolveBarrelAttachmentRender(stack) ?: return
         val boneName = resolveBarrelAttachmentBone(stack) ?: return
         val mountTransform = model.getGlobalTransform(boneName) ?: return
 
         poseStack.pushPose()
         mulPoseWithNormal(poseStack, Matrix4f(mountTransform))
-        attachmentModel.renderToBuffer(poseStack, bufferSource, texture, packedLight, packedOverlay)
+        attachmentModel.renderToBuffer(
+            poseStack, bufferSource, texture, packedLight, packedOverlay,
+            null, resolveAmmoReadout(stack, definition.effectiveAmmoBar(), definition.effectiveTextShow())
+        )
         poseStack.popPose()
     }
 
-    open fun resolveBarrelAttachmentRender(stack: ItemStack): Pair<BedrockAttachmentModel, ResourceLocation>? {
+    open fun resolveBarrelAttachmentRender(stack: ItemStack): AttachmentRenderData? {
         val data = GunData.from(stack)
         val attachmentId = data.attachment.id(AttachmentType.BARREL) ?: return null
         val definition = AttachmentDefinition.from(attachmentId) ?: return null
         val modelPath = definition.model ?: return null
         val texture = definition.texture ?: return null
         val attachmentModel = AttachmentModelReloadListener.getModel(modelPath) ?: return null
-        return Pair(attachmentModel, texture)
+        return AttachmentRenderData(attachmentModel, texture, definition)
     }
 
     open fun resolveBarrelAttachmentMuzzleFlashScale(stack: ItemStack): Float {
@@ -671,9 +759,9 @@ open class GeoGunRenderer : AbstractGeoItemRendererV2() {
     open fun resolveBarrelAttachmentMuzzleTransform(
         stack: ItemStack,
         model: GeoGunModel,
-        renderData: Pair<BedrockAttachmentModel, ResourceLocation>
+        renderData: AttachmentRenderData
     ): Matrix4f? {
-        val attachmentMuzzle = renderData.first.getGlobalTransform(MUZZLE_BONE) ?: return null
+        val attachmentMuzzle = renderData.model.getGlobalTransform(MUZZLE_BONE) ?: return null
         val boneName = resolveBarrelAttachmentBone(stack) ?: return null
         val mountTransform = model.getGlobalTransform(boneName) ?: return null
         return Matrix4f(mountTransform)
@@ -701,6 +789,55 @@ open class GeoGunRenderer : AbstractGeoItemRendererV2() {
         val data = GunData.from(stack)
         return data.attachment.id(AttachmentType.SCOPE) != null
                 || data.attachment.get(AttachmentType.SCOPE) != 0
+    }
+
+    /**
+     * 脚架展开进度：0 为收起，1 为完全展开。
+     *
+     * 直接复用 `bipod_view` 定位点用的 [ClientEventHandler.bipodViewTime]，这样子骨骼的翻转与
+     * 卧姿视角过渡天然同步，脚本里不需要自己再做一次插值。
+     *
+     * 但它描述的是**本地玩家自己**的持枪视角过渡，是客户端全局的一份状态，所以只有他手里那把枪
+     * 能用它。掉落在地上的、摆在展示框里的、别人手里的枪都拿不到"持有者"来问是否趴着
+     * （物品渲染路径只有 [ItemStack]，没有实体），对它们一律返回 0，也就是保持收起——
+     * 否则世界上每一把同型号枪都会跟着本地玩家的卧姿一起展开。
+     *
+     * 判定**不能只看 ItemStack 对象身份**。第三人称、掉落物、展示框、别人手里的枪确实是别的对象，
+     * 但第一人称不是：`FirstPersonRenderHandler` 渲染时传下来的是动画实例持有的那份 stack
+     * （`GeoGunAnimationInstance.currentItem()`），而它每个客户端 tick 才由 `updateItem` 刷新一次，
+     * 换枪过渡期间渲染的更是上一个实例里的旧对象。服务端每次同步手持槽（开枪改弹药、热量、
+     * 各种计时器）都会把客户端手上的 ItemStack **换成新对象**（见 `GunData.DATA_CACHE` 的注释），
+     * 于是同步之后到下一次 `updateItem` 之间的那几帧里身份对不上，脚本会以为枪不在手上，
+     * 脚架被压回 bind 姿态、下一帧又展开——第一人称看到的就是脚架在收起/展开之间来回横跳。
+     * [GeoGunAnimationInstance.shouldSpin] 早就为同一个坑改成比物品类型了。
+     *
+     * 所以这里分两种情况：对象身份成立（第三人称与正常的第一人称帧）直接用；
+     * 第一人称下额外接受"渲染的是本地玩家主手 + 同一种物品"。第一人称入口只会画本地玩家自己的手，
+     * 所以这个放宽不会波及世界上的同型号枪——掉落物/展示框/别人手里走的是普通物品渲染，
+     * [localFirstPersonHand] 为 `null`，仍然一律返回 0。
+     *
+     * 换枪动画期间渲染的是旧 stack：换了另一种枪时物品对不上、脚架直接收起而不是平滑过渡，
+     * 与之前的行为一致，可以接受。
+     */
+    open fun scriptBipodProgress(stack: ItemStack): Double {
+        val player = Minecraft.getInstance().player ?: return 0.0
+        val held = player.mainHandItem
+        val mine = held === stack
+                || (localFirstPersonHand == InteractionHand.MAIN_HAND
+                && !held.isEmpty
+                && held.item === stack.item)
+        return if (mine) ClientEventHandler.bipodViewTime else 0.0
+    }
+
+    /**
+     * 枪管热量：0 为空，100 为过热阈值（与 `HeatBarOverlay` 的 `heat / 100` 同一刻度）。
+     *
+     * 和 [scriptBipodProgress] 不同，这里**不**按对象身份限制：热量写在枪自己的 tag 里，是逐物品的属性，
+     * 别人手里的、地上躺着的枪读到的都是它自己的热量，而不是本地玩家的。代价是热量只在持有者的 tick 里
+     * 自然冷却（`GunEventHandler.reduceHeat`），一把打到过热再丢在地上的枪会一直保持那个热度。
+     */
+    open fun scriptHeat(stack: ItemStack): Double {
+        return GunData.from(stack).heat.get()
     }
 
     open fun scriptFrameDeltaSeconds(): Float {
@@ -825,6 +962,8 @@ open class GeoGunRenderer : AbstractGeoItemRendererV2() {
     }
 
     open fun applyCameraShake(stack: ItemStack, model: GeoGunModel, hand: InteractionHand) {
+        val item = stack.item as? GunItem ?: return
+        val player = localPlayer ?: return
         val animation = FirstPersonRenderHandler.getActiveAnimationInstance(hand) ?: return
         val camera = model.getCameraBone()
         if (camera == null) {
@@ -838,7 +977,15 @@ open class GeoGunRenderer : AbstractGeoItemRendererV2() {
             return
         }
 
-        val zoomTime = ClientEventHandler.zoomTime.coerceIn(0.0, 1.0).toFloat()
+        val data = from(stack)
+        // 与定位点混合、Z 轴长度压缩共用同一条曲线。以前这里读的是线性的 zoomTime，于是姿态收敛跑在
+        // 枪到位之前：中段枪身的摆动已经被压平了，位置却还没跟上，衔接处会看出"甩一下"。
+        // 卧姿架在脚架上也要求收敛，所以与 bipodViewTime 取较大者；缓动单调，先取 max 再缓动与
+        // 各自缓动后取 max 等价。
+        val zoomTime = aimingProgress(
+            ClientEventHandler.zoomTime.coerceAtLeast(ClientEventHandler.bipodViewTime)
+        )
+
         var rotationScale = (1f - 0.5f * zoomTime).coerceAtLeast(0.05f)
         var rotationScaleX = (1f - 0.97f * zoomTime).coerceAtLeast(0.05f)
         var rotationScaleY = (1f - 0.97f * zoomTime).coerceAtLeast(0.05f)
@@ -847,7 +994,6 @@ open class GeoGunRenderer : AbstractGeoItemRendererV2() {
         var positionScaleX = (1f - 0.95f * zoomTime).coerceAtLeast(0.05f)
         var positionScaleZ = (1f - 0.96f * zoomTime).coerceAtLeast(0.05f)
 
-        val data = from(stack)
         if (!data.reloading()) {
             rotationScale = (1f - 0.5f * zoomTime).coerceAtLeast(0.05f)
             rotationScaleX = (1f - 0.55f * zoomTime).coerceAtLeast(0.05f)
@@ -856,12 +1002,6 @@ open class GeoGunRenderer : AbstractGeoItemRendererV2() {
             positionScale = (1f - 0.4f * zoomTime).coerceAtLeast(0.05f)
             positionScaleX = (1f - 0.5f * zoomTime).coerceAtLeast(0.05f)
             positionScaleZ = (1f - 0.82f * zoomTime).coerceAtLeast(0.05f)
-//            rotationScale = 1f
-//            rotationScaleX = 1f
-//            rotationScaleY = 1f
-//            rotationScaleZ = 1f
-//            positionScale = 1f
-//            positionScaleZ = 1f
         }
 
         val main = model.getRootBone()
@@ -888,31 +1028,48 @@ open class GeoGunRenderer : AbstractGeoItemRendererV2() {
         mulPoseWithNormal(poseStack, viewTransform.invert())
     }
 
+    /**
+     * 把 0..1 的瞄准进度换算成真正用于插值的值。
+     *
+     * **瞄准过渡里所有按进度推进的量都必须走这里**，否则同一个过渡的不同部分会以不同速度推进：
+     * [computeViewTransform] 的定位点混合（平移与旋转）、`renderModel` 里的 Z 轴长度压缩、
+     * [applyCameraShake] 的姿态收敛，三者只要有一条用了线性的 `zoomTime`，中段就会看出
+     * "长度先缩掉一截 / 姿态先甩到位，枪却还没进来"。
+     *
+     * [AnimationCurves.EASE_IN_OUT_QUINT] 是单调的，所以对若干个驱动量先取较大者再缓动，
+     * 与各自缓动后取较大者等价——[applyCameraShake] 里脚架进度与瞄准进度取 max 就依赖这一点。
+     *
+     * 两个端点固定（0 → 0、1 → 1），所以换成它不会改变"完全未瞄准"和"完全瞄准"两帧的样子，
+     * 只改变中间的推进节奏。
+     */
+    private fun aimingProgress(rawProgress: Double): Float =
+        AnimationCurves.EASE_IN_OUT_QUINT.apply(rawProgress.coerceIn(0.0, 1.0)).toFloat()
+
     open fun computeViewTransform(
         model: GeoGunModel,
         scopeRender: ScopeRenderData? = null,
         hand: InteractionHand = InteractionHand.MAIN_HAND
     ): Matrix4f? {
         val idleViewTransform = model.getGlobalTransform(IDLE_VIEW_BONE) ?: return null
+        val hipViewTransform = bipodViewTransform(model, idleViewTransform)
 
-        val zoom = AnimationCurves.EASE_IN_OUT_QUINT
-            .apply(ClientEventHandler.zoomTime.coerceIn(0.0, 1.0))
-            .toFloat()
+        val zoom = aimingProgress(ClientEventHandler.zoomTime)
 
         val focusOffset = ClientEventHandler.editFocusOffset
         if (focusOffset.lengthSquared() > 1e-8f && zoom <= 0f) {
-            val idlePos = Vector3f()
-            idleViewTransform.getTranslation(idlePos)
-            val translation = Vector3f(idlePos).add(focusOffset)
+            // 以 hipViewTransform 为基准，保证与未聚焦时的返回值连续（脚架视图退场过程中不会跳变）
+            val basePos = Vector3f()
+            hipViewTransform.getTranslation(basePos)
+            val translation = Vector3f(basePos).add(focusOffset)
             var rotation = Quaternionf()
-            idleViewTransform.getNormalizedRotation(rotation)
+            hipViewTransform.getNormalizedRotation(rotation)
             val yaw = ClientEventHandler.editFocusYaw
             val pitch = ClientEventHandler.editFocusPitch
             if (Mth.abs(pitch) > 1e-5f || Mth.abs(yaw) > 1e-5f) {
                 rotation = Quaternionf().rotateY(yaw).rotateX(pitch).mul(rotation)
             }
             val scale = Vector3f()
-            idleViewTransform.getScale(scale)
+            hipViewTransform.getScale(scale)
             return Matrix4f()
                 .translation(translation)
                 .rotate(rotation)
@@ -920,12 +1077,31 @@ open class GeoGunRenderer : AbstractGeoItemRendererV2() {
         }
 
         if (zoom <= 0f) {
-            return Matrix4f(idleViewTransform)
+            return hipViewTransform
         }
         val ironViewTransform = scopeViewTransform(scopeRender, hand)
             ?: model.getGlobalTransform(IRON_VIEW_BONE)
+            ?: return hipViewTransform
+        return blendViewTransform(hipViewTransform, Matrix4f(ironViewTransform), zoom)
+    }
+
+    /**
+     * 非瞄准视角的脚架视图：脚架功能启用（卧姿 + 枪械或配件带脚架）时，
+     * 以 [ClientEventHandler.bipodViewTime] 为进度把 `idle_view` 平滑过渡到模型自带的 `bipod_view`。
+     * 模型没有 `bipod_view` 定位点或进度为 0 时保持 `idle_view`。
+     */
+    private fun bipodViewTransform(model: GeoGunModel, idleViewTransform: Matrix4f): Matrix4f {
+        val progress = ClientEventHandler.bipodViewTime
+        if (progress <= 0.0) return Matrix4f(idleViewTransform)
+
+        val bipodViewTransform = model.getGlobalTransform(BIPOD_VIEW_BONE)
             ?: return Matrix4f(idleViewTransform)
-        return blendViewTransform(Matrix4f(idleViewTransform), Matrix4f(ironViewTransform), zoom)
+        if (progress >= 1.0) return Matrix4f(bipodViewTransform)
+
+        val blend = AnimationCurves.EASE_IN_OUT_QUINT
+            .apply(progress.coerceIn(0.0, 1.0))
+            .toFloat()
+        return blendViewTransform(Matrix4f(idleViewTransform), Matrix4f(bipodViewTransform), blend)
     }
 
     private fun scopeViewTransform(
@@ -977,18 +1153,27 @@ open class GeoGunRenderer : AbstractGeoItemRendererV2() {
 
     /**
      * 返回当前正在编辑的配件槽位对应的定位骨骼名；未支持或未选中时返回 null。
-     * 目前支持枪托与弹匣。
+     * 目前支持枪托、弹匣与弹药类型。
+     *
+     * [model] 是正在渲染的模型：弹药槽位有多个候选骨骼，需要靠它挑出模型实际拥有的那个。
      */
-    open fun attachmentFocusBone(): String? {
+    open fun attachmentFocusBone(model: GeoGunModel): String? {
         return when (ClientEventHandler.editingAttachmentType) {
             0 -> MUZZLE_BONE
             1 -> SCOPE_BONE
             2 -> GRIP_BONE
             3 -> STOCK_BONE
             4 -> MAGAZINE_BONE
-            5 -> MAGAZINE_BONE
+            5 -> ammoFocusBone(model)
             else -> null
         }
+    }
+
+    /**
+     * 弹药槽位的定位骨骼：模型自带 `ammo_pos`（如 m_79）时聚焦到它，否则沿用弹匣的定位骨骼。
+     */
+    private fun ammoFocusBone(model: GeoGunModel): String {
+        return if (model.getIndex(AMMO_BONE) >= 0) AMMO_BONE else MAGAZINE_BONE
     }
 
     /**
@@ -997,10 +1182,10 @@ open class GeoGunRenderer : AbstractGeoItemRendererV2() {
      */
     private fun updateEditFocus(model: GeoGunModel) {
         val desired = computeEditFocusOffset(model) ?: Vector3f()
-        val desiredYaw = computeEditFocusYaw()
-        val desiredPitch = computeEditFocusPitch()
+        val desiredYaw = computeEditFocusYaw(model)
+        val desiredPitch = computeEditFocusPitch(model)
         val delta = Minecraft.getInstance().deltaFrameTime.coerceAtMost(0.5f)
-        val focusing = attachmentFocusBone() != null
+        val focusing = attachmentFocusBone(model) != null
         val panning = ClientEventHandler.isEditing && !focusing
 
         if (focusing) {
@@ -1029,7 +1214,7 @@ open class GeoGunRenderer : AbstractGeoItemRendererV2() {
      */
     private fun computeEditFocusOffset(model: GeoGunModel): Vector3f? {
         if (!ClientEventHandler.isEditing) return null
-        val boneName = attachmentFocusBone() ?: return computeUnfocusedPanOffset()
+        val boneName = attachmentFocusBone(model) ?: return computeUnfocusedPanOffset()
 
         val idleView = model.getGlobalTransform(IDLE_VIEW_BONE) ?: return null
         val attachment = model.getGlobalTransform(boneName) ?: return null
@@ -1069,8 +1254,8 @@ open class GeoGunRenderer : AbstractGeoItemRendererV2() {
      * 返回未聚焦浮动预览绕 Y 轴的旋转角（弧度）：以屏幕中心为原点，鼠标越靠右整体越向逆时针
      * 方向旋转，越靠左越向顺时针旋转，避免视角平移时卡进模型。聚焦或非改装状态下返回 0。
      */
-    private fun computeEditFocusYaw(): Float {
-        if (!ClientEventHandler.isEditing || attachmentFocusBone() != null) return 0f
+    private fun computeEditFocusYaw(model: GeoGunModel): Float {
+        if (!ClientEventHandler.isEditing || attachmentFocusBone(model) != null) return 0f
 
         val mc = Minecraft.getInstance()
         val window = mc.window
@@ -1086,8 +1271,8 @@ open class GeoGunRenderer : AbstractGeoItemRendererV2() {
      * 返回未聚焦浮动预览绕 X 轴的旋转角（弧度）：以屏幕中心为原点，鼠标越靠上整体越向俯视
      * 方向旋转，越靠下越向仰视方向旋转。聚焦或非改装状态下返回 0。
      */
-    private fun computeEditFocusPitch(): Float {
-        if (!ClientEventHandler.isEditing || attachmentFocusBone() != null) return 0f
+    private fun computeEditFocusPitch(model: GeoGunModel): Float {
+        if (!ClientEventHandler.isEditing || attachmentFocusBone(model) != null) return 0f
 
         val mc = Minecraft.getInstance()
         val window = mc.window
@@ -1185,10 +1370,12 @@ open class GeoGunRenderer : AbstractGeoItemRendererV2() {
     companion object {
         // Bone Positions
         private const val IDLE_VIEW_BONE = "idle_view"
+        private const val BIPOD_VIEW_BONE = "bipod_view"
         private const val IRON_VIEW_BONE = "iron_view"
         private const val MUZZLE_BONE = "muzzle_pos"
         private const val GRIP_BONE = "grip_pos"
         private const val MAGAZINE_BONE = "magazine_pos"
+        private const val AMMO_BONE = "ammo_pos"
         private const val SCOPE_BONE = "scope_pos"
         private const val SCOPE_VIEW_BONE = "scope_view"
         private const val SCOPE_VIEW_SMOOTHING = 0.6f

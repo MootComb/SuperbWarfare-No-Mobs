@@ -1,23 +1,29 @@
 {
-  "DefaultZoom": 2,
-  "Spread": 5,
-  "OpenBolt": true,
+  "Spread": 6.75,
+  "TacticalReload": true,
   "HasBarrelBullet": true,
-  "RecoilX": 0.0018,
-  "RecoilY": 0.01,
+  "HasBipod": true,
+  "RecoilX": 0.0019,
+  "RecoilY": 0.020,
   "Damage": 9.5,
   "Headshot": 2,
-  "Velocity": 20,
-  "Magazine": 55,
+  "Velocity": 22,
+  "Magazine": [40, 60, 80],
   "Weight": 6,
+  "MeleeDamage": 15,
+  "MeleeDuration": 16,
+  "MeleeAngle": 100,
   "DrawTime": 13,
   "ZoomTime": 8,
   "DefaultFireMode": "Auto",
-  "NormalReloadTime": 73,
-  "EmptyReloadTime": 95,
-  "BypassesArmor": 0.25,
+  "NormalReloadTime": 71,
+  "EmptyReloadTime": 86,
+  "BypassesArmor": 0.35,
   "SoundRadius": 13,
   "RPM": 400,
+  "RpmAddAfterShoot": 15,
+  "MinCustomRpm": 0,
+  "MaxCustomRpm": 500,
   "GunType": "MachineGun",
   "AvailableFireModes": [
     "Auto"
@@ -25,7 +31,10 @@
   "DamageReduce": {
     "Type": "Rifle"
   },
-  "AmmoType": "@RifleAmmo",
+  "AmmoType": "FE",
+  "AmmoCostPerShoot": 1,
+  "FuelPerAmmo": 1000,
+  "MaxEnergy": 100000,
   "Icon": "superbwarfare:textures/gun_icon/devotion_icon.png",
   "AvailablePerks": [
     "@Ammo",
@@ -34,11 +43,13 @@
     "superbwarfare:powerful_attraction",
     "superbwarfare:intelligent_chip",
     "superbwarfare:backpack_linked_magazine",
+    "superbwarfare:regeneration",
     "superbwarfare:killing_tally",
     "superbwarfare:desperado",
     "superbwarfare:monster_hunter",
     "superbwarfare:vorpal_weapon",
     "superbwarfare:turbo_charger",
+    "superbwarfare:stop_gap",
     "superbwarfare:fair_means",
     "superbwarfare:high_impact_reserves",
     "superbwarfare:brain_storm",
@@ -47,16 +58,64 @@
     "!superbwarfare:longer_wire",
     "!superbwarfare:cupid_arrow"
   ],
+  "AvailableAttachments": {
+    "Scope": [
+      "superbwarfare:scope_coyote",
+      "superbwarfare:scope_aimpoint_t2",
+      "superbwarfare:scope_eotech_551",
+      "superbwarfare:scope_okp_7",
+      "superbwarfare:scope_pkas",
+      "superbwarfare:scope_bruiser",
+      "superbwarfare:scope_ranger",
+      "superbwarfare:scope_1p_78",
+      "superbwarfare:scope_pk_a",
+      "superbwarfare:scope_acog",
+      "superbwarfare:scope_qmk171",
+      "superbwarfare:scope_hamr",
+      "superbwarfare:scope_elcan_4x",
+      "superbwarfare:scope_lpvo",
+      "superbwarfare:scope_sniper",
+      "superbwarfare:scope_winefox",
+      "superbwarfare:scope_spyglass"
+    ],
+    "Magazine": [
+      "superbwarfare:magazine_extend",
+      "superbwarfare:magazine_extend_pro"
+    ],
+    "Grip": [
+      "superbwarfare:vertical_grip",
+      "superbwarfare:grip_vertical_bipod",
+      "superbwarfare:grip_rectangle_vertical",
+      "superbwarfare:triangle_grip",
+      "superbwarfare:grip_cqr_gen2"
+    ],
+    "Barrel": [
+      "superbwarfare:meowlencer",
+      "superbwarfare:hissilencer",
+      "superbwarfare:silaowuncer",
+      "superbwarfare:ru_silencer",
+      "superbwarfare:muzzle_brake_ru",
+      "superbwarfare:muzzle_brake_ar",
+      "superbwarfare:muzzle_zenit_dtk_1",
+      "superbwarfare:muzzle_compensator_r_17",
+      "superbwarfare:ar_silencer",
+      "superbwarfare:loudspeaker",
+      "superbwarfare:silencer_qinglan"
+    ],
+    "Stock": [
+      "superbwarfare:stock_ar_tactical",
+      "superbwarfare:stock_elite",
+      "superbwarfare:stock_str",
+      "superbwarfare:stock_ubr",
+      "superbwarfare:stock_prs"
+    ]
+  },
   "SoundInfo": {
     "Fire1P": "superbwarfare:devotion_fire_1p",
     "Fire3P": "superbwarfare:devotion_fire_3p",
     "Fire3PFar": "superbwarfare:devotion_far",
     "Fire3PVeryFar": "superbwarfare:devotion_veryfar",
-    "ReloadNormal": "superbwarfare:devotion_reload_normal",
-    "ReloadEmpty": "superbwarfare:devotion_reload_empty",
-    "CancellableSounds": [
-      "superbwarfare:devotion_reload_normal",
-      "superbwarfare:devotion_reload_empty"
-    ]
+    "Fire1PSilent": "superbwarfare:devotion_fire_1p_s",
+    "Fire3PSilent": "superbwarfare:devotion_fire_3p_s"
   }
 }

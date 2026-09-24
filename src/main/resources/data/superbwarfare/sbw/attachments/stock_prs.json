@@ -2,9 +2,29 @@
   "Slot": "Stock",
   "Modifiers": [
     {
+      "Prop": "RecoilX",
+      "Op": "Mul",
+      "Value": 0.8
+    },
+    {
+      "Prop": "RecoilY",
+      "Op": "Mul",
+      "Value": 0.88
+    },
+    {
       "Prop": "Weight",
       "Op": "Add",
-      "Value": 1.5
+      "Value": 2.2
+    },
+    {
+      "Prop": "ZoomTime",
+      "Op": "Mul",
+      "Value": 1.1
+    },
+    {
+      "Prop": "MeleeDamage",
+      "Op": "Mul",
+      "Value": 5
     }
   ],
   "Bone": "custom_stock_adapter",

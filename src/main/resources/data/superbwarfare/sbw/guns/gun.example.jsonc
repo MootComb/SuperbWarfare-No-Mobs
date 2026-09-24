@@ -55,6 +55,12 @@
       "owner": "@sbw:owner"
     }
   },
+  /*
+   * Model bones that draw the default round, hidden together with every "ProjectileBone" declared
+   * by AmmoType except the ones of the selected ammo type.
+   * May be a single name or a list of them, so one ammo type can draw several bones at once.
+   */
+  "ProjectileBone": "bullet",
   // Ammo cost per shoot
   "AmmoCostPerShoot": 1,
   // Projectile amount spawned per shoot, set this to zero will prevent gun from shooting
@@ -108,6 +114,9 @@
       "AmmoSlot": "Default",
       // Projectile info override, same as defined above
       "Projectile": "superbwarfare:projectile",
+      // Model bone override, shown only while this ammo type is selected
+      // Also accepts a list, e.g. ["bullet", "bullet_dummy"]
+      "ProjectileBone": "bullet",
       // Gun property override, check out GunProp.java for mor info
       "Override": {
         "Damage": 810
@@ -131,6 +140,18 @@
   // ammo cost when performing iterative load
   "IterativeLoadAmount": 1,
   "FinishTime": 0,
+  // Magazine levels that hold a drum magazine, counted the same way as the entries of "Magazine"
+  // (0 is the original magazine). Drum levels play the *_drum reload animations, and may override the
+  // reload ActionSteps below with the RELOAD_NORMAL_DRUM / RELOAD_EMPTY_DRUM timelines.
+  "DrumLevels": [],
+  // Data-driven reload/bolt behaviours. Each step fires once, when the progress of its timeline passes
+  // "Progress" (0.0 = the timeline starts, 1.0 = it is complete).
+  // "Timeline": "RELOAD" (any reload), "RELOAD_NORMAL", "RELOAD_EMPTY", "RELOAD_NORMAL_DRUM",
+  //   "RELOAD_EMPTY_DRUM", "RELOAD_FINISH", "RELOAD_PREPARE_LOAD", "NO_AMMO", "BOLT".
+  //   A *_DRUM timeline only fires while the installed magazine level is listed in "DrumLevels", and
+  //   whenever such an entry exists it replaces its non-drum counterpart for drum levels.
+  // "Action": "HOLD_OPEN", "CLOSE_STRIKE", "CLOSE_HAMMER", "EMPTY", "HIDE_BULLET_CHAIN".
+  "ActionSteps": [],
   // Sound radius in blocks
   "SoundRadius": 0,
   // Fire RPM

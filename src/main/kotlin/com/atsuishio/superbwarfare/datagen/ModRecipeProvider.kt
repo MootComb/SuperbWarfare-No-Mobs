@@ -664,6 +664,14 @@ class ModRecipeProvider(output: PackOutput, registries: CompletableFuture<Holder
                 .unlockedBy(getHasName(ModItems.MISSILE_ENGINE.get()), has(ModItems.MISSILE_ENGINE.get()))
                 .save(writer, loc(getItemName(ModItems.MEDIUM_ANTI_AIR_MISSILE.get())))
 
+            ShapelessRecipeBuilder.shapeless(RecipeCategory.COMBAT, ModItems.SMOKE_GUN_GRENADE.get())
+                .requires(ModItems.M18_SMOKE_GRENADE.get())
+                .unlockedBy(
+                    getHasName(ModItems.M18_SMOKE_GRENADE.get()),
+                    has(ModItems.M18_SMOKE_GRENADE.get())
+                )
+                .save(writer, loc(getItemName(ModItems.SMOKE_GUN_GRENADE.get())))
+
             ShapelessRecipeBuilder.shapeless(RecipeCategory.COMBAT, ModItems.LARGE_ANTI_AIR_MISSILE.get())
                 .requires(ModItems.MEDIUM_ANTI_AIR_MISSILE.get(), 2)
                 .unlockedBy(
@@ -1767,6 +1775,62 @@ class ModRecipeProvider(output: PackOutput, registries: CompletableFuture<Holder
                 .unlockedBy(getHasName(ModItems.SULFUR.get()), has(DUSTS_SULFUR))
                 .unlockedBy(getHasName(ModItems.NITER.get()), has(GEMS_NITER))
                 .save(writer, loc(getItemName(Items.GUNPOWDER) + "_from_sulfur_niter_coal"))
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.COMMON_ACCESSORY_KIT.get())
+                .pattern("aba")
+                .pattern("b b")
+                .pattern("aba")
+                .define('a', PLATES_PLASTIC)
+                .define('b', Tags.Items.INGOTS_IRON)
+                .unlockedBy(getHasName(ModItems.ENGINEERING_PLASTIC.get()), has(PLATES_PLASTIC))
+                .save(writer, loc(getItemName(ModItems.COMMON_ACCESSORY_KIT.get())))
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.RARE_ACCESSORY_KIT.get())
+                .pattern("aba")
+                .pattern("b b")
+                .pattern("aba")
+                .define('a', PLATES_PLASTIC)
+                .define('b', INGOTS_STEEL)
+                .unlockedBy(getHasName(ModItems.ENGINEERING_PLASTIC.get()), has(PLATES_PLASTIC))
+                .save(writer, loc(getItemName(ModItems.RARE_ACCESSORY_KIT.get())))
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.EPIC_ACCESSORY_KIT.get())
+                .pattern("aba")
+                .pattern("b b")
+                .pattern("aba")
+                .define('a', PLATES_PLASTIC)
+                .define('b', ModTags.Items.INGOTS_CEMENTED_CARBIDE)
+                .unlockedBy(getHasName(ModItems.ENGINEERING_PLASTIC.get()), has(PLATES_PLASTIC))
+                .save(writer, loc(getItemName(ModItems.EPIC_ACCESSORY_KIT.get())))
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.VIRTUAL_ACCESSORY_KIT.get())
+                .pattern(" b ")
+                .pattern("bab")
+                .pattern(" b ")
+                .define('a', ModItems.EPIC_ACCESSORY_KIT.get())
+                .define('b', Items.AMETHYST_SHARD)
+                .unlockedBy(getHasName(Items.AMETHYST_SHARD), has(Items.AMETHYST_SHARD))
+                .save(writer, loc(getItemName(ModItems.VIRTUAL_ACCESSORY_KIT.get())))
+            SmithingTransformRecipeBuilder.smithing(
+                Ingredient.of(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE),
+                Ingredient.of(ModItems.EPIC_ACCESSORY_KIT.get()),
+                Ingredient.of(Items.NETHERITE_INGOT),
+                RecipeCategory.MISC,
+                ModItems.LEGENDARY_ACCESSORY_KIT.get()
+            )
+                .unlocks(
+                    getHasName(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE),
+                    has(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE)
+                )
+                .unlocks(getHasName(ModItems.EPIC_ACCESSORY_KIT.get()), has(ModItems.EPIC_ACCESSORY_KIT.get()))
+                .save(writer, loc(getItemName(ModItems.LEGENDARY_ACCESSORY_KIT.get())))
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.SUPERB_ACCESSORY_KIT.get())
+                .pattern(" a ")
+                .pattern("bec")
+                .pattern(" d ")
+                .define('a', ModItems.COMMON_ACCESSORY_KIT.get())
+                .define('b', ModItems.RARE_ACCESSORY_KIT.get())
+                .define('c', ModItems.EPIC_ACCESSORY_KIT.get())
+                .define('d', ModItems.LEGENDARY_ACCESSORY_KIT.get())
+                .define('e', Items.NETHER_STAR)
+                .unlockedBy(getHasName(Items.NETHER_STAR), has(Items.NETHER_STAR))
+                .save(writer, loc(getItemName(ModItems.SUPERB_ACCESSORY_KIT.get())))
         }
 
         private fun buildBlockRecipes(writer: RecipeOutput) {
@@ -3212,6 +3276,15 @@ class ModRecipeProvider(output: PackOutput, registries: CompletableFuture<Holder
 
                 this.generatePerkRecycleResearchingRecipe(writer, it)
             }
+
+            listOf(
+                Rarity.COMMON,
+                Rarity.RARE,
+                Rarity.EPIC,
+                ModRarities.LEGENDARY,
+                ModRarities.SUPERB,
+                ModRarities.VIRTUAL
+            ).forEach { this.generateAttachmentResearchingRecipe(writer, it) }
         }
 
         fun copyBlueprint(writer: RecipeOutput, result: ItemLike) {
@@ -3674,6 +3747,56 @@ class ModRecipeProvider(output: PackOutput, registries: CompletableFuture<Holder
                 .unlockedBy("has_${resTag.location.path}", has(resTag))
                 .unlockedBy(getHasName(ModItems.BOOST_RESEARCH_MODULE.get()), has(ModItems.BOOST_RESEARCH_MODULE.get()))
                 .save(writer, loc(getItemName(inputPerk) + "_from_blueprint_boost"))
+        }
+
+        fun generateAttachmentResearchingRecipe(writer: RecipeOutput, rarity: Rarity) {
+            val input: Item
+            val resTag: TagKey<Item>
+            val rarityName: String
+            when (rarity) {
+                Rarity.RARE -> {
+                    input = ModItems.RARE_ACCESSORY_KIT.get()
+                    resTag = ModTags.Items.ATTACHMENT_RESEARCHABLE_RARE
+                    rarityName = "rare"
+                }
+
+                Rarity.EPIC -> {
+                    input = ModItems.EPIC_ACCESSORY_KIT.get()
+                    resTag = ModTags.Items.ATTACHMENT_RESEARCHABLE_EPIC
+                    rarityName = "epic"
+                }
+
+                ModRarities.LEGENDARY -> {
+                    input = ModItems.LEGENDARY_ACCESSORY_KIT.get()
+                    resTag = ModTags.Items.ATTACHMENT_RESEARCHABLE_LEGENDARY
+                    rarityName = "legendary"
+                }
+
+                ModRarities.SUPERB -> {
+                    input = ModItems.SUPERB_ACCESSORY_KIT.get()
+                    resTag = ModTags.Items.ATTACHMENT_RESEARCHABLE_SUPERB
+                    rarityName = "superb"
+                }
+
+                ModRarities.VIRTUAL -> {
+                    input = ModItems.VIRTUAL_ACCESSORY_KIT.get()
+                    resTag = ModTags.Items.ATTACHMENT_RESEARCHABLE_VIRTUAL
+                    rarityName = "virtual"
+                }
+
+                else -> {
+                    input = ModItems.COMMON_ACCESSORY_KIT.get()
+                    resTag = ModTags.Items.ATTACHMENT_RESEARCHABLE_COMMON
+                    rarityName = "common"
+                }
+            }
+
+            val id = "attachment_${rarityName}"
+            ResearchingRecipeBuilder.tag(resTag, 1, input)
+                .time(200)
+                .selectable()
+                .unlockedBy(getHasName(input), has(input))
+                .save(writer, loc("${id}_researching"))
         }
     }
 }

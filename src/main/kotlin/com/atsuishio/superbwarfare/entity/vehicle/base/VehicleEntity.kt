@@ -59,6 +59,8 @@ import com.atsuishio.superbwarfare.tools.VectorTool.combineRotationsTurret
 import com.atsuishio.superbwarfare.world.saveddata.TDMSavedData
 import com.google.common.collect.ImmutableList
 import com.mojang.math.Axis
+import kotlinx.serialization.json.floatOrNull
+import kotlinx.serialization.json.jsonPrimitive
 import net.minecraft.ChatFormatting
 import net.minecraft.client.CameraType
 import net.minecraft.core.BlockPos
@@ -1163,19 +1165,28 @@ open class VehicleEntity(pEntityType: EntityType<*>, pLevel: Level) : Entity(pEn
     open fun vehicleWeaponRpm(living: LivingEntity?): Int {
         val data = getGunData(getSeatIndex(living))
         if (data == null || data.get(GunProp.RPM) <= 0) return 60
-        return data.get(GunProp.RPM)
+        return data.weaponRpm()
     }
 
     open fun vehicleWeaponRpm(seatIndex: Int): Int {
         val data = getGunData(seatIndex)
         if (data == null || data.get(GunProp.RPM) <= 0) return 60
-        return data.get(GunProp.RPM)
+        return data.weaponRpm()
     }
 
     open fun vehicleWeaponRpm(weaponName: String): Int {
         val data = getGunData(weaponName) ?: return 1
-        return data.get(GunProp.RPM).coerceAtLeast(1)
+        return data.weaponRpm()
     }
+
+    /**
+     * 武器实际射速：基础 RPM 乘上全局射速倍率，最小为 1。
+     *
+     * 倍率可能来自数据包或 perk（例如权宜之计把它压到 0.2）；载具这边没有
+     * 手持武器那套每发累加值（customRpm），所以只乘倍率。
+     */
+    private fun GunData.weaponRpm(): Int =
+        (get(GunProp.RPM) * get(GunProp.RPM_MULTIPLIER)).roundToInt().coerceAtLeast(1)
 
     open fun getWeaponHeat(living: LivingEntity?): Int {
         val gunData = getGunData(getSeatIndex(living)) ?: return 0
@@ -3789,7 +3800,7 @@ open class VehicleEntity(pEntityType: EntityType<*>, pLevel: Level) : Entity(pEn
                 this.engineInfo = if (serializer == null) {
                     null
                 } else {
-                    DataLoader.JSON.decodeFromJsonElement(serializer, engineInfo.toKxJson())
+                    DataLoader.JSON.decodeFromJsonElement(serializer, engineInfo)
                 }
             } catch (e: Exception) {
                 Mod.LOGGER.error("Failed to parse engine info for vehicle {}, {}", this, e)
@@ -3807,7 +3818,7 @@ open class VehicleEntity(pEntityType: EntityType<*>, pLevel: Level) : Entity(pEn
 
         // Fallback to computed engineInfo JSON when runtime engineInfo is not yet initialized (e.g. phantom entities)
         val engineSoundVolume = this.engineInfo?.engineSoundVolume
-            ?: computed.engineInfo.get("EngineSoundVolume")?.asFloat
+            ?: computed.engineInfo["EngineSoundVolume"]?.jsonPrimitive?.floatOrNull
             ?: 0.4f
 
         return when (engineType) {
