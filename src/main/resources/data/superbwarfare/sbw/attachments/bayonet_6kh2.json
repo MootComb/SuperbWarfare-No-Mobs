@@ -22,10 +22,11 @@
     "MeleeActions": [
       {
         "Animation": [
-          "animation.m_4.bayonet_hit"
+          "bayonet_hit",
+          "hit"
         ],
         "Duration": 16,
-        "HitTime": 6,
+        "HitTime": 4,
         "Hitbox": {
           "Type": "Box",
           "Width": 1.0,
@@ -42,6 +43,6 @@
       }
     ]
   },
-  "Model": "superbwarfare:models/bedrock/attachment/bayonet_m_9.geo.json",
-  "Texture": "superbwarfare:textures/bedrock/attachment/bayonet_m_9.png"
+  "Model": "superbwarfare:models/bedrock/attachment/bayonet_6kh2.geo.json",
+  "Texture": "superbwarfare:textures/bedrock/attachment/bayonet_6kh2.png"
 }
