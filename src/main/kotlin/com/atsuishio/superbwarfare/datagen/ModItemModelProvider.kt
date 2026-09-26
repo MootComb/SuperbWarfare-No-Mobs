@@ -43,6 +43,7 @@ class ModItemModelProvider(output: PackOutput, existingFileHelper: ExistingFileH
         gunItemV2(ModItems.M_4)
         gunItem(ModItems.M_60)
         gunItemV2(ModItems.M_79)
+        gunItemV2(ModItems.GP_25)
         gunItemV2(ModItems.M_1911)
         gunItemV2(ModItems.M_870)
         gunItem(ModItems.M_98B)
@@ -271,6 +272,7 @@ class ModItemModelProvider(output: PackOutput, existingFileHelper: ExistingFileH
         gunBlueprintItem(ModItems.MP_443_BLUEPRINT)
         gunBlueprintItem(ModItems.HUNTING_RIFLE_BLUEPRINT)
         gunBlueprintItem(ModItems.M_79_BLUEPRINT)
+        gunBlueprintItem(ModItems.GP_25_BLUEPRINT)
         gunBlueprintItem(ModItems.RPG_BLUEPRINT)
         gunBlueprintItem(ModItems.BOCEK_BLUEPRINT)
         gunBlueprintItem(ModItems.M_4_BLUEPRINT)
@@ -376,7 +378,7 @@ class ModItemModelProvider(output: PackOutput, existingFileHelper: ExistingFileH
         simpleItem(ModItems.STEEL_PIPE_GRIP)
         simpleItem(ModItems.BAYONET_M_9)
         simpleItem(ModItems.BAYONET_6KH2)
-        simpleItem(ModItems.GP_25)
+        simpleItem(ModItems.SUB_WEAPON_GP_25)
 
         // blocks
         evenSimplerBlockItem(ModBlocks.BARBED_WIRE)

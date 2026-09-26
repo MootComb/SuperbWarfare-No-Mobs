@@ -11,8 +11,8 @@
   ],
   "SubWeapon": {
     "AmmoSlot": "SubWeapon",
-    "Cooldown": 0
+    "ReloadEndSound": "superbwarfare:gp_25_reload_2"
   },
-  "Model": "superbwarfare:models/bedrock/attachment/gp_25.geo.json",
-  "Texture": "superbwarfare:textures/bedrock/attachment/gp_25.png"
+  "Model": "superbwarfare:models/bedrock/attachment/sub_weapon_gp_25.geo.json",
+  "Texture": "superbwarfare:textures/bedrock/gun/gp_25.png"
 }
