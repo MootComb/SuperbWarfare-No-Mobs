@@ -8,9 +8,11 @@ import com.atsuishio.superbwarfare.data.gun.GunProp
 import com.atsuishio.superbwarfare.data.gun.GunState
 import com.atsuishio.superbwarfare.data.gun.subdata.Cooldown
 import com.atsuishio.superbwarfare.data.gun.value.AttachmentType
+import com.atsuishio.superbwarfare.data.gun.value.ReloadState
 import com.atsuishio.superbwarfare.event.GunEventHandler
 import com.atsuishio.superbwarfare.item.attachment.SubWeaponItem
 import com.atsuishio.superbwarfare.subweapon.SubWeaponRuntime.BY_UUID
+import com.atsuishio.superbwarfare.subweapon.SubWeaponRuntime.applyBaselineId
 import com.atsuishio.superbwarfare.subweapon.SubWeaponRuntime.tick
 import com.atsuishio.superbwarfare.tools.playLocalSound
 import net.minecraft.ChatFormatting
@@ -34,7 +36,7 @@ import java.util.concurrent.ConcurrentHashMap
  * |---|---|
  * | 物品 | 副武器物品**自己**（`SubWeaponItem : GunItem, AttachmentProvider`） |
  * | 合成栈 | `ItemStack(subWeaponItem, 1, liveTag)` —— tag 就是主武器 NBT 里那个附件子 tag 的**活引用** |
- * | 数据基线 | 默认按物品注册 id 解析（`sbw/guns/<id>.json` 与配件同名成对出现）；`SubWeaponInfo.Data` 非空时才覆盖 |
+ * | 数据基线 | **配件定义说了算**：`SubWeaponInfo.Data` 非空就用它，否则用附件自己的注册 id（`sbw/guns/<id>.json` 与配件同名成对出现）。落成 tag 上的 `defaultDataId`，见 [applyBaselineId] |
  * | 状态 | 弹药/热量/换弹/耐久/revision 全部写在这份共享 tag 上 → **随主武器 NBT 持久化**，无新存档字段 |
  * | 实例身份 | 缓存表（见 [BY_UUID]）持有合成栈的强引用，否则会掉出 `GunData.DATA_CACHE`（weakKeys） |
  * | tick | 合成栈不在背包里，`GunItem.inventoryTick` 不会跑 → 主武器 gun tick 里顺带 tick（见 [tick]） |
@@ -116,6 +118,14 @@ object SubWeaponRuntime {
         /** 报文与冷却键里用的槽位标识 */
         val slotName: String get() = slot.name
 
+        /**
+         * 这份副武器实际使用的**枪数据 id**（`SubWeapon.Data`，不写就是附件自己的注册 id）。
+         *
+         * 它会在装配时写进合成栈的枪械状态（[applyBaselineId]），所以调试时对不上账就查这里：
+         * 写的 id 在 `sbw/guns` 里不存在的话，`GunData` 会退回一份空基线（既打不出也装不上弹）。
+         */
+        val baselineId: String get() = baselineIdOf(attachmentId, info)
+
         /** 主武器冷却表上的键（`sub:<slot>`） */
         val cooldownKey: String get() = Cooldown.subWeaponKey(slotName)
 
@@ -190,6 +200,16 @@ object SubWeaponRuntime {
             // 就永远复用同一个 [Instance]**（必要时把槽位里那份挂回槽位）。
             // 其余情况都是"没得复用"：槽位从没装配过 / 换成了别的副武器 / 手里那份本来就没状态。
             val instance = if (cached != null && cached.attachmentId == attachment.id && carriesGunState(cached.liveTag)) {
+                // 基线 id 以**配件定义**为准：数据包改了 `SubWeapon.Data` 之后这里要跟着换，
+                // 而且必须换在**同一份 tag** 上（引用、`GunData`、[Instance] 三者都不能动）。
+                // 正常情况下两边一致，`setDefaultDataId` 会自己跳过写入，所以这里几乎总是空操作。
+                if (cached.data.defaultDataId.get() != baselineIdOf(attachment.id, info)) {
+                    applyBaselineId(cached.stack, attachment.id, info)
+                    // 状态是"构造时解码一次"的镜像（见 `GunData.pullFromTag`），写完要重新解码
+                    cached.data.pullFromTag()
+                    debug { "baseline of ${attachment.slot} -> ${cached.baselineId}" }
+                }
+
                 if (cached.liveTag !== incoming) {
                     // 主武器 rebind 过：附件子 tag 被换成了**副本**（见类 KDoc 的不变式 ②）。
                     // 把副本折进手里那份，再把手里那份挂回槽位 ——
@@ -256,10 +276,32 @@ object SubWeaponRuntime {
             stack.tag = liveTag
         }
 
+        // ⚠ 必须在 `GunData.from(stack)` **之前**：`GunData` 构造时就把 `defaultDataId` 解码进状态
+        applyBaselineId(stack, attachmentId, info)
+
         val instance = Instance(slot, attachmentId, info, client, stack, liveTag, GunData.from(stack))
         warnIfNoBaseline(instance)
 
         return instance
+    }
+
+    /** 副武器实际使用的枪数据 id：`SubWeapon.Data` 非空就用它，否则回落到附件自己的注册 id */
+    @JvmStatic
+    fun baselineIdOf(attachmentId: ResourceLocation, info: SubWeaponInfo): String =
+        info.data?.takeIf { it.isNotBlank() } ?: attachmentId.toString()
+
+    /**
+     * 把枪数据 id 写进合成栈（`SubWeaponInfo.Data` 的落地）。
+     *
+     * 走 [GunData.setDefaultDataId]：它把 id 盖在枪械状态子 tag 上，之后 `GunData.getDefault()`
+     * 就按这个 id 去 `CustomData.GUN_DATA`（`sbw/guns/<id>.json`）里取基线 ——
+     * 与载具武器共用同一个物品 id 时那一套机制完全相同，不新增任何存档字段。
+     *
+     * 那份子 tag **就是主武器 NBT 里的附件子 tag**，所以 id 随主武器持久化、也随同步到达客户端，
+     * 两边解出的是同一份基线（否则客户端与服务器的弹药/弹道会各算各的）。
+     */
+    private fun applyBaselineId(stack: ItemStack, attachmentId: ResourceLocation, info: SubWeaponInfo) {
+        GunData.setDefaultDataId(stack, baselineIdOf(attachmentId, info))
     }
 
     /**
@@ -309,12 +351,16 @@ object SubWeaponRuntime {
      * - 主武器自己**不是副武器**（否则一把副武器上再装副武器会无限递归）；
      * - 主武器身上**确实有附件**（便宜的前置过滤，绝大多数枪直接跳过装配流程）。
      *
-     * **状态推进与"自动装填 / 提示"分开**：
-     * - 进度、栓动、热量这些**每把枪都推**（`inMainHand` 无关）——
-     *   一旦绑在 `inMainHand` 上，那个判定为假时副武器的状态机就会被整段冻住
-     *   （换弹计时器永远停在同一 tick、`canShoot` 永远 false）；
-     * - **自动装填、音效、动作栏提示只在 `inMainHand` 时做** ——
-     *   挂在背包里的枪不该自己吃备弹、也不该给玩家弹提示。
+     * **装填与栓动的进度只在"这把主武器正被持有"时推进** —— 与主武器完全同一条口径：
+     * 主武器的换弹计时器也在 `gunTickInternal` 的 `inMainHand` 分支里，切枪时
+     * `LivingEventHandler` 还会把计时器与状态一起清掉。副武器照做：主手没拿着这把枪时
+     * **直接中断装填**（进度归零），切回来从头装。
+     * 否则就会出现"把枪收回背包，装填照样在背包里跑完，切回来弹药已经满了"
+     * ——早先这里无条件传 `inMainHand = true`，正是这个毛病。
+     *
+     * 与持有无关的（热量、冷却、perk、各种计时器）照常推进：把它们也绑在 `inMainHand` 上，
+     * 副武器的状态机就会在那段判定为假时被整段冻住（换弹计时器停在同一 tick、`canShoot` 永远 false）。
+     * **自动装填、音效、动作栏提示同样只在持有**时做 —— 背包里的枪不该自己吃备弹、也不该弹提示。
      *
      * @param inMainHand 这把主武器是不是正被持有（`GunEventHandler.gunTickInternal` 的入参）
      */
@@ -337,6 +383,13 @@ object SubWeaponRuntime {
             val sub = instance.data
             val reloadingBefore = instance.wasReloading
 
+            // ⓪ 主手没拿着这把枪：**中断装填**（进度归零），而不是让它在背包里自己走完。
+            //    中断同时要把"装填结束"这个跳变吃掉 —— 中断不是完成，不该播完成音效与提示。
+            val interrupted = !inMainHand && sub.reloading()
+            if (!inMainHand) {
+                interruptReload(sub)
+            }
+
             // ① 自动装填：判定与主武器 `autoReload` 同一个谓词，入口是主武器的 `tryStartReload`
             //    （它会自己拒掉"正在装填 / 正在拉栓 / 计时器没归零 / 没有备弹 / 弹匣是满的"）。
             //    **必须在 `gunTick` 之前调用**：换弹是两段式的（`tryStartReload` 只 markStart，
@@ -349,15 +402,15 @@ object SubWeaponRuntime {
                 }
             }
 
-            // ② 推进状态机（与持有状态无关：已经在走的换弹必须能走完）
-            GunEventHandler.gunTick(shooter, sub, inMainHand = true)
+            // ② 推进状态机：入参就是主武器的持有状态 —— 装填/栓动只在持有的时候走
+            GunEventHandler.gunTick(shooter, sub, inMainHand = inMainHand)
 
-            // ③ 处理"开始 / 结束"这两个跳变
+            // ③ 处理"开始 / 结束"这两个跳变（被中断的那一次不算"完成"）
             val reloadingNow = sub.reloading()
-            if (!reloadingBefore && reloadingNow) {
-                onReloadStarted(shooter, instance)
-            } else if (reloadingBefore && !reloadingNow) {
-                onReloadFinished(shooter, instance)
+            when {
+                interrupted -> debug { "reload of ${instance.slotName} interrupted (gun left the main hand)" }
+                !reloadingBefore && reloadingNow -> onReloadStarted(shooter, instance)
+                reloadingBefore && !reloadingNow -> onReloadFinished(shooter, instance)
             }
             instance.wasReloading = reloadingNow
 
@@ -366,6 +419,42 @@ object SubWeaponRuntime {
                 showReloadingProgress(shooter, instance)
             }
         }
+    }
+
+    /**
+     * 中断装填：换弹状态与计时器清干净，**栓动计时器一起清**。
+     *
+     * 与主武器切枪时 `LivingEventHandler` 做的是同一件事（`reload.setTime(0)` +
+     * `NOT_RELOADING` + 单发装填的各阶段计时器 + `bolt.actionTimer.reset()`），
+     * 于是"切走再切回来"是从 0 重新装，而不是接着上次的进度。
+     *
+     * `reloadStarter` 不用手动清：它只在"标记了、但还没被 `gunTick` 消费"的那一 tick 里为真，
+     * 留着它反而正好让切回来的第一 tick 就重新起步。
+     *
+     * 没有任何东西在走时直接返回 —— 背包里躺着不动的枪每 tick 都会走到这里。
+     */
+    private fun interruptReload(data: GunData) {
+        if (!data.reloading() && data.bolt.actionTimer.get() == 0) return
+
+        data.reload.setTime(0)
+        data.reload.setState(ReloadState.NOT_RELOADING)
+
+        // 单发装填（`ReloadTypes: ["Iterative"]`）自己的阶段计时器也要一起清，否则会留下半截状态
+        if (data.get(GunProp.ITERATIVE_TIME) != 0) {
+            data.stopped.set(false)
+            data.forceStop.set(false)
+            data.reload.setStage(0)
+            data.reload.prepareTimer.reset()
+            data.reload.prepareLoadTimer.reset()
+            data.reload.iterativeLoadTimer.reset()
+            data.reload.finishTimer.reset()
+        }
+
+        if (data.get(GunProp.BOLT_ACTION_TIME) > 0) {
+            data.bolt.actionTimer.reset()
+        }
+
+        data.invalidateProperties()
     }
 
     /**
@@ -471,7 +560,7 @@ object SubWeaponRuntime {
     private const val RELOAD_SOUND_VOLUME = 1.0f
 
     /**
-     * 副武器**必须**能按物品注册 id 解析到 `sbw/guns/<id>.json`。
+     * 副武器**必须**能按 [Instance.baselineId] 解析到 `sbw/guns/<id>.json`。
      *
      * 解析不到时 [GunData.getDefault] 会退回一份空的 [com.atsuishio.superbwarfare.data.gun.DefaultGunData]：
      * `Magazine = 0` → `useBackpackAmmo()` 为真 → `tryStartReload` 第一行就返回（**永远装不了弹**），
@@ -480,14 +569,13 @@ object SubWeaponRuntime {
      */
     private fun warnIfNoBaseline(instance: Instance) {
         if (!instance.data.getDefault().isDefaultData) return
-        if (!warnedMissingBaseline.add(instance.attachmentId.toString())) return
+        if (!warnedMissingBaseline.add(instance.baselineId)) return
 
         Mod.LOGGER.error(
-            "[SubWeapon] '{}' has no matching gun data; GunData fell back to an empty baseline " +
-                    "(Magazine=0, ProjectileAmount=0), so it can neither fire nor reload. " +
-                    "Expected a file at data/<namespace>/sbw/guns/{}.json " +
-                    "(or set SubWeapon.Data to an existing gun data id).",
-            instance.attachmentId, instance.attachmentId.path,
+            "[SubWeapon] '{}' has no matching gun data at sbw/guns/{}.json; GunData fell back to an empty " +
+                    "baseline (Magazine=0, ProjectileAmount=0), so it can neither fire nor reload. " +
+                    "Either ship that file or point SubWeapon.Data at an existing gun data id.",
+            instance.attachmentId, instance.baselineId.substringAfter(':'),
         )
     }
 
