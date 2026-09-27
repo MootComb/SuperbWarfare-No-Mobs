@@ -6,19 +6,18 @@ import com.atsuishio.superbwarfare.data.attachment.SubWeaponInfo
 import com.atsuishio.superbwarfare.data.gun.GunData
 import com.atsuishio.superbwarfare.data.gun.GunProp
 import com.atsuishio.superbwarfare.data.gun.GunState
-import com.atsuishio.superbwarfare.data.gun.subdata.Cooldown
 import com.atsuishio.superbwarfare.data.gun.value.AttachmentType
 import com.atsuishio.superbwarfare.data.gun.value.ReloadState
+import com.atsuishio.superbwarfare.data.stack.GunStackStorage
 import com.atsuishio.superbwarfare.event.GunEventHandler
 import com.atsuishio.superbwarfare.item.attachment.SubWeaponItem
 import com.atsuishio.superbwarfare.subweapon.SubWeaponRuntime.BY_UUID
 import com.atsuishio.superbwarfare.subweapon.SubWeaponRuntime.applyBaselineId
+import com.atsuishio.superbwarfare.subweapon.SubWeaponRuntime.onReloadStarted
 import com.atsuishio.superbwarfare.subweapon.SubWeaponRuntime.tick
 import com.atsuishio.superbwarfare.tools.playLocalSound
-import net.minecraft.ChatFormatting
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.Tag
-import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.entity.Entity
@@ -35,13 +34,12 @@ import java.util.concurrent.ConcurrentHashMap
  * | 要素 | 做法 |
  * |---|---|
  * | 物品 | 副武器物品**自己**（`SubWeaponItem : GunItem, AttachmentProvider`） |
- * | 合成栈 | `ItemStack(subWeaponItem, 1, liveTag)` —— tag 就是主武器 NBT 里那个附件子 tag 的**活引用** |
+ * | 合成栈 | `ItemStack(subWeaponItem, 1, rootTag)` —— 根 tag 就是主武器 NBT 里那个附件子 tag 的**活引用** |
  * | 数据基线 | **配件定义说了算**：`SubWeaponInfo.Data` 非空就用它，否则用附件自己的注册 id（`sbw/guns/<id>.json` 与配件同名成对出现）。落成 tag 上的 `defaultDataId`，见 [applyBaselineId] |
  * | 状态 | 弹药/热量/换弹/耐久/revision 全部写在这份共享 tag 上 → **随主武器 NBT 持久化**，无新存档字段 |
  * | 实例身份 | 缓存表（见 [BY_UUID]）持有合成栈的强引用，否则会掉出 `GunData.DATA_CACHE`（weakKeys） |
  * | tick | 合成栈不在背包里，`GunItem.inventoryTick` 不会跑 → 主武器 gun tick 里顺带 tick（见 [tick]） |
- * | 开火 | 服务端装配合成栈 → `GunData.shoot(...)`，与主武器**同一个入口** |
- * | 装填 | 服务端 `tryStartReload`（主武器自动装填的同一个入口）+ 主武器那套 `gunTick` 状态机 |
+ * | 开火/换弹/瞄准 | **四期起不再有任何副武器专用链路**：副武器被 G 切出来之后就是"当前操控的枪"（见 `ActiveGun`），开火走 `FireKeyMessage`、换弹走 `ReloadMessage`，与主武器**完全同一个入口** |
  *
  * **客户端与服务端用同一套装配规则**：`GunData` 的同步会把主武器整份 tag 推给客户端，
  * 附件子 tag 也在里面，所以两边都能解出同一份副武器状态。
@@ -54,15 +52,15 @@ import java.util.concurrent.ConcurrentHashMap
  * 表现是"装填走完提示了却没装进去""按一下 G 装填计时被打回满值""像是两条装填并行在跑"。
  * 所以缓存命中判定必须稳，重建必须罕见（见 ②）。
  *
- * **② tag 引用必须全程不变。**
+ * **② 载体引用必须全程不变。**
  * `GunData` 构造时把根 tag 与它的子 compound 全部捕获成 `val`，所以 tag 一换，
  * 这个 [Instance] 就永久脱钩了。而主武器的 `GunData.rebind` 走 `clearTag + merge`：
  * 被清空的键会以 `tag.copy()` 重新落进去（`CompoundTag.merge` 对"原来不存在"的键是复制），
  * **每次 resync 之后附件子 tag 都是新实例**。
- * 早期版本因此每 tick 重建一次 `GunData`，两个实例抢着写同一份状态，于是：
- * 装填完成被覆盖、装填音效重复播、按住 G 一直响 —— 全是这一个原因。
  * 现在遇到副本不再重建，而是把新内容折进手里那份再把手里那份**挂回槽位**
- * （[Attachment.setTag]），引用、`GunData`、[Instance] 三者全程不变。
+ * （`Attachment.setTag`），引用、`GunData`、[Instance] 三者全程不变。
+ * **四期起这条不变量的判据从"`liveTag` 引用"升级成"载体令牌"**（[GunStackStorage.Carrier]），
+ * 这样 1.21.1 分支换成 DataComponent 存储时这段逻辑不用重写。
  *
  * **③ 客户端和服务端各自一份缓存。**
  * 单人游戏里两边在同一个 JVM、同一份静态表，主武器 UUID 也相同；
@@ -79,8 +77,8 @@ object SubWeaponRuntime {
      * @param info 配件上的 `SubWeapon` 定义
      * @param clientSide 这份实例属于哪一侧（缓存键的一半，见不变式 ③）
      * @param stack 合成栈；持有强引用是**有意的**（见类的 KDoc）
-     * @param liveTag 合成栈根 tag 的引用。
-     *   **不能靠 `stack.tag` 反查**：缓存命中判定必须比较这一份我们亲手存下来的引用，
+     * @param carrier 合成栈根 tag 的**数据载体**（根 tag + 身份令牌）。
+     *   **不能靠 `stack.tag` 反查**：缓存命中判定必须比较这一份我们亲手存下来的载体，
      *   否则 `ItemStack` 内部一旦不是"原样持有"（复制 / 规整 / 被 `GunData` 换过），
      *   判定就会永远为假 —— 表现为每 tick 重建一次 `GunData`，副武器状态机被反复清零。
      * @param data 合成栈对应的枪械数据
@@ -91,29 +89,20 @@ object SubWeaponRuntime {
         val info: SubWeaponInfo,
         val clientSide: Boolean,
         val stack: ItemStack,
-        val liveTag: CompoundTag,
+        val carrier: GunStackStorage.Carrier,
         val data: GunData,
     ) {
         /**
          * 上一 tick 是否在装填。
          *
-         * 用来捕捉"装填开始/结束"这**一瞬间**（跳变）—— 完成提示、"一发都没装进去"的退避、
-         * 以及换弹音效都挂在这个跳变上。没有它就只能在装填期间每 tick 猜。
+         * 四期起它只用来捕捉"装填开始/结束"这**一瞬间**（完成音效）——
+         * 自动装填已经删除，玩家自己按 R，与主武器完全一致。
          *
-         * ⚠ 这是**跨 tick 的记忆**，也是"实例必须复用"的另一个理由：实例一换，
+         * ⚠ 这仍然是**跨 tick 的记忆**，也是"实例必须复用"的另一个理由：实例一换，
          * 这个标记退回 `false`，新实例第一次 tick 看到的恰好是"正在装填"，
-         * 于是又报一次"装填开始" —— 听感就是按住 G 时换弹音效一直响。
+         * 于是又报一次"装填开始" —— 听感就是换弹音效一直响。
          */
         var wasReloading: Boolean = false
-
-        /**
-         * 自动装填的退避计时。
-         *
-         * 上一次装填**一发都没装进去**（备弹是缓存值、可能已经过期）时置上：
-         * 否则下一 tick `shouldStartReloading` 又为真 → 又装一次 → 又装不进 →
-         * 玩家会看到"装填走了一遍又一遍，就是打不出去"。
-         */
-        var autoReloadBackoff: Int = 0
 
         /** 报文与冷却键里用的槽位标识 */
         val slotName: String get() = slot.name
@@ -126,19 +115,11 @@ object SubWeaponRuntime {
          */
         val baselineId: String get() = baselineIdOf(attachmentId, info)
 
-        /** 主武器冷却表上的键（`sub:<slot>`） */
-        val cooldownKey: String get() = Cooldown.subWeaponKey(slotName)
+        /** 根 tag（活引用）；等价于老的 `liveTag` */
+        val root: CompoundTag get() = carrier.root
 
-        /**
-         * 触发冷却 tick：**一律按副武器数据里的 `RPM` 自动算**（`1200 / RPM`），与主武器开火同一个口径。
-         *
-         * 配件数据里没有单独的冷却字段：一把武器"多快"只应该在枪数据里写一次。
-         * 至少 1 tick（`rpm <= 0` 会让下次触发立刻通过，等于没有冷却）。
-         */
-        fun cooldownTicks(): Int {
-            val rpm = data.get(GunProp.RPM).coerceAtLeast(1)
-            return (1200 / rpm).coerceAtLeast(1)
-        }
+        /** 载体令牌（不变式 ② 的判据） */
+        val token: Long get() = carrier.token
     }
 
     /** 按 `(客户端?, 主武器 UUID)` 缓存；主武器还没拿到 UUID 时退回按 [GunData] 身份缓存 */
@@ -184,22 +165,37 @@ object SubWeaponRuntime {
             val info = attachment.definition.subWeapon ?: continue
             val item = ForgeRegistries.ITEMS.getValue(attachment.id) as? SubWeaponItem ?: continue
 
-            // ⚠ 必须用 `getOrCreateTag`，不能用 `AttachmentInstance.tag`。
-            //
-            // `Attachment.getTag()` 对**字符串形式**的槽位内容返回的是
-            // `CompoundTag().apply { putString("Id", ...) }` —— **每次调用都是一个新对象**。
-            // 拿它当合成栈的根 tag，会同时踩两个坑：
-            //   1. 副武器的状态写进一个游离的临时 compound，**永远回不到主武器 NBT**；
-            //   2. 引用对不上，下面的缓存永远不命中。
-            // `getOrCreateTag` 会把该槽位实体化成 compound **并写回枪 NBT**，
-            // 之后 `getCompound` 返回的就是同一个活引用。
-            val incoming = gun.attachment.getOrCreateTag(attachment.slot)
             val cached = cache[attachment.slot]
 
+            // ⚠ **我们手里那份才是"活引用"，不能每帧去枪上重新materialize。**
+            //
+            // 四期踩过一次（症状：客户端每帧打印一条 `re-attached ... (folded=true)`，
+            // 同时"能播开火动画但打不出去"）：
+            //
+            // `Attachment.getOrCreateTag` 对**字符串形式**的槽位内容会
+            // `CompoundTag().apply { putString("Id", ...) }` —— **每次调用都返回一个新对象**。
+            // 客户端的主手物品每个 tick 都会被服务端同步换成一份**新的栈对象**，
+            // 而那份栈上的槽位内容在没被实体化之前一直是字符串 → 于是客户端每一帧都：
+            // 拿到一个**游离的空 compound** → 判定"槽位不是我们那份" → `foldIncoming` 拿它**清空并 merge**
+            // 我们缓存的那份 → 客户端手里的弹药/换弹状态被**每帧清空一次**。
+            // 表现就是"动画照播、子弹永远打不出去"（服务端那份是好的，所以服务端没报错）。
+            //
+            // 正确做法：**只要手里那份还带着枪械状态，就以它为准**；
+            // 只有枪上那份**确实带着不同的内容**时才折；而且**绝不用一份空 compound 去覆盖有内容的**。
+            val cachedRoot = cached?.root
+            val incoming: CompoundTag?
+            if (cachedRoot != null && carriesGunState(cachedRoot)) {
+                // 尽量复用：只有枪上那份本身就是 compound 时才读它（读操作没有副作用）
+                incoming = gun.attachment.getTagIfCompound(attachment.slot)
+            } else {
+                // 还没装配过：这一次必须把它实体化（`getOrCreateTag` 会写回枪 NBT）
+                incoming = gun.attachment.getOrCreateTag(attachment.slot)
+            }
+
             // 装配规则只有一条：**只要还是同一个配件、而且我们手里那份 tag 里有枪械状态，
-            // 就永远复用同一个 [Instance]**（必要时把槽位里那份挂回槽位）。
+            // 就永远复用同一个 [Instance]**（必要时把手里那份挂回槽位）。
             // 其余情况都是"没得复用"：槽位从没装配过 / 换成了别的副武器 / 手里那份本来就没状态。
-            val instance = if (cached != null && cached.attachmentId == attachment.id && carriesGunState(cached.liveTag)) {
+            val instance = if (cached != null && cached.attachmentId == attachment.id) {
                 // 基线 id 以**配件定义**为准：数据包改了 `SubWeapon.Data` 之后这里要跟着换，
                 // 而且必须换在**同一份 tag** 上（引用、`GunData`、[Instance] 三者都不能动）。
                 // 正常情况下两边一致，`setDefaultDataId` 会自己跳过写入，所以这里几乎总是空操作。
@@ -210,30 +206,64 @@ object SubWeaponRuntime {
                     debug { "baseline of ${attachment.slot} -> ${cached.baselineId}" }
                 }
 
-                if (cached.liveTag !== incoming) {
-                    // 主武器 rebind 过：附件子 tag 被换成了**副本**（见类 KDoc 的不变式 ②）。
-                    // 把副本折进手里那份，再把手里那份挂回槽位 ——
-                    // tag 引用、`GunData`、[Instance] 三者全程不变。
+                // 这次调用有没有真的把外面的内容折进手里那份。
+                // 单独记一笔的原因见下面 revision 检查那段注释：折进来的内容 revision 可能与手里那份相等。
+                var folded = false
+
+                if (incoming !== null && incoming !== cached.root) {
+                    // 枪上那份不是我们手里这份了：可能只是**换了个副本**（主武器 rebind 过，内容一样），
+                    // 也可能是**服务端真的推了新内容过来**。两者都走同一条路：
                     //
-                    // **客户端那份是权威视图，无条件折**：`GunState.revision` 只在枪械状态变化时推进，
-                    // 拿它当"内容变了"的信号会漏掉真正的同步内容，客户端就会一直拿着装配那一刻的
-                    // 弹药/装填状态（曾经让"正在装填"也判定成"能开火"）。
-                    // 服务端手里那份才是权威，所以只在副本确实更新时才折，免得被旧快照倒回去。
-                    val folded = foldIncoming(cached.liveTag, incoming, force = client)
-                    gun.attachment.setTag(attachment.slot, cached.liveTag)
-
-                    // 折进来了新内容就**必须重新解码**：`GunData.state` 是"构造时解码一次"的镜像，
-                    // 只靠本实例自己的写入跟进（`pullFromTag` 见 `GunData`）。
-                    if (folded) cached.data.pullFromTag()
-
-                    debug {
-                        "re-attached the live tag of ${attachment.slot} -> ${attachment.id} " +
-                                "(folded=$folded)"
+                    // - 内容一致（`foldIncoming` 自己会早退）→ 什么都不做，**也不打印日志**；
+                    // - 内容不同 → 折进手里那份，再把手里那份挂回槽位 ——
+                    //   tag 引用、`GunData`、[Instance] 三者全程不变。
+                    //
+                    // ⚠ **绝不用空 compound 覆盖有内容的**：客户端每帧都可能拿到一份
+                    // 刚 materialize 出来的空 compound（见上面那段注释），
+                    // 拿它去 `clear + merge` 就等于每帧把客户端的副武器状态清空一次 ——
+                    // 那正是"能播开火动画但打不出去 / 换弹两边不同步"的根因。
+                    if (foldIncoming(cached.root, incoming, acceptEqualRevision = client)) {
+                        // 折进来的内容 revision 可能与手里那份**相等**（客户端"宁可信服务端"那条路），
+                        // 所以这次折必须显式记一笔，否则下面的 revision 检查会漏掉它。
+                        folded = true
                     }
+                    gun.attachment.setTag(attachment.slot, cached.root)
+                } else if (incoming == null) {
+                    // 枪上那把枪的槽位又变回字符串了（客户端每帧一份新栈就会这样）：
+                    // 把手里这份**挂回去**（不折、也不打印日志）—— 手里那份才是活引用。
+                    gun.attachment.setTag(attachment.slot, cached.root)
+                }
+
+                // ⚠⚠ **不管上面折不折，只要活 tag 上的 revision 跑在 `state` 前面就必须重新解码。**
+                //
+                // `GunData.state` 是**懒解码一次就缓存住**的镜像（`decodedState ?: fromTag(tag)`），
+                // 之后只有 `update` / `updateLocal` / `pullFromTag` / `rebind` 会换掉它 ——
+                // **没有任何机制能察觉"别人直接改了这份 tag"**。
+                //
+                // 而副武器的 tag 恰好就有第二个写入方：单人游戏里客户端与服务端共用静态缓存表，
+                // 两边解析出来的 `root` 常常**就是同一个活 tag 对象**，服务端每 tick 往里写。
+                // 这时上面那个 `incoming !== cached.root` 守卫直接跳过，`foldIncoming` 一次都不会
+                // 被调用 —— 只靠它来触发重新解码就等于**永远不解码**。
+                //
+                // 症状（四期实际踩到）：客户端的副武器状态冻结在装配那一刻，而装配时弹匣是满的
+                // → `canShoot` 恒为 true → 客户端在服务端换弹期间照播开火动画、照发包，
+                // 服务端把这一发丢掉 → "能播开火动画但子弹打不出去 / 换弹两边不同步"。
+                //
+                // 判据用 `data.state.revision` 而不是另存一个字段：它就是"这个实例最后知道的
+                // revision"，而 `GunData.persist` 在内容变化时会把这个数写进 tag。
+                // 于是 `tag 上的 revision != 实例知道的 revision` 恰好等价于
+                // **"有别人写了这份 tag，我落后了"**，而本实例自己写的那些 tick 不会误判
+                // （批量写入把 revision 推迟到 `flush`，两边一起变，始终相等）。
+                val revision = revisionOf(cached.root)
+                if (folded || revision != cached.data.state.revision) {
+                    cached.data.pullFromTag()
                 }
                 cached
             } else {
-                assemble(attachment.slot, attachment.id, info, item, client, incoming)
+                // `incoming` 在"手里那份有状态"的分支里可能是 null（枪上还是字符串形式），
+                // 走到这里说明没得复用，必须实体化一次。
+                val root = incoming ?: gun.attachment.getOrCreateTag(attachment.slot)
+                assemble(attachment.slot, attachment.id, info, item, client, root, GunStackStorage.tokenOf(root))
             }
 
             found[attachment.slot] = instance
@@ -255,11 +285,11 @@ object SubWeaponRuntime {
         installed(gun, client).firstOrNull { it.slotName == slotName }
 
     /**
-     * 真正新建一份 [Instance]：合成栈必须**原样持有** [liveTag]。
+     * 真正新建一份 [Instance]：合成栈必须**原样持有** [root]。
      *
      * 不假设 `ItemStack(ItemLike, int, CompoundTag)` 一定原样持有这份 tag：
-     * 只要拿回来的不是同一个对象，就显式覆盖回去。
-     * `GunData` 在构造时会把根 tag 与它的子 compound 全部**捕获成 val**，
+     * 只要拿回来的不是同一个对象，就通过 [GunStackStorage.writeRoot] 显式覆盖回去。
+     * `GunData` 在构造时会把根 tag 与它的子 compound 全部**捕获成 `val`**，
      * 一旦栈里挂的是副本，副武器的所有状态都会写进一个和主武器 NBT 无关的角落
      * —— 症状就是"换弹启动了但计时器永远停在原地、下次读又是 0"。
      */
@@ -269,17 +299,17 @@ object SubWeaponRuntime {
         info: SubWeaponInfo,
         item: SubWeaponItem,
         client: Boolean,
-        liveTag: CompoundTag,
+        root: CompoundTag,
+        token: Long,
     ): Instance {
-        val stack = ItemStack(item, 1, liveTag)
-        if (stack.tag !== liveTag) {
-            stack.tag = liveTag
-        }
+        val stack = ItemStack(item, 1, root)
+        GunData.stackStorage.writeRoot(stack, root)
 
         // ⚠ 必须在 `GunData.from(stack)` **之前**：`GunData` 构造时就把 `defaultDataId` 解码进状态
         applyBaselineId(stack, attachmentId, info)
 
-        val instance = Instance(slot, attachmentId, info, client, stack, liveTag, GunData.from(stack))
+        val carrier = GunStackStorage.Carrier(root, token)
+        val instance = Instance(slot, attachmentId, info, client, stack, carrier, GunData.from(stack))
         warnIfNoBaseline(instance)
 
         return instance
@@ -307,24 +337,98 @@ object SubWeaponRuntime {
     /**
      * 把 [source] 折进 [target]（先清空再 merge，与 `GunData.reloadTagFrom` 同一套做法）。
      *
-     * @param force `true` = 只要内容不同就折（客户端：同步过来的那份就是权威视图）。
-     *   `false` = 只在 [source] 确实更新（`GunState.revision` 更大）时才折 ——
-     *   服务端手里那份才是权威，副本可能来自一份更旧的快照（主武器被另一个栈 rebind 时带进来的旧 NBT），
-     *   无条件覆盖会把副武器的弹药/装填进度倒回去。
+     * @param acceptEqualRevision `true` = 客户端：两边 revision **一样**时也接受同步过来的内容。
+     *
+     *   为什么需要它：`GunState.revision` **只在枪械状态变化时推进**。副武器的装填计时器每 tick 都在动，
+     *   但 `persist` 只在内容真的变了时 bump —— 两边时序不同步时很容易出现
+     *   "服务端 revision 已经 +1、客户端还是旧值"之外的**相反**情况：客户端手里那份 revision 更大
+     *   （它自己接受过更新的同步内容），于是服务端的正常同步被当成"旧快照"**全部丢掉**，
+     *   客户端永远停在那一刻 —— 表现就是"换弹进度两边不同步 / 打不出去"。
+     *
+     *   所以客户端的方向是"**宁可信服务端**"：只要不是**明确更旧**（revision 更小），就折。
+     *   服务端反过来（`acceptEqualRevision = false`）：手里那份才是权威，只在副本确实更新时才折。
+     *
      * @return 是否真的折了内容（折了的话调用方**必须**让对应的 `GunData` 重新解码状态，
-     *   见 [GunData.pullFromTag]）
+     *   见 `GunData.pullFromTag`）。⚠ 返回 `false` **不等于"没有变化"** —— 上面每一条早退
+     *   都可能是"内容其实一样"也可能是"这份来源不该采信"，而"同一个活 tag 被对面写了"
+     *   这种最常见的情况根本走不到这里。所以调用方判断要不要重新解码**不能只看这个返回值**，
+     *   见 `installed` 里那段 revision 检查。
      */
-    private fun foldIncoming(target: CompoundTag, source: CompoundTag, force: Boolean): Boolean {
+    private fun foldIncoming(
+        target: CompoundTag,
+        source: CompoundTag,
+        acceptEqualRevision: Boolean,
+    ): Boolean {
         if (target === source) return false
         if (target == source) return false
-        if (!force && !GunState.isNewerRevision(revisionOf(source), revisionOf(target))) return false
 
-        for (key in target.allKeys.toList()) {
-            target.remove(key)
-        }
-        target.merge(source)
+        // ⚠ **绝不用空/无状态的来源覆盖有内容的自己**。
+        //
+        // 客户端每帧都可能拿到一份刚 materialize 出来的空 compound（见 `installed` 里的长注释），
+        // 一旦折进来就等于把客户端的副武器状态（弹药/换弹计时器）**清空**，
+        // 表现是"开火动画照播、子弹永远打不出去"。服务端手里那份是权威，
+        // 客户端手里那份同样是**已经从同步内容解出来的完整视图**，两者都不该被空快照冲掉。
+        if (!target.isEmpty && !carriesGunState(source)) return false
+
+        val sourceRevision = revisionOf(source)
+        val targetRevision = revisionOf(target)
+        if (sourceRevision < targetRevision) return false
+        if (!acceptEqualRevision && !GunState.isNewerRevision(sourceRevision, targetRevision)) return false
+
+        // ⚠⚠ **只能在保住对象身份的前提下合并** —— 不能先把键删光，也不能直接用 `target.merge`。
+        //
+        // 这里原本是 `for (key in target.allKeys) target.remove(key)` 再 `merge` —— 看着像
+        // "先清空再合并"，实际上是个**对象身份杀手**：vanilla 的 `CompoundTag.merge` 在
+        // **两边都有**这个键时是**递归合并**（保住嵌套 compound 的对象），只有键不存在时才
+        // `put(key, value.copy())`。先把键删光，就让**每一个**键都落进后面那条分支 ——
+        // `root.GunData` 被整整换成一个新副本。
+        //
+        // 为什么致命：`GunData` 构造时把根 tag 与它的子 compound 全部**捕获成 `val`**
+        // （`tag` / `gunDataTag` / `perkTag` / `attachmentTag`），子数据处理器也都握着这些引用。
+        // 子 compound 一被换掉，`cached.data` 就与活 tag **脱钩**：
+        //
+        // - `revisionOf(cached.root)` 读的是**新**副本 → 一路涨；
+        // - `cached.data.pullFromTag()` 解码的是**旧**那个 → `state` 冻死。
+        //
+        // 四期实测（双端探针日志）：客户端 `root rev` 从 21 稳定跟到 69、与服务端完全一致，
+        // 而 `stateRev` 冻在 20 不动 —— tag 同步一直是好的，是**解码解码错了对象**。
+        // 表现就是弹药永不消耗（"能播开火动画但打不出去"）、换弹进度两边不同步。
+        //
+        // 但也不能图省事直接用 `target.merge(source)`：它**只增不删**，而 `GunState.writeInto`
+        // 恰恰用"键消失"表达"这个字段回到默认值"（`encodeDefaults = false`）——
+        // 少了删除这一步，`Ammo` 从 5 回到 0 时会留在 target 里变成 5。
+        // 所以两件事都要做，且删除必须**递归到每一层**。
+        mergePreservingIdentity(target, source)
 
         return true
+    }
+
+    /**
+     * 把 [source] 的内容合并进 [target]，**两层要求同时满足**：
+     *
+     * 1. **深度上内容相等** —— 包括"source 里没有的键必须从 target 删掉"
+     *    （`GunState.writeInto` 用键消失表达"回到默认值"）；
+     * 2. **两边都存在的 compound 保持 [target] 那一侧的对象身份** —— `GunData` 及其子数据处理器
+     *    都是靠引用活着的（见调用处的长注释），换掉对象 = 状态永久脱钩。
+     *
+     * 只有"target 里没有这个键"或"类型对不上"时才真的落一份 [Tag.copy] 进去。
+     */
+    private fun mergePreservingIdentity(target: CompoundTag, source: CompoundTag) {
+        // ① 删：source 里没有的键，target 里不能留
+        for (key in target.allKeys.toList()) {
+            if (!source.contains(key)) target.remove(key)
+        }
+
+        // ② 合并：两边都是 compound 就递归下去，否则整体替换
+        for (key in source.allKeys) {
+            val incoming = source.get(key) ?: continue
+            val existing = target.get(key)
+            if (incoming is CompoundTag && existing is CompoundTag) {
+                mergePreservingIdentity(existing, incoming)
+            } else {
+                target.put(key, incoming.copy())
+            }
+        }
     }
 
     /** 根 tag 里的枪械状态子 tag；`null` = 这个槽位还没被装配过 */
@@ -351,21 +455,21 @@ object SubWeaponRuntime {
      * - 主武器自己**不是副武器**（否则一把副武器上再装副武器会无限递归）；
      * - 主武器身上**确实有附件**（便宜的前置过滤，绝大多数枪直接跳过装配流程）。
      *
-     * **装填与栓动的进度只在"这把主武器正被持有"时推进** —— 与主武器完全同一条口径：
+     * **装填与栓动的进度只在"这把副武器正被操控"时推进** —— 与主武器完全同一条口径：
      * 主武器的换弹计时器也在 `gunTickInternal` 的 `inMainHand` 分支里，切枪时
-     * `LivingEventHandler` 还会把计时器与状态一起清掉。副武器照做：主手没拿着这把枪时
+     * `LivingEventHandler` 还会把计时器与状态一起清掉。副武器照做：没被切出来/宿主枪不在主手时
      * **直接中断装填**（进度归零），切回来从头装。
-     * 否则就会出现"把枪收回背包，装填照样在背包里跑完，切回来弹药已经满了"
-     * ——早先这里无条件传 `inMainHand = true`，正是这个毛病。
      *
      * 与持有无关的（热量、冷却、perk、各种计时器）照常推进：把它们也绑在 `inMainHand` 上，
      * 副武器的状态机就会在那段判定为假时被整段冻住（换弹计时器停在同一 tick、`canShoot` 永远 false）。
-     * **自动装填、音效、动作栏提示同样只在持有**时做 —— 背包里的枪不该自己吃备弹、也不该弹提示。
      *
-     * @param inMainHand 这把主武器是不是正被持有（`GunEventHandler.gunTickInternal` 的入参）
+     * @param deployedSlot 这次 tick 期间**被切出来**的槽位（`ActiveGun` 解析结果）；
+     *   `null` = 这把主武器当前操控的是它自己
+     * @param inMainHand 宿主枪是不是正在主手（`GunEventHandler.gunTickInternal` 的入参）
      */
     @JvmStatic
-    fun tick(shooter: Entity?, gun: GunData, inMainHand: Boolean = true) {
+    @JvmOverloads
+    fun tick(shooter: Entity?, gun: GunData, deployedSlot: AttachmentType? = null, inMainHand: Boolean = true) {
         if (shooter == null) return
         if (shooter.level().isClientSide) return
         if (gun.item is SubWeaponItem) return
@@ -374,50 +478,32 @@ object SubWeaponRuntime {
         val instances = installed(gun, client = false)
         if (instances.isEmpty()) return
 
-        // 诊断：每把主武器只打一次，用来确认"副武器的 tick 到底有没有在跑"。
-        if (loggedTickSeen.add(gun.uuid?.toString() ?: gun.id)) {
-            debug { "tick: driving ${instances.map { it.slotName }} for ${gun.id} (mainHand=$inMainHand)" }
-        }
-
         for (instance in instances) {
             val sub = instance.data
             val reloadingBefore = instance.wasReloading
 
-            // ⓪ 主手没拿着这把枪：**中断装填**（进度归零），而不是让它在背包里自己走完。
-            //    中断同时要把"装填结束"这个跳变吃掉 —— 中断不是完成，不该播完成音效与提示。
-            val interrupted = !inMainHand && sub.reloading()
-            if (!inMainHand) {
+            // 这把副武器是不是"当前操控的枪"：宿主枪在手上 **且** 切出来的就是它。
+            // 只有这时装填/栓动的进度才往前走 —— 与主武器 `if (inMainHand)` 完全同一条口径。
+            val operated = inMainHand && deployedSlot == instance.slot
+
+            // ⓪ 没被操控：**中断装填**（进度归零），而不是让它在背包里自己走完。
+            if (!operated) {
                 interruptReload(sub)
             }
 
-            // ① 自动装填：判定与主武器 `autoReload` 同一个谓词，入口是主武器的 `tryStartReload`
-            //    （它会自己拒掉"正在装填 / 正在拉栓 / 计时器没归零 / 没有备弹 / 弹匣是满的"）。
-            //    **必须在 `gunTick` 之前调用**：换弹是两段式的（`tryStartReload` 只 markStart，
-            //    真正的状态切换在下一 tick 的 `gunTick` 里），先 mark 再 tick 就能在本 tick 内起步。
-            if (inMainHand) {
-                if (instance.autoReloadBackoff > 0) {
-                    instance.autoReloadBackoff--
-                } else if (sub.shouldStartReloading(shooter)) {
-                    GunEventHandler.tryStartReload(shooter, sub, save = false)
-                }
-            }
+            // ① 推进状态机：入参就是"这把副武器有没有被操控" —— 装填/栓动只在被操控时走
+            GunEventHandler.gunTick(shooter, sub, inMainHand = operated)
 
-            // ② 推进状态机：入参就是主武器的持有状态 —— 装填/栓动只在持有的时候走
-            GunEventHandler.gunTick(shooter, sub, inMainHand = inMainHand)
-
-            // ③ 处理"开始 / 结束"这两个跳变（被中断的那一次不算"完成"）
+            // ② 处理"开始 / 结束"这两个跳变（被中断的那一次不算"完成"）
             val reloadingNow = sub.reloading()
             when {
-                interrupted -> debug { "reload of ${instance.slotName} interrupted (gun left the main hand)" }
+                !operated && reloadingBefore ->
+                    debug { "reload of ${instance.slotName} interrupted (no longer the active gun)" }
+
                 !reloadingBefore && reloadingNow -> onReloadStarted(shooter, instance)
                 reloadingBefore && !reloadingNow -> onReloadFinished(shooter, instance)
             }
             instance.wasReloading = reloadingNow
-
-            // ④ 装填进度提示（临时方案：动作栏文字；以后换成 HUD）
-            if (inMainHand) {
-                showReloadingProgress(shooter, instance)
-            }
         }
     }
 
@@ -433,7 +519,8 @@ object SubWeaponRuntime {
      *
      * 没有任何东西在走时直接返回 —— 背包里躺着不动的枪每 tick 都会走到这里。
      */
-    private fun interruptReload(data: GunData) {
+    @JvmStatic
+    fun interruptReload(data: GunData) {
         if (!data.reloading() && data.bolt.actionTimer.get() == 0) return
 
         data.reload.setTime(0)
@@ -460,101 +547,43 @@ object SubWeaponRuntime {
     /**
      * 换弹开始的那一瞬间。
      *
-     * 音效走**配件数据自己的** `ReloadSound`：主武器的换弹音效是动画关键帧发的，
-     * 配件没有动画，所以副武器必须自己声明一次（不写就是不发声）。
+     * 音效走**配件数据自己的** `ReloadSound`。
      *
-     * 播放用 `playLocalSound`（`SoundTool` → `ClientboundSoundPacket`，只发给射手）：
-     * 它支持 `Holder.Direct`，所以数据包里按名字写的音效（`SoundEventSerializer` 造的、
-     * 不在音效注册表里的那种）同样能发给客户端。
+     * 四期为什么**仍然**需要它：换弹动画现在归副武器自己的资源
+     * （`sbw/guns/<id>.json` 的 `Animation.Reload`，见设计文档 §9.8.7），
+     * 而那条新增的附件动画播放链路**不接数据包的 `sound_effects` 关键帧** ——
+     * 写在副武器动画里的音效不会响。所以这里保留三期的做法：
+     * 由配件数据声明、在状态跳变时用 `playLocalSound` 播给射手。
      *
      * 这个回调只应该在"真的开始了一次装填"时响一次 —— 它重复触发意味着实例/状态被重建过
      * （见类 KDoc 的不变式 ①②）。
      */
     private fun onReloadStarted(shooter: Entity?, instance: Instance) {
+        debug { "reload started: ${instance.slotName}" }
+
         val player = shooter as? ServerPlayer ?: return
         val sound = instance.info.reloadSound ?: return
         player.playLocalSound(sound, RELOAD_SOUND_VOLUME, 1f)
-        debug { "reload started: ${instance.slotName}" }
     }
 
     /**
-     * 换弹结束的那一瞬间：播完成音效 + 发**绿色**完成提示；一发都没装进去就退避一会儿。
+     * 换弹结束的那一瞬间。
      *
-     * 副武器不做动画的话，"自动装填"整个过程是**不可见**的 ——
-     * 玩家只会看到"过了一小会儿又能打一发"，像是白送了一发。音效 + 提示把这个过程讲清楚。
+     * 四期起**不再**发完成提示：副武器就是"当前操控的枪"，
+     * 它的弹药变化由常规 HUD（弹药条/弹药数）直接体现，与其它枪完全一致 ——
+     * 三期那三条动作栏提示（`info.superbwarfare.subweapon.*`）连同自动装填一起删除了。
+     *
+     * 完成音效仍然保留，理由与 [onReloadStarted] 同一条。
      */
     private fun onReloadFinished(shooter: Entity?, instance: Instance) {
         val sub = instance.data
         val ammo = sub.ammo.get()
 
-        // 一发都没装进去（备弹是缓存值、可能已经过期）：退避，别每 tick 重启装填。
-        if (ammo <= 0) {
-            instance.autoReloadBackoff = AUTO_RELOAD_BACKOFF
-            debug { "reload finished with an empty magazine, backing off" }
-        }
-
-        val player = shooter as? ServerPlayer ?: return
-
-        // 装填"走完了"不等于"装进去了"：没装进弹药时给红字，别报成完成
-        if (ammo <= 0) {
-            player.displayClientMessage(
-                Component.translatable(
-                    "info.superbwarfare.subweapon.reload_empty",
-                    Component.translatable(sub.stack.descriptionId),
-                ).withStyle(ChatFormatting.RED),
-                true,
-            )
-            return
-        }
-
-        instance.info.reloadEndSound?.let { player.playLocalSound(it, RELOAD_SOUND_VOLUME, 1f) }
-
-        player.displayClientMessage(
-            Component.translatable(
-                "info.superbwarfare.subweapon.reloaded",
-                Component.translatable(sub.stack.descriptionId),
-                ammo,
-            ).withStyle(ChatFormatting.GREEN),
-            // true = 动作栏，不刷聊天框
-            true,
-        )
-
         debug { "reload finished: ${instance.slotName} ammo=$ammo/${sub.get(GunProp.MAGAZINE)}" }
-    }
 
-    /**
-     * 装填期间给玩家发一条动作栏提示。
-     *
-     * **临时的**：需求方之后会把它做成 HUD。所以这里只做两件事 ——
-     * 判断"正在装填"、按固定间隔节流（`RELOAD_HINT_INTERVAL` tick 一次，
-     * 既不会每 tick 刷包，看起来也是连续进度）。
-     */
-    private fun showReloadingProgress(shooter: Entity?, instance: Instance) {
         val player = shooter as? ServerPlayer ?: return
-        val sub = instance.data
-        if (!sub.reloading()) return
-        if (shooter.tickCount % RELOAD_HINT_INTERVAL != 0) return
-
-        val total = sub.reload.totalTicks.get().coerceAtLeast(1)
-        val remaining = sub.reload.time().coerceIn(0, total)
-        val percent = ((total - remaining) * 100 / total).coerceIn(0, 100)
-
-        player.displayClientMessage(
-            Component.translatable(
-                "info.superbwarfare.subweapon.reloading",
-                Component.translatable(sub.stack.descriptionId),
-                percent,
-            ),
-            // true = 动作栏，不刷聊天框
-            true,
-        )
+        instance.info.reloadEndSound?.let { player.playLocalSound(it, RELOAD_SOUND_VOLUME, 1f) }
     }
-
-    /** 装填提示的刷新间隔（tick）；4 tick ≈ 每秒 5 次，够平滑又不刷包 */
-    private const val RELOAD_HINT_INTERVAL = 4
-
-    /** 一次"没装进任何弹药"的装填之后，自动装填要退避多少 tick */
-    private const val AUTO_RELOAD_BACKOFF = 40
 
     /** 副武器换弹音效的音量（本地音，只有射手听得到） */
     private const val RELOAD_SOUND_VOLUME = 1.0f
@@ -562,10 +591,10 @@ object SubWeaponRuntime {
     /**
      * 副武器**必须**能按 [Instance.baselineId] 解析到 `sbw/guns/<id>.json`。
      *
-     * 解析不到时 [GunData.getDefault] 会退回一份空的 [com.atsuishio.superbwarfare.data.gun.DefaultGunData]：
+     * 解析不到时 [GunData.getDefault] 会退回一份空的 `DefaultGunData`：
      * `Magazine = 0` → `useBackpackAmmo()` 为真 → `tryStartReload` 第一行就返回（**永远装不了弹**），
      * 同时 `ProjectileAmount = 0` → `canShoot` 恒为假（**永远开不了火**）。
-     * 表现是"按 G 完全没反应"，所以这里必须吼一声，不能让它静默。
+     * 表现是"切过去之后完全没反应"，所以这里必须吼一声，不能让它静默。
      */
     private fun warnIfNoBaseline(instance: Instance) {
         if (!instance.data.getDefault().isDefaultData) return
@@ -578,9 +607,6 @@ object SubWeaponRuntime {
             instance.attachmentId, instance.baselineId.substringAfter(':'),
         )
     }
-
-    /** 已经打过"tick 到了"日志的主武器 uuid，只在诊断时用一次 */
-    private val loggedTickSeen: MutableSet<String> = ConcurrentHashMap.newKeySet()
 
     private inline fun debug(message: () -> String) {
         if (DisplayConfig.MELEE_DEBUG_LOG.get()) {
