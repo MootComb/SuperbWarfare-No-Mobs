@@ -1,5 +1,5 @@
 {
-  "Slot": "Barrel",
+  "Slot": "Muzzle",
   "Level": 1,
   "Bone": "muzzle_pos",
   "Modifiers": [
@@ -9,6 +9,7 @@
       "Value": 1.0
     }
   ],
+  "IsSilenced": true,
   "Override": {
     "SoundInfo": {
       "Fire1P": "superbwarfare:laowu",

@@ -109,7 +109,7 @@
     "Magazine": [
       "superbwarfare:magazine_extend"
     ],
-    "Barrel": [
+    "Muzzle": [
       "superbwarfare:meowlencer",
       "superbwarfare:hissilencer",
       "superbwarfare:silaowuncer",
@@ -120,6 +120,9 @@
       "superbwarfare:muzzle_compensator_r_17",
       "superbwarfare:ar_silencer",
       "superbwarfare:loudspeaker"
+    ],
+    "Charm": [
+      "#superbwarfare:attachment/charm"
     ]
   },
   "SoundInfo": {

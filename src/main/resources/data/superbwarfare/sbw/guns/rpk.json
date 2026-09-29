@@ -118,7 +118,7 @@
       "superbwarfare:stock_elite",
       "superbwarfare:stock_zenit_pt_1"
     ],
-    "Barrel": [
+    "Muzzle": [
       "superbwarfare:meowlencer",
       "superbwarfare:hissilencer",
       "superbwarfare:silaowuncer",
@@ -130,6 +130,9 @@
       "superbwarfare:ar_silencer",
       "superbwarfare:loudspeaker",
       "superbwarfare:silencer_qinglan"
+    ],
+    "Charm": [
+      "#superbwarfare:attachment/charm"
     ]
   },
   "SoundInfo": {

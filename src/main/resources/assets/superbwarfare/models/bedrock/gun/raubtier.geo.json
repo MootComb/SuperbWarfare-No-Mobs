@@ -8595,6 +8595,11 @@
 					]
 				},
 				{
+					"name": "charm_pos",
+					"parent": "armor",
+					"pivot": [3, 6.5, 2.83223]
+				},
+				{
 					"name": "maingun",
 					"parent": "z23",
 					"pivot": [6, 1, -10]

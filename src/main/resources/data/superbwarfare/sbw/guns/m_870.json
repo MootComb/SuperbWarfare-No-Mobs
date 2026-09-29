@@ -106,7 +106,7 @@
       "superbwarfare:triangle_grip",
       "superbwarfare:grip_cqr_gen2"
     ],
-    "Barrel": [
+    "Muzzle": [
       "superbwarfare:meowlencer",
       "superbwarfare:hissilencer",
       "superbwarfare:silaowuncer",
@@ -117,6 +117,9 @@
       "superbwarfare:star_muzzle",
       "superbwarfare:linear_muzzle",
       "superbwarfare:cross_muzzle"
+    ],
+    "Charm": [
+      "#superbwarfare:attachment/charm"
     ]
   },
   "SoundInfo": {
