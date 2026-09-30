@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "superbwarfare:item/secondary_cataclysm_icon"
+    "layer0": "superbwarfare:item/bayonet_m_91_30"
   }
 }

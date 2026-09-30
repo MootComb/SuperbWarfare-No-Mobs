@@ -108,6 +108,9 @@
       "superbwarfare:ar_silencer",
       "superbwarfare:loudspeaker"
     ],
+    "Bayonet": [
+      "superbwarfare:bayonet_m_91_30"
+    ],
     "Charm": [
       "#superbwarfare:attachment/charm"
     ]
