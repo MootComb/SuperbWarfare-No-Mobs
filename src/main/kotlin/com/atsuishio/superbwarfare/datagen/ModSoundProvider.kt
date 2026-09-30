@@ -288,8 +288,7 @@ class ModSoundProvider(output: PackOutput, existingFileHelper: ExistingFileHelpe
         group("gun/igla_9k38", "igla_9k38_locking", "igla_9k38_locked")
 
         // -------------------- gun/insidious --------------------
-        group("gun/insidious", "insidious_fire_1p", "insidious_fire_3p", "insidious_far", "insidious_veryfar")
-        register("insidious_reload_empty", "gun/insidious/insidious_reload")
+        group("gun/insidious", "insidious_fire_1p", "insidious_fire_3p", "insidious_far", "insidious_veryfar", "insidious_reload_empty")
 
         // -------------------- gun/javelin --------------------
         group("gun/javelin", "javelin_fire_1p", "javelin_fire_3p", "javelin_far")
@@ -330,8 +329,8 @@ class ModSoundProvider(output: PackOutput, existingFileHelper: ExistingFileHelpe
 
         // -------------------- gun/m_60 --------------------
         group(
-            "gun/m_60", "m_60_fire_1p", "m_60_fire_3p", "m_60_far", "m_60_veryfar", "m_60_reload_normal",
-            "m_60_reload_empty",
+            "gun/m_60", "m_60_fire_1p", "m_60_fire_3p", "m_60_far", "m_60_veryfar", "m_60_mag_out",
+            "m_60_mag_in", "m_60_open", "m_60_close", "m_60_bolt", "m_60_ammo_in",
         )
 
         // -------------------- gun/m_79 --------------------
@@ -349,7 +348,7 @@ class ModSoundProvider(output: PackOutput, existingFileHelper: ExistingFileHelpe
         // -------------------- gun/m_98b --------------------
         group(
             "gun/m_98b", "m_98b_fire_1p", "m_98b_fire_3p", "m_98b_fire_1p_s", "m_98b_fire_3p_s", "m_98b_far",
-            "m_98b_veryfar", "m_98b_reload_normal", "m_98b_reload_empty", "m_98b_bolt",
+            "m_98b_veryfar", "m_98b_mag_out", "m_98b_mag_in", "m_98b_bolt_open", "m_98b_bolt_close",
         )
 
         // -------------------- gun/marlin --------------------

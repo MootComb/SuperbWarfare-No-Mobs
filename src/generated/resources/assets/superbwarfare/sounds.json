@@ -1095,7 +1095,7 @@
   },
   "insidious_reload_empty": {
     "sounds": [
-      "superbwarfare:gun/insidious/insidious_reload"
+      "superbwarfare:gun/insidious/insidious_reload_empty"
     ]
   },
   "insidious_veryfar": {
@@ -1565,6 +1565,21 @@
       "superbwarfare:gun/m_4/m_4_veryfar"
     ]
   },
+  "m_60_ammo_in": {
+    "sounds": [
+      "superbwarfare:gun/m_60/m_60_ammo_in"
+    ]
+  },
+  "m_60_bolt": {
+    "sounds": [
+      "superbwarfare:gun/m_60/m_60_bolt"
+    ]
+  },
+  "m_60_close": {
+    "sounds": [
+      "superbwarfare:gun/m_60/m_60_close"
+    ]
+  },
   "m_60_far": {
     "sounds": [
       "superbwarfare:gun/m_60/m_60_far"
@@ -1580,14 +1595,19 @@
       "superbwarfare:gun/m_60/m_60_fire_3p"
     ]
   },
-  "m_60_reload_empty": {
+  "m_60_mag_in": {
     "sounds": [
-      "superbwarfare:gun/m_60/m_60_reload_empty"
+      "superbwarfare:gun/m_60/m_60_mag_in"
     ]
   },
-  "m_60_reload_normal": {
+  "m_60_mag_out": {
     "sounds": [
-      "superbwarfare:gun/m_60/m_60_reload_normal"
+      "superbwarfare:gun/m_60/m_60_mag_out"
+    ]
+  },
+  "m_60_open": {
+    "sounds": [
+      "superbwarfare:gun/m_60/m_60_open"
     ]
   },
   "m_60_veryfar": {
@@ -1680,9 +1700,14 @@
       "superbwarfare:gun/m_870/m_870_veryfar"
     ]
   },
-  "m_98b_bolt": {
+  "m_98b_bolt_close": {
     "sounds": [
-      "superbwarfare:gun/m_98b/m_98b_bolt"
+      "superbwarfare:gun/m_98b/m_98b_bolt_close"
+    ]
+  },
+  "m_98b_bolt_open": {
+    "sounds": [
+      "superbwarfare:gun/m_98b/m_98b_bolt_open"
     ]
   },
   "m_98b_far": {
@@ -1710,14 +1735,14 @@
       "superbwarfare:gun/m_98b/m_98b_fire_3p_s"
     ]
   },
-  "m_98b_reload_empty": {
+  "m_98b_mag_in": {
     "sounds": [
-      "superbwarfare:gun/m_98b/m_98b_reload_empty"
+      "superbwarfare:gun/m_98b/m_98b_mag_in"
     ]
   },
-  "m_98b_reload_normal": {
+  "m_98b_mag_out": {
     "sounds": [
-      "superbwarfare:gun/m_98b/m_98b_reload_normal"
+      "superbwarfare:gun/m_98b/m_98b_mag_out"
     ]
   },
   "m_98b_veryfar": {
