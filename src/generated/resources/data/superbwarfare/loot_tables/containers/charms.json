@@ -21,6 +21,21 @@
         },
         {
           "type": "minecraft:item",
+          "name": "superbwarfare:charm_axolotl",
+          "weight": 25
+        },
+        {
+          "type": "minecraft:item",
+          "name": "superbwarfare:charm_cow",
+          "weight": 25
+        },
+        {
+          "type": "minecraft:item",
+          "name": "superbwarfare:charm_snowgolem",
+          "weight": 25
+        },
+        {
+          "type": "minecraft:item",
           "name": "superbwarfare:charm_fukamizu_fish",
           "weight": 15
         },
@@ -41,6 +56,21 @@
         },
         {
           "type": "minecraft:item",
+          "name": "superbwarfare:charm_axolotl_blue",
+          "weight": 15
+        },
+        {
+          "type": "minecraft:item",
+          "name": "superbwarfare:charm_mooshroom",
+          "weight": 15
+        },
+        {
+          "type": "minecraft:item",
+          "name": "superbwarfare:charm_piglin_head",
+          "weight": 15
+        },
+        {
+          "type": "minecraft:item",
           "name": "superbwarfare:charm_wither_skeleton_skull",
           "weight": 10
         },
@@ -56,12 +86,32 @@
         },
         {
           "type": "minecraft:item",
+          "name": "superbwarfare:charm_rice_cake_fox_lolita",
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "superbwarfare:charm_winefox_tail",
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "superbwarfare:charm_elder_guardian",
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
           "name": "superbwarfare:charm_sept_wolves",
           "weight": 5
         },
         {
           "type": "minecraft:item",
           "name": "superbwarfare:charm_ancient_cpu",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "superbwarfare:charm_dragon_head",
           "weight": 5
         },
         {
@@ -76,6 +126,11 @@
         {
           "type": "minecraft:item",
           "name": "superbwarfare:charm_lily",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "superbwarfare:charm_hiru_head",
           "weight": 2
         }
       ],
