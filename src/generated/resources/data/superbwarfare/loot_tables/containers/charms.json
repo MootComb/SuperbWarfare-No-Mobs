@@ -36,6 +36,11 @@
         },
         {
           "type": "minecraft:item",
+          "name": "superbwarfare:charm_small_container",
+          "weight": 25
+        },
+        {
+          "type": "minecraft:item",
           "name": "superbwarfare:charm_fukamizu_fish",
           "weight": 15
         },
@@ -71,6 +76,16 @@
         },
         {
           "type": "minecraft:item",
+          "name": "superbwarfare:charm_container",
+          "weight": 15
+        },
+        {
+          "type": "minecraft:item",
+          "name": "superbwarfare:charm_m67_grenade",
+          "weight": 15
+        },
+        {
+          "type": "minecraft:item",
           "name": "superbwarfare:charm_wither_skeleton_skull",
           "weight": 10
         },
@@ -101,6 +116,21 @@
         },
         {
           "type": "minecraft:item",
+          "name": "superbwarfare:charm_sui_container",
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "superbwarfare:charm_stars_il",
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "superbwarfare:charm_mk_82",
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
           "name": "superbwarfare:charm_sept_wolves",
           "weight": 5
         },
@@ -116,7 +146,16 @@
         },
         {
           "type": "minecraft:item",
+          "name": "superbwarfare:charm_the_emperors_new_charm",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
           "name": "superbwarfare:charm_senpai"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "superbwarfare:charm_mrahc"
         },
         {
           "type": "minecraft:item",
