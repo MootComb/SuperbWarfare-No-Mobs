@@ -724,7 +724,7 @@ open class GeoGunRenderer : AbstractGeoItemRendererV2() {
                 }
                 attachmentModel.renderToBuffer(
                     poseStack, bufferSource, texture, packedLight, packedOverlay,
-                    null, resolveAmmoReadout(stack, definition.effectiveAmmoBar(), definition.effectiveTextShow())
+                    null, resolveAmmoReadout(stack, definition.ammoBar, definition.textShow)
                 )
             } finally {
                 // 附件模型实例是全局共享的，写进去的摆动姿态必须还原
@@ -820,7 +820,7 @@ open class GeoGunRenderer : AbstractGeoItemRendererV2() {
         return ScopeRenderData(
             attachmentModel, texture, scopeMode, scopeModeIndex, companionSightMode, attachmentId,
             Matrix4f(mountTransform), Matrix4f(bindMountTransform),
-            definition.effectiveAmmoBar(), definition.effectiveTextShow()
+            definition.ammoBar, definition.textShow
         )
     }
 
@@ -948,7 +948,7 @@ open class GeoGunRenderer : AbstractGeoItemRendererV2() {
         mulPoseWithNormal(poseStack, Matrix4f(mountTransform))
         attachmentModel.renderToBuffer(
             poseStack, bufferSource, texture, packedLight, packedOverlay,
-            null, resolveAmmoReadout(stack, definition.effectiveAmmoBar(), definition.effectiveTextShow())
+            null, resolveAmmoReadout(stack, definition.ammoBar, definition.textShow)
         )
         poseStack.popPose()
     }
@@ -1007,7 +1007,7 @@ open class GeoGunRenderer : AbstractGeoItemRendererV2() {
         )
         attachmentModel.renderToBuffer(
             poseStack, bufferSource, texture, packedLight, packedOverlay,
-            null, resolveAmmoReadout(stack, definition.effectiveAmmoBar(), definition.effectiveTextShow())
+            null, resolveAmmoReadout(stack, definition.ammoBar, definition.textShow)
         )
         poseStack.popPose()
     }
@@ -1058,7 +1058,7 @@ open class GeoGunRenderer : AbstractGeoItemRendererV2() {
         mulPoseWithNormal(poseStack, Matrix4f(mountTransform))
         attachmentModel.renderToBuffer(
             poseStack, bufferSource, texture, packedLight, packedOverlay,
-            null, resolveAmmoReadout(stack, definition.effectiveAmmoBar(), definition.effectiveTextShow())
+            null, resolveAmmoReadout(stack, definition.ammoBar, definition.textShow)
         )
         poseStack.popPose()
     }
