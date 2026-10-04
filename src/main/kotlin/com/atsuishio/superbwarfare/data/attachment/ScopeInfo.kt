@@ -19,6 +19,7 @@ private const val AMMO_COLOR_WHITE = -0x1
 private const val OPAQUE_ALPHA = -0x1000000
 private const val GRADIENT_MODE_HSV = 2
 private const val AMMO_COUNT_PLACEHOLDER = "%ammo_count%"
+private const val RANGE_PLACEHOLDER = "%range%"
 private const val DEFAULT_TEXT_SCALE = 0.0625f
 
 @Serializable
@@ -207,7 +208,8 @@ enum class TextAlign {
  * 画在骨骼上的一行弹药文字，写法对齐 TACZ 的 `text_show`
  *
  * 骨骼只作为锚点（不需要自带方块），位置与朝向都取自它的全局变换，[scale] 是"每字体像素占多少模型单位"
- * [text] 里的 [AMMO_COUNT_PLACEHOLDER] 会换成当前弹匣数量，不含占位符就原样绘制（例如固定标签 `"AMMO"`）
+ * [text] 里的 [AMMO_COUNT_PLACEHOLDER] 会换成当前弹匣数量、`%range%` 换成当前测距读数（单位：格，
+ * 无有效读数时是 `---`），不含占位符就原样绘制（例如固定标签 `"AMMO"`）
  * 可见性由骨骼的祖先决定：挂在 `division*` 下时只随分划出现（即开镜时），挂在别处则随镜身常驻
  *
  * [color] 与 [colorMode] 的分级规则同 [AmmoBarEntry]，[align] 或颜色写错会让整份配件数据解析失败
@@ -238,11 +240,18 @@ data class AmmoTextEntry(
     @Transient
     private val tiers = AmmoColorTiers(colorMode, color, bone)
 
+    @Transient
+    val usesRange: Boolean = text.contains(RANGE_PLACEHOLDER)
+
     /** 按剩余弹药比例 [progress] 取色，返回不透明 ARGB，没配颜色则返回白色 */
     fun colorAt(progress: Float): Int = tiers.colorAt(progress)
 
-    /** 把 [AMMO_COUNT_PLACEHOLDER] 换成实际数量 */
-    fun resolve(count: Int): String = text.replace(AMMO_COUNT_PLACEHOLDER, count.toString())
+    /** 把 [AMMO_COUNT_PLACEHOLDER] / `%range%` 换成实际数值 */
+    fun resolve(count: Int, range: Int = NO_RANGE): String {
+        val resolved = text.replace(AMMO_COUNT_PLACEHOLDER, count.toString())
+        if (!usesRange) return resolved
+        return resolved.replace(RANGE_PLACEHOLDER, if (range < 0) NO_RANGE_TEXT else range.toString())
+    }
 
     /** 让 [width] 宽的文字按 [align] 对齐、原点仍留在骨骼上的水平偏移 */
     fun offsetX(width: Int): Float {
@@ -251,6 +260,11 @@ data class AmmoTextEntry(
             TextAlign.CENTER -> -width / 2f
             TextAlign.RIGHT -> -width.toFloat()
         }
+    }
+
+    companion object {
+        const val NO_RANGE = -1
+        const val NO_RANGE_TEXT = "---"
     }
 }
 

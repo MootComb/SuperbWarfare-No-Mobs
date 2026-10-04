@@ -155,7 +155,8 @@
       "superbwarfare:peq_15"
     ],
     "LeftRail": [
-      "superbwarfare:peq_15"
+      "superbwarfare:peq_15",
+      "superbwarfare:range_finder"
     ],
     "RightRail": [
       "superbwarfare:peq_15"

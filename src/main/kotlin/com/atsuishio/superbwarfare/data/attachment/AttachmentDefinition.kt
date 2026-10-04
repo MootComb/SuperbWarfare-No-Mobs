@@ -24,20 +24,21 @@ data class AttachmentDefinition(
     val slot: AttachmentType = AttachmentType.SCOPE,
 
     /**
-     * 除 [slot] 之外**还能**装进哪些槽位（`"Slots": ["LowerRail", "LeftRail", "RightRail"]`）。
+     * 除 [slot] 之外**还能**装进哪些槽位（`"ExtraSlots": ["LowerRail", "LeftRail", "RightRail"]`）。
+     *
+     * 名字里的 `Extra` 是要紧的：[slot] 是这件配件**定义在哪个槽位**上，这里列的只是"顺便也能装"，
+     * 两者不是平级关系 —— 装上以后一律以**实际安装的槽位**为准（挂载骨骼 [AttachmentSlots.mountBoneOf]、
+     * 互斥判定、渲染都取那个槽位），[slot] 同时还是 [scopeMode] / [scopeZoom] 这类
+     * **按槽位下标取值**的数据的取值依据。所以多槽位的配件请**不要**带 `ScopeInfo`：
+     * 同一份模式表会在不同槽位上被解释成不同的档位。
      *
      * 存在的理由是同一件东西在好几根导轨上都装得下：激光指示器 / 战术手电这类不分上下左右，
      * 而四条导轨在 `AttachmentSlots` 里各占一个槽位（只有这样它们才能互不冲突），
      * 于是"一件配件、多个槽位"只能由配件数据自己表达。
      *
-     * 装上以后一律以**实际安装的槽位**为准 —— 挂载骨骼（[AttachmentSlots.mountBoneOf]）、互斥判定、
-     * 渲染都取那个槽位，[slot] 只是"首选槽位"，同时也是 [scopeMode] / [scopeZoom] 这类
-     * **按槽位下标取值**的数据的取值依据。所以多槽位的配件请**不要**带 `ScopeInfo`：
-     * 同一份模式表会在不同槽位上被解释成不同的档位。
-     *
      * 值里不必重复写 [slot]（[acceptedSlots] 会自动并上），写重了也无害。
      */
-    @SerialName("Slots")
+    @SerialName("ExtraSlots")
     val extraSlots: List<AttachmentType> = emptyList(),
 
     /** 配件等级，如果类型是弹匣则用于弹匣等级，`GunData.magazineLevel()` 靠它从 `DrumLevels` 与分级换弹时间里取值 */
@@ -76,6 +77,22 @@ data class AttachmentDefinition(
 
     @SerialName("Texture")
     val texture: SerializedResourceLocation? = null,
+
+    /**
+     * 配件的基础三轴旋转（度）：乘在挂点变换**之内**，也就是"挂上去之后再整件转一下"。
+     *
+     * 三个分量与 geo 里骨骼的 `rotation` **是同一套写法**（换算见 `TreeBedrockModelBaker`：
+     * X、Y 取负、Z 不取负，按 `ZYX` 顺序合成），所以美术在 Blockbench 里量到多少度，这里就写多少度。
+     * 不写、或三个分量都是 `0`，等于没有这个字段（渲染路径会整段跳过）。
+     *
+     * 存在的理由是"同一件配件要装在朝向不同的挂点上"：四条导轨的挂点骨骼各自带
+     * ±90° / 180° 的 Z 轴旋转（见 [AttachmentSlots.Bones]），而配件模型只可能照其中一根的方向去建模，
+     * 换到别的导轨上就用这个字段补正，不必再让美术多出一份模型。
+     *
+     * **瞄准镜会忽略它**：镜筒的挂点变换还兼着开镜窗口（`ocular`）的定位，旋转光学瞄具本身也没有意义。
+     */
+    @SerialName("Rotation")
+    val rotation: AttachmentRotation? = null,
 
     @SerialName("MuzzleFlashScale")
     val muzzleFlashScale: Float = 1.0f,
@@ -264,6 +281,27 @@ enum class AttachmentModifierOp {
 
     @SerialName("ClampMax")
     CLAMP_MAX,
+}
+
+/**
+ * 配件的基础三轴旋转（见 [AttachmentDefinition.rotation]），单位是度
+ *
+ * 三个分量分别省略时为 `0`；[isIdentity] 为 `true` 时渲染路径整个跳过，
+ * 既不建矩阵也不乘进 `PoseStack` —— 绝大多数配件都不写这个字段。
+ */
+@Serializable
+data class AttachmentRotation(
+    @SerialName("X")
+    val x: Float = 0f,
+
+    @SerialName("Y")
+    val y: Float = 0f,
+
+    @SerialName("Z")
+    val z: Float = 0f,
+) {
+    /** 三个分量都是 `0`，等价于不写（没有背衬字段，本来就不会被序列化） */
+    val isIdentity: Boolean get() = x == 0f && y == 0f && z == 0f
 }
 
 @Serializable
