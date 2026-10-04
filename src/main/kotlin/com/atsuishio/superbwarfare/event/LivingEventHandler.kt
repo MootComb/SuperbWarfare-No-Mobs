@@ -375,10 +375,6 @@ object LivingEventHandler {
                             oldData.reload.finishTimer.reset()
                         }
 
-                        if (oldStack.`is`(ModItems.SENTINEL.get())) {
-                            oldData.charge.timer.reset()
-                        }
-
                         // TODO 如何保存修改后的数据
                         oldGun.onChangeSlot(oldData, entity)
                         oldData.save()
@@ -402,10 +398,6 @@ object LivingEventHandler {
                             newData.reload.prepareLoadTimer.reset()
                             newData.reload.iterativeLoadTimer.reset()
                             newData.reload.finishTimer.reset()
-                        }
-
-                        if (newStack.`is`(ModItems.SENTINEL.get())) {
-                            newData.charge.timer.reset()
                         }
 
                         for (type in Perk.Type.entries) {
