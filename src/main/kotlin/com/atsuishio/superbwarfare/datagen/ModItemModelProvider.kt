@@ -194,6 +194,7 @@ class ModItemModelProvider(output: PackOutput, existingFileHelper: ExistingFileH
         simpleItem(ModItems.TACTICAL_TERMINAL)
         simpleItem(ModItems.CRUST)
         simpleItem(ModItems.RAD_AWAY)
+        simpleItem(ModItems.NITROCELLULOSE)
 
         simpleMaterials(ModItems.IRON_MATERIALS)
         simpleMaterials(ModItems.STEEL_MATERIALS)
@@ -394,6 +395,7 @@ class ModItemModelProvider(output: PackOutput, existingFileHelper: ExistingFileH
         simpleItem(ModItems.CHARM_SHEEP)
         simpleItem(ModItems.CHARM_CHICKEN)
         simpleItem(ModItems.CHARM_PUFFERFISH)
+        simpleItem(ModItems.CHARM_DOG_TAG)
         simpleItem(ModItems.CHARM_ZOMBIE_HEAD)
         simpleItem(ModItems.CHARM_SKELETON_SKULL)
         simpleItem(ModItems.CHARM_CREEPER_HEAD)
