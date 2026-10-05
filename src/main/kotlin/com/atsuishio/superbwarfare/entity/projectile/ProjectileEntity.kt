@@ -17,6 +17,7 @@ import com.atsuishio.superbwarfare.entity.projectile.IBulletProperties.Companion
 import com.atsuishio.superbwarfare.entity.projectile.IBulletProperties.Companion.DEFAULT_R
 import com.atsuishio.superbwarfare.entity.setValue
 import com.atsuishio.superbwarfare.entity.vehicle.base.VehicleEntity
+import com.atsuishio.superbwarfare.event.ShieldHandler
 import com.atsuishio.superbwarfare.init.ModDamageTypes.causeGunFireAbsoluteDamage
 import com.atsuishio.superbwarfare.init.ModDamageTypes.causeGunFireDamage
 import com.atsuishio.superbwarfare.init.ModDamageTypes.causeGunFireHeadshotAbsoluteDamage
@@ -198,6 +199,9 @@ open class ProjectileEntity(entityType: EntityType<out ProjectileEntity>, level:
 
     // 重力（非接口属性，保留私有）
     private var gravity = 0.05f
+
+    // 上次在枪盾上溅火花的 gameTime
+    private var lastShieldSpark = 0L
 
     init {
         this.noCulling = true
@@ -554,21 +558,22 @@ open class ProjectileEntity(entityType: EntityType<out ProjectileEntity>, level:
                     15, 0.1, 0.1, 0.1, 0.05, true
                 )
             } else {
-                val bulletDecalOption = BulletDecalOption(
-                    result.direction, result.blockPos,
-                    this.entityData.get(COLOR_R),
-                    this.entityData.get(COLOR_G),
-                    this.entityData.get(COLOR_B)
-                )
+                var red = this.entityData.get(COLOR_R)
+                var green = this.entityData.get(COLOR_G)
+                var blue = this.entityData.get(COLOR_B)
+                if (red == DEFAULT_R && green == DEFAULT_G && blue == DEFAULT_B) {
+                    red = 0.9f
+                    green = 0f
+                    blue = 0f
+                }
+
+                val bulletDecalOption = BulletDecalOption(result.direction, result.blockPos, red, green, blue)
                 ParticleTool.sendParticle(
                     level, bulletDecalOption,
                     location.x, location.y, location.z,
                     1, 0.0, 0.0, 0.0, 0.0, true
                 )
                 summonVectorParticle(level, state, location, dir)
-                // Explosion flash is emitted client-side via onRemovedFromWorld()
-                // when discard() propagates the removal packet to the client.
-                // The dead-code "if (level.isClientSide)" block has been removed.
             }
             level.playSound(
                 null,
@@ -669,6 +674,8 @@ open class ProjectileEntity(entityType: EntityType<out ProjectileEntity>, level:
                 beastKill(this.owner, entity)
                 return
             }
+
+            hitShield(entity, result.location)
         }
 
         this.damageValue *= (deltaMovement.length() / velocityValue).coerceIn(0.0, 1.0).toFloat()
@@ -777,6 +784,25 @@ open class ProjectileEntity(entityType: EntityType<out ProjectileEntity>, level:
         this.xRot = (Mth.atan2(this.deltaMovement.y(), horizontalDistance) * (180.0 / PI)).toFloat()
         this.yRotO = this.yRot
         this.xRotO = this.xRot
+    }
+
+    /** 命中枪盾时在命中点溅一次火花；判定本身在 `ShieldHandler` 的事件层 */
+    private fun hitShield(target: LivingEntity, pos: Vec3) {
+        // 反推 1 tick 的位置，与 `ShieldHandler` 用同一套来向口径
+        val travel = position().subtract(xo, yo, zo)
+        if (travel.lengthSqr() < 1.0E-6) return
+        if (!ShieldHandler.willCover(target, travel, position().subtract(travel))) return
+
+        val level = this.level() as? ServerLevel ?: return
+        val now = level.gameTime
+        if (now - lastShieldSpark < SHIELD_SPARK_INTERVAL) return
+        lastShieldSpark = now
+
+        ParticleTool.sendParticle(
+            level, ModParticleTypes.FIRE_STAR.get(), pos.x, pos.y, pos.z,
+            3, 0.0, 0.0, 0.0, 0.2, false
+        )
+        level.playSound(null, BlockPos.containing(pos), ModSounds.STEEL_PIPE_HIT.get(), SoundSource.PLAYERS, 1f, 1.2f)
     }
 
     override fun performDamage(entity: Entity, damage: Float, isHeadshot: Boolean) {
@@ -937,6 +963,9 @@ open class ProjectileEntity(entityType: EntityType<out ProjectileEntity>, level:
 
     companion object {
         val MODEL = loc("models/bedrock/projectile/projectile.geo.json")
+
+        /** 枪盾火花的节流间隔（tick） */
+        private const val SHIELD_SPARK_INTERVAL = 4L
 
         @JvmField
         val PROJECTILE_TARGETS_FAST =
