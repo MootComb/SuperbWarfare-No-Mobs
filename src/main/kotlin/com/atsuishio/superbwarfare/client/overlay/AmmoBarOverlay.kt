@@ -8,6 +8,7 @@ import com.atsuishio.superbwarfare.client.overlay.AmmoBarOverlay.getBackupAmmoSt
 import com.atsuishio.superbwarfare.client.overlay.AmmoBarOverlay.render
 import com.atsuishio.superbwarfare.client.overlay.AmmoBarOverlay.toUnderScores
 import com.atsuishio.superbwarfare.config.client.DisplayConfig
+import com.atsuishio.superbwarfare.data.gun.ActiveGun
 import com.atsuishio.superbwarfare.data.gun.Ammo
 import com.atsuishio.superbwarfare.data.gun.AmmoConsumer.AmmoConsumeType
 import com.atsuishio.superbwarfare.data.gun.GunData
