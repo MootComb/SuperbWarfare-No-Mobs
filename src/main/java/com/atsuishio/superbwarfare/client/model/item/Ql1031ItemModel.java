@@ -1,6 +1,5 @@
 package com.atsuishio.superbwarfare.client.model.item;
 
-import com.atsuishio.superbwarfare.client.overlay.CrossHairOverlay;
 import com.atsuishio.superbwarfare.data.gun.GunData;
 import com.atsuishio.superbwarfare.data.gun.value.AttachmentType;
 import com.atsuishio.superbwarfare.event.ClientEventHandler;
@@ -104,7 +103,6 @@ public class Ql1031ItemModel extends CustomGunModel<Ql1031Item> {
             }
         }
 
-        CrossHairOverlay.gunRot = shen.getRotZ();
 
         GeoBone flare = getAnimationProcessor().getBone("flare");
         int BarrelType = data.attachment.get(AttachmentType.BARREL);
