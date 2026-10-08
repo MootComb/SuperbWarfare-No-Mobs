@@ -1123,6 +1123,13 @@ class GunData private constructor(
         this.item.shoot(this, entity, spread, zoom, uuid, targetPos, power)
     }
 
+    fun shoot(
+        entity: Entity, spread: Double, zoom: Boolean, uuid: UUID?, targetPos: Vec3?, power: Double,
+        muzzleDirection: Vec3?
+    ) {
+        this.item.shoot(this, entity, spread, zoom, uuid, targetPos, power, muzzleDirection)
+    }
+
     /** Fires projectile using encapsulated parameter structure. */
     fun shoot(parameters: ShootParameters) {
         this.item.shoot(parameters)

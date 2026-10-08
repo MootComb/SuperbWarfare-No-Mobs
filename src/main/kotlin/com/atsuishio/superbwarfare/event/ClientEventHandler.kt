@@ -3,6 +3,7 @@ package com.atsuishio.superbwarfare.event
 import com.atsuishio.superbwarfare.Mod
 import com.atsuishio.superbwarfare.api.event.ClientGunFireEvent
 import com.atsuishio.superbwarfare.api.event.ClientVehicleFireEvent
+import com.atsuishio.superbwarfare.client.ClientRenderHandler
 import com.atsuishio.superbwarfare.client.ClientSyncedEntityHandler
 import com.atsuishio.superbwarfare.client.animation.AnimationCurves
 import com.atsuishio.superbwarfare.client.animation.gun.GeoGunAnimationInstance
@@ -1031,7 +1032,12 @@ object ClientEventHandler {
                         } else {
                             if (lockOn) {
                                 if (lockingPos != null) {
-                                    sendPacketToServer(ShootMessage(gunSpread, zoom, null, lockingPos!!.toVector3f()))
+                                    sendPacketToServer(
+                                        ShootMessage(
+                                            gunSpread, zoom, null, lockingPos!!.toVector3f(),
+                                            direction = ClientRenderHandler.freshMuzzleDirection()
+                                        )
+                                    )
                                 }
                                 lockOn = false
                             }
@@ -1087,7 +1093,8 @@ object ClientEventHandler {
                                             gunSpread,
                                             zoom,
                                             lockingEntity!!.uuid,
-                                            lockingEntity!!.eyePosition.toVector3f()
+                                            lockingEntity!!.eyePosition.toVector3f(),
+                                            direction = ClientRenderHandler.freshMuzzleDirection()
                                         )
                                     )
                                 }
@@ -1137,7 +1144,8 @@ object ClientEventHandler {
                                 gunSpread,
                                 zoom,
                                 lockingEntity!!.getUUID(),
-                                lockingEntity!!.eyePosition.toVector3f()
+                                lockingEntity!!.eyePosition.toVector3f(),
+                                direction = ClientRenderHandler.freshMuzzleDirection()
                             )
                         )
                         holdingFireKey = false
@@ -1867,7 +1875,9 @@ object ClientEventHandler {
                 zoom,
                 if (lockedEntity != null) lockedEntity!!.getUUID() else null,
                 null,
-                chargePower
+                chargePower,
+                // 枪管此刻指向哪儿（上一帧采的位形 = 这一发的后坐顶上来之前），服务端拿它当开火方向
+                ClientRenderHandler.freshMuzzleDirection()
             )
         )
         fireRecoilTime = 10.0
@@ -2452,7 +2462,7 @@ object ClientEventHandler {
         val walkPosY = (swayY + movePosY).toFloat()
         val walkPosZ = 0f
         val walkRotX = swayX.toFloat()
-        val walkRotY = (0.2f * movePosX).toFloat()
+        val walkRotY = (0.1f * movePosX).toFloat()
         val walkRotZ = (0.2f * movePosX).toFloat()
 
         val i = if (useCustomAnim) 0 else 1
@@ -2480,9 +2490,9 @@ object ClientEventHandler {
 
         poseStack.translate(-gunPosX / 16, gunPosY / 16, gunPosZ / 16)
 
-        poseStack.mulPose(Axis.XP.rotation(gunRotX))
-        poseStack.mulPose(Axis.YP.rotation(gunRotY))
-        poseStack.mulPose(Axis.ZP.rotation(gunRotZ))
+        poseStack.mulPose(Axis.XP.rotation(gunRotX * if (firePosTimer != 0.0) 0.1f else 1.0f))
+        poseStack.mulPose(Axis.YP.rotation(gunRotY * if (firePosTimer != 0.0) 0.1f else 1.0f))
+        poseStack.mulPose(Axis.ZP.rotation(gunRotZ * if (firePosTimer != 0.0) 0.1f else 1.0f))
     }
 
     private fun handleWeaponZoom(entity: LivingEntity) {

@@ -1,5 +1,6 @@
 ﻿package com.atsuishio.superbwarfare.network.message.send
 
+import com.atsuishio.superbwarfare.config.server.MiscConfig
 import com.atsuishio.superbwarfare.data.gun.ActiveGun
 import com.atsuishio.superbwarfare.data.gun.GunData.Companion.from
 import com.atsuishio.superbwarfare.item.gun.GunItem
@@ -18,17 +19,20 @@ data class ShootMessage @JvmOverloads constructor(
     val zoom: Boolean,
     val uuid: SerializedUUID?,
     val targetPos: SerializedVector3f?,
-    val power: Double = 1.0
+    val power: Double = 1.0,
+    val direction: SerializedVector3f? = null
 ) : ServerPacketPayload() {
     override fun PayloadContext.handler() {
         val player = sender()
         val stack = ActiveGun.stackOf(player)
         if (stack.item !is GunItem) return
 
-        if (targetPos == null) {
-            from(stack).shoot(player, spread, zoom, uuid, power)
-        } else {
-            from(stack).shoot(player, spread, zoom, uuid, targetPos.toVec3(), power)
+        val flag = try {
+            MiscConfig.REALISTIC_SHOOT_MODE.get()
+        } catch (_: Exception) {
+            false
         }
+        val muzzleDirection = if (flag) direction?.toVec3() else null
+        from(stack).shoot(player, spread, zoom, uuid, targetPos?.toVec3(), power, muzzleDirection)
     }
 }
