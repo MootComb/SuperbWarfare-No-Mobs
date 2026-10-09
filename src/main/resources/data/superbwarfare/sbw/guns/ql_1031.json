@@ -1,5 +1,6 @@
 {
   "Spread": 6,
+  "HasBipod": true,
   "RecoilX": 0.0016,
   "RecoilY": 0.018,
   "Damage": 9,
@@ -209,7 +210,7 @@
     ],
     "UpperRail": [
       "superbwarfare:peq_15",
-      "superbwarfare:shield_test",
+      "superbwarfare:standard_gun_shield",
       "superbwarfare:pistol_laser"
     ],
     "LeftRail": [
