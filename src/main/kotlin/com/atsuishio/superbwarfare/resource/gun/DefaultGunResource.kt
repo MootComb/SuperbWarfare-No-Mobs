@@ -47,6 +47,10 @@ class DefaultGunResource : IDBasedData<DefaultGunResource> {
     var itemDisplay: MutableMap<String, ItemDisplayInfo> = hashMapOf()
 
     @JvmField
+    @SerialName("Description")
+    var description: List<ComponentInfo> = emptyList()
+
+    @JvmField
     @SerialName("Model")
     var modelValue: ModelResource? = ModelResource()
 
@@ -99,8 +103,8 @@ class DefaultGunResource : IDBasedData<DefaultGunResource> {
     var animation: GunAnimation? = GunAnimation()
 
     @JvmField
-    @SerialName("UseOldHandRenderer")
-    var useOldHandRenderer: Boolean = false
+    @SerialName("HasReflectionSound")
+    var hasReflectionSound: Boolean = true
 
     @JvmField
     @SerialName("FlarePosition")

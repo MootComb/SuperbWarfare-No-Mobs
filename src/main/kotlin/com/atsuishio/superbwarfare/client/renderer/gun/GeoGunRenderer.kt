@@ -91,6 +91,8 @@ open class GeoGunRenderer : AbstractGeoItemRendererV2() {
      */
     private var localFirstPersonHand: InteractionHand? = null
 
+    private val defaultItemDisplay = ItemDisplayInfo()
+
     private data class ScopeViewSmoothState(
         var modeIndex: Int = -1,
         var source: Matrix4f = Matrix4f(),
@@ -246,6 +248,9 @@ open class GeoGunRenderer : AbstractGeoItemRendererV2() {
             applyItemDisplayTransform(poseStack, display)
         }
         super.beforeRender(poseStack, transformType, stack, partialTick)
+        if (usesModelBone) {
+            applyItemDisplayScale(poseStack, display ?: defaultItemDisplay)
+        }
     }
 
     override fun updateParticleEmitterTransforms(
@@ -411,8 +416,7 @@ open class GeoGunRenderer : AbstractGeoItemRendererV2() {
         if (transformType.firstPerson()) {
             val hand = handForContext(transformType)
             val pose = FirstPersonRenderHandler.getActiveAnimationInstance(hand)?.cachedPose
-            // 副武器换弹：让**主武器（含玩家手臂）**跟着副武器动画的 `root` 运动走（§9.8.7）。
-            // ⚠ 必须在 `applyPose` **之前**算：它会直接改写主武器 `root` 那根骨骼。
+            // 副武器换弹：让**主武器（含玩家手臂）**跟着副武器动画的 `root` 运动走
             val follow = resolveSubWeaponFollowPose(stack, model)
             subWeaponFollow = follow
 
@@ -2343,6 +2347,11 @@ open class GeoGunRenderer : AbstractGeoItemRendererV2() {
 
         val scale = display.scale
         poseStack.scale(scale[0], scale[1], scale[2])
+    }
+
+    open fun applyItemDisplayScale(poseStack: PoseStack, display: ItemDisplayInfo) {
+        val scale = display.scale
+        poseStack.scale(scale.x, scale.y, scale.z)
     }
 
     open fun positioningBone(transformType: ItemDisplayContext): String? {

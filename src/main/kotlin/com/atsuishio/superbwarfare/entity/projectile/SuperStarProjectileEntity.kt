@@ -74,6 +74,10 @@ open class SuperStarProjectileEntity(type: EntityType<out SuperStarProjectileEnt
         this.hitAndSlash(result.entity, result.headshot)
     }
 
+    override fun afterShieldBlock(result: EntityHitResult) {
+        this.currentTarget = null
+    }
+
     @JvmOverloads
     open fun hitAndSlash(entity: Entity, headshot: Boolean = false) {
         val level = level() as? ServerLevel ?: return
