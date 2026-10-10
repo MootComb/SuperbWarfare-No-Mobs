@@ -1,5 +1,6 @@
 package com.atsuishio.superbwarfare.mixins;
 
+import com.atsuishio.superbwarfare.event.DeployedWeaponHandler;
 import com.atsuishio.superbwarfare.init.ModItems;
 import com.atsuishio.superbwarfare.init.ModMobEffects;
 import com.atsuishio.superbwarfare.tools.NBTTool;
@@ -27,6 +28,17 @@ public abstract class KeyboardInputMixin extends Input {
         var tag = NBTTool.getTag(stack);
 
         if (stack.is(ModItems.MONITOR.get()) && tag.getBoolean("Using") && tag.getBoolean("Linked")) {
+            this.up = false;
+            this.down = false;
+            this.left = false;
+            this.right = false;
+            this.shiftKeyDown = false;
+            this.forwardImpulse = 0;
+            this.leftImpulse = 0;
+            this.jumping = false;
+        }
+
+        if (DeployedWeaponHandler.isDeployed(player)) {
             this.up = false;
             this.down = false;
             this.left = false;
