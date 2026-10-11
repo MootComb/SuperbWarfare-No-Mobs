@@ -6897,6 +6897,11 @@
 					"pivot": [-1.75, 2, -8]
 				},
 				{
+					"name": "deploy_pos",
+					"parent": "root",
+					"pivot": [0, -2.82422, -2.25]
+				},
+				{
 					"name": "positioning",
 					"pivot": [0, 0, 0]
 				},

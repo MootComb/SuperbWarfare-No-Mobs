@@ -1,6 +1,7 @@
 package com.atsuishio.superbwarfare.client.charm
 
 import com.atsuishio.superbwarfare.client.charm.CharmRuntime.apply
+import com.atsuishio.superbwarfare.client.charm.CharmRuntime.clampBodyCone
 import com.atsuishio.superbwarfare.client.model.attachment.BedrockAttachmentModel
 import com.atsuishio.superbwarfare.data.attachment.AttachmentDefinition
 import com.atsuishio.superbwarfare.data.attachment.CharmInfo
@@ -10,9 +11,7 @@ import net.minecraft.world.InteractionHand
 import org.joml.Matrix4f
 import org.joml.Quaternionf
 import org.joml.Vector3f
-import kotlin.math.exp
-import kotlin.math.sin
-import kotlin.math.sqrt
+import kotlin.math.*
 
 object CharmRuntime {
 
@@ -174,8 +173,6 @@ object CharmRuntime {
         state.params.turnResponse = state.baseTurnResponse * (1f - zoom) + state.aimResponse * zoom
 
         val cameraPos = mc.gameRenderer.mainCamera.position
-        // ⚠ 相机位置基线必须在 [updateFrame] **之前**立好：它是"帧间位移"的零点，
-        // 缺了它第一次差分就会拿 (0,0,0) 当上一帧位置，得到一个上万方块/秒的速度。
         if (!state.hasCamera) {
             state.camX = cameraPos.x
             state.camY = cameraPos.y
@@ -187,9 +184,6 @@ object CharmRuntime {
         state.accumulator = (state.accumulator + frameDt).coerceAtMost(MAX_ACCUMULATOR)
         val steps = (state.accumulator / SIM_STEP).toInt().coerceAtMost(MAX_STEPS)
         for (i in 1..steps) {
-            // ⚠ 悬挂点要在"上一次解算 → 本帧采样"之间**线性铺开**分给各个子步。
-            // 直接把本帧的值原样交给每一步是不行的：一帧跑几步时后面几步的位移会算成 0，
-            // 而"一帧跑几步"取决于渲染帧率 —— 那会让摆幅跟着帧率变（高帧率下每步摊到的位移更小）。
             val t = i.toFloat() / steps
             state.anchorInterpolated.set(state.anchorStep).lerp(state.anchorFiltered, t)
 
@@ -204,8 +198,6 @@ object CharmRuntime {
             }
         }
 
-        // ⚠ 只有**真的推进过**才把基准挪到本帧：否则高帧率下连着好几帧不推进，
-        // 基准却被逐帧推着走，下一次推进就只能看到最后一帧的位移 —— 摆幅又会跟着帧率变。
         if (steps > 0) {
             state.camX = cameraPos.x
             state.camY = cameraPos.y
@@ -223,14 +215,7 @@ object CharmRuntime {
     }
 
     /**
-     * 采集本帧的相机运动量（[CharmFrame]）。每帧**一次**，各个子步共用。
-     *
-     * 三个量都在视图空间里表达：
-     *
-     * - **重力**：世界的"向下"被相机转过来。相机抬头时它跟着偏，于是吊坠吊的仍然是世界的下；
-     * - **线加速度**：相机世界坐标先低通成速度、再差分；这是"起步往后甩"的全部来源；
-     * - **角速度**：由「视图 ← 世界」的帧间差得到（推导见 [CharmFrameMath.angularVelocity]），
-     *   角加速度再差分一次。**匀速转身时角加速度为 0、离心力恒定**，这正是"匀速转身往前飘"。
+     * 采集本帧的相机运动量（[CharmFrame]）。每帧**一次**，各个子步共用
      */
     private fun updateFrame(state: CharmState, frameDt: Float, camX: Double, camY: Double, camZ: Double) {
         val frame = state.frame
@@ -256,9 +241,6 @@ object CharmRuntime {
             state.camVelocityPrev[1] = state.camVelocity[1]
             state.camVelocityPrev[2] = state.camVelocity[2]
         } else {
-            // 归位后的第一步：不知道上一刻的速度，就把当前速度当基线、伪力记 0 ——
-            // 否则"走动中被重置"会凭空吃到一次和走路速度等量的踢。（[apply] 会先立好位置基线，
-            // 这里只是兜底。）
             state.camVelocity[0] = (camX - state.camX) / frameDt
             state.camVelocity[1] = (camY - state.camY) / frameDt
             state.camVelocity[2] = (camZ - state.camZ) / frameDt
@@ -268,9 +250,7 @@ object CharmRuntime {
             frame.camAccel.set(0f, 0f, 0f)
             state.hasCamera = true
         }
-        // ⚠ 传送/维度切换/调试停帧会让"一帧位移"大到离谱，差分出来的加速度能上百倍重力。
-        // 夹一下上限（远高于正常游玩：走路起步约 20、载具急加速约 50），
-        // 免得偶尔一次跳变把吊坠甩到限位上去。
+
         if (frame.camAccel.lengthSquared() > MAX_CAM_ACCEL * MAX_CAM_ACCEL) {
             frame.camAccel.normalize(MAX_CAM_ACCEL)
         }
@@ -282,8 +262,6 @@ object CharmRuntime {
         // 相机角速度（视图空间）→ 低通 → 角加速度
         if (state.hasRotation) {
             CharmFrameMath.angularVelocity(state.rotationPrev, state.viewFromWorld, frameDt, state.rawOmega)
-            // 低通的作用和相机速度那道一样：把鼠标/window 事件带来的逐帧抖动抹平。
-            // 它保住的是**冲量**（∫α dt = Δω），只是把一个尖峰摊成 0.06 秒的斜坡 —— 反而更好积分。
             state.omega.lerp(state.rawOmega, k)
             frame.alpha.set(state.omega).sub(state.omegaPrev).mul(1f / frameDt)
             state.omegaPrev.set(state.omega)
@@ -306,13 +284,7 @@ object CharmRuntime {
     }
 
     /**
-     * 解算出来的绳方向 → 模型局部空间的旋转，结果放在 `state.swing`。
-     *
-     * 解算已经跑在视图空间里，所以只需要**一次**换基：视图空间 → 附件模型局部
-     * （摆点就是模型局部空间的原点）。换基用的是**当前这一帧**的渲染矩阵，
-     * 所以插值出来的角度会被画在正确的挂点姿态上。
-     *
-     * @return 方向退化（理论上不会发生）时返回 `false`，调用方保持上一次的结果
+     * 解算出来的绳方向 → 模型局部空间的旋转，结果放在 `state.swing`
      */
     private fun solveSwing(state: CharmState, rig: CharmRig, modelToView: Matrix4f): Boolean {
         state.direction.set(state.solver.rope)
@@ -320,6 +292,9 @@ object CharmRuntime {
         if (state.direction.lengthSquared() < 1.0e-8f) return false
         state.direction.normalize()
 
+        // ⚠ 顺序有意义：先圆锥、后横向墙，让现有的横向墙保持最终裁决权 ——
+        // 这样锥没咬住时，所有现有吊坠的输出与加这项之前逐位一致（见 [clampBodyCone]）。
+        clampBodyCone(state.direction, rig.restDir, state.params.bodyMaxAngle)
         clampLateral(state.direction, state.params.lateralLimitSin)
 
         // ⚠ 最短弧旋转在 `direction ≈ −restDir` 处退化（叉积为零，"最短弧"没有定义）：
@@ -334,14 +309,48 @@ object CharmRuntime {
         return true
     }
 
+    private fun clampBodyCone(direction: Vector3f, restDir: Vector3f, limit: Float) {
+        if (limit <= 0f) return
+
+        // ⚠ 两个向量都在**模型局部**空间里（调用方已经换过基），所以这个夹角只跟挂点（枪身）走：
+        // 世界重力、相机朝向、枪的动画姿态全都进不来 —— 拿重力方向来量就退化成 `MaxAngle` 那套重力圆锥了。
+        val angleCos = direction.x * restDir.x + direction.y * restDir.y + direction.z * restDir.z
+        if (angleCos >= cos(limit)) return
+
+        // 轴 = direction × restDir：绕它正转 excess 就是沿最短弧朝 restDir 收
+        var ax = direction.y * restDir.z - direction.z * restDir.y
+        var ay = direction.z * restDir.x - direction.x * restDir.z
+        var az = direction.x * restDir.y - direction.y * restDir.x
+        val axisLen = sqrt(ax * ax + ay * ay + az * az)
+        if (axisLen < 1.0e-8f) {
+            // 方向几乎正对/背对绑定姿态：正对时上面已经返回，背对时（上限接近 180° 才可能）轴任取一个与 restDir 垂直的方向
+            ax = 0f
+            ay = restDir.z
+            az = -restDir.y
+            val l = sqrt(ax * ax + ay * ay + az * az)
+            if (l < 1.0e-8f) {
+                ax = restDir.z
+                ay = 0f
+                az = -restDir.x
+            } else {
+                ax /= l
+                ay /= l
+                az /= l
+            }
+        } else {
+            ax /= axisLen
+            ay /= axisLen
+            az /= axisLen
+        }
+
+        val excess = acos(angleCos.coerceIn(-1f, 1f)) - limit
+        if (excess <= 0f) return
+
+        CONE_ROTATION.fromAxisAngleRad(ax, ay, az, excess).transform(direction)
+    }
+
     /**
-     * 侧向限位：把绳方向在模型局部 X 上的分量钳到 [limitSin]，Y/Z 等比缩放保持单位长度。
-     *
-     * 只卡一个方向（[limitSin] 的符号决定是哪一边），因为吊坠只挂在枪身**一侧**：
-     * 朝枪身那一边摆会扫进模型里，朝外侧摆是自由的（上限交给 `MaxAngleFree` 与软限位）。
-     *
-     * 钳的是**方向**而不是物理状态：解算在视图空间里跑，模型局部的约束在那里表达不出来。
-     * 表现上就是"贴住一面斜墙滑动"——顶住时角度停住、不抖，推力消失后自然弹回来。
+     * 侧向限位：把绳方向在模型局部 X 上的分量钳到 [limitSin]，Y/Z 等比缩放保持单位长度
      */
     private fun clampLateral(direction: Vector3f, limitSin: Float) {
         if (limitSin == 0f) return
@@ -397,6 +406,11 @@ object CharmRuntime {
             else -> 0f
         }
 
+        // 挂件的内部锥形限位（枪身参考系，全方位）：0 = 关闭；非 0 钳到 [1°, 179°] ——
+        // 0° 会把挂件钉死在绑定姿态上、没有意义，所以把 0 留给"关闭"
+        val bodyLimit = info.bodyMaxAngle.coerceIn(0.0, 179.0)
+        params.bodyMaxAngle = if (bodyLimit < 1.0) 0f else Math.toRadians(bodyLimit).toFloat()
+
         state.baseResponse = info.response.coerceIn(0.0, 1.0).toFloat()
         state.baseTurnResponse = info.turnResponse.coerceIn(0.0, 1.0).toFloat()
         state.aimResponse = info.aimResponseScale.coerceIn(0.0, 1.0).toFloat()
@@ -411,6 +425,9 @@ object CharmRuntime {
 
     /** 模型局部 → 视图空间 的逆矩阵，复用它避免每帧分配 */
     private val MODEL_FROM_VIEW = Matrix4f()
+
+    /** [clampBodyCone] 的草稿四元数，同上，避免每个子步都新建一个 */
+    private val CONE_ROTATION = Quaternionf()
 
     /** 固定物理步长（秒）。30Hz 对一两赫兹的摆锤绰绰有余 */
     private const val SIM_STEP = 1f / 30f

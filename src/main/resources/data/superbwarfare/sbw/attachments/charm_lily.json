@@ -3,13 +3,24 @@
   "Model": "superbwarfare:models/bedrock/attachment/charm_lily.geo.json",
   "Texture": "superbwarfare:textures/bedrock/attachment/charm_lily.png",
   "Charm": {
-    "LateralAngle": 15.0
+    "LateralAngle": 15.0,
+    "BodyMaxAngle": 30.0
   },
   "Modifiers": [
     {
       "Prop": "Weight",
       "Op": "Add",
       "Value": 0.05
+    },
+    {
+      "Prop": "ZoomSpreadRate",
+      "Op": "Mul",
+      "Value": 0.95
+    },
+    {
+      "Prop": "Sway",
+      "Op": "Mul",
+      "Value": 0.95
     }
   ]
 }

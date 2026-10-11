@@ -5896,6 +5896,11 @@
 					"rotation": [0, 0, -180]
 				},
 				{
+					"name": "deploy_pos",
+					"parent": "root",
+					"pivot": [0, -1.82422, -6.25]
+				},
+				{
 					"name": "positioning",
 					"pivot": [0, 0, 0]
 				},
@@ -5932,6 +5937,16 @@
 					"parent": "positioning",
 					"pivot": [1.51275, 7.77986, -16.37819],
 					"rotation": [0, -90, 0]
+				},
+				{
+					"name": "bipod_view",
+					"parent": "positioning",
+					"pivot": [0, 14, 22]
+				},
+				{
+					"name": "bipod_iron_view",
+					"parent": "positioning",
+					"pivot": [0, 14, 22]
 				}
 			]
 		}

@@ -30,11 +30,7 @@ class CharmSolver {
 
     /** 静止余摆的相位（秒） */
     private var swayTime = 0f
-
     private var initialized = false
-
-    /** 是否已经有过一次有效推进 */
-    val isReady: Boolean get() = initialized
 
     // 逐帧复用的草稿，避免每步分配
     private val scratch = Vector3f()
@@ -45,10 +41,7 @@ class CharmSolver {
     private val accel = Vector3f()
 
     /**
-     * 把质点直接放到"悬挂点沿重力方向下方"，并清空全部速度。
-     *
-     * [gravityIn] 传的是**视图空间**的重力（含大小），只取它的方向；朝向被相机抬起来时
-     * 静止方向也随之偏，归位要用同一套方向，否则刚切回第一人称会先歪一下再荡正。
+     * 把质点直接放到"悬挂点沿重力方向下方"，并清空全部速度
      */
     fun reset(anchorIn: Vector3f, gravityIn: Vector3f, length: Float) {
         anchor.set(anchorIn)
@@ -133,13 +126,6 @@ class CharmSolver {
         // 2(v×Ω) = -2Ω×v ⇒ 科里奥利力
         pseudo.add(scratch.set(velocity).cross(omega).mul(2f))
 
-        // ⚠ 缩放的是**合力**，不是 Ω。
-        // 缩放 Ω 看着更"物理"（等于假装转得慢一点），但离心力正比于 Ω²，于是摆角变成
-        // `turnResponse² · ω² · R / g` —— 旋钮拧到 0.3 实际只有 9% 的力度，写 0.3 得到的
-        // 是 0.3² 的效果，数据和文档差一个数量级。更糟的是三股力的**比例**也被改掉了：
-        // 欧拉力/科里奥利力只正比于 Ω，会相对离心力强出 1/turnResponse 倍，
-        // 起转/停转那一下的切向甩动盖过匀速时的离心飘。
-        // 缩合力则三股力同比例缩，摆角就是老老实实的 `turnResponse · ω² · R / g`。
         pseudo.mul(p.turnResponse)
 
         val damp = exp(-p.damping * dt)
@@ -199,10 +185,6 @@ class CharmSolver {
         if (p.blockedAxisSign == 0f || p.maxAngleFree <= p.maxAngle) return p.maxAngle
 
         // 偏离方向 = 绳方向**自己的**横向分量（n̂ 扣掉沿 ĝ 的分量），模长 sinθ
-        //
-        // ⚠ 不能拿重力的横向分量 `ĝ - n̂(n̂·ĝ)` 来当这个用：那个向量是"回正方向"，
-        // 它在 [sideAxis] 上的投影是 `cosθ` 而不是 ±1 —— 越偏离越小，55° 时只剩一半，
-        // 于是"哪一侧"会随着摆角模糊掉（实测表现为摆角在 70° 附近被莫名收住）。
         val cos = nx * gravityDir.x + ny * gravityDir.y + nz * gravityDir.z
         val tx = nx - gravityDir.x * cos
         val ty = ny - gravityDir.y * cos
@@ -376,11 +358,7 @@ class CharmFrame {
 }
 
 /**
- * 一帧解算需要的全部标量（都是**方块/秒**量纲）。
- *
- * 单独拎出来是为了让 [CharmSolver] 保持"无分配、无 MC 类型"：
- * 参数由 [CharmRuntime] 从配件数据 + 模型几何 + 当前状态（开镜进度）算好后填进来，
- * 每个 (手, 配件) 只保留一份、逐帧原地更新。
+ * 一帧解算需要的全部标量（都是**方块/秒**量纲）
  */
 class CharmParams {
     /** 摆长（方块），来自 `string` 分组的绑定包围盒高度 */
@@ -392,12 +370,7 @@ class CharmParams {
     var gravity: Float = 9.8f
 
     /**
-     * 速度阻尼（1/秒）。阻尼比 `ζ = damping / (2·2πf)`，小于 1 才会**振荡**：
-     * 默认 4 配上 1.5Hz 约 0.21 —— 每摆一次衰减到 26%，停转/急停之后能来回荡三四下。
-     * 20 以上基本"黏在枪上"，3 以下会像钟摆一样晃很久。
-     *
-     * ⚠ 积分方案本身**不再**贡献阻尼（见 [CharmSolver] 顶部"数值方案"里"扣掉径向"那一步），
-     * 所以这个参数写多少就是多少。
+     * 速度阻尼（1/秒）。阻尼比 `ζ = damping / (2·2πf)`，小于 1 才会**振荡**
      */
     @JvmField
     var damping: Float = 4.0f
@@ -423,51 +396,34 @@ class CharmParams {
     var smoothing: Float = 0.06f
 
     /**
-     * 侧向限位：绳方向在**模型局部 X** 上的分量上限（`sin(角度)`，带符号，0 = 不限制）。
-     *
-     * 只在 [CharmRuntime] 换基到模型局部之后才用得上，解算本身在视图空间里跑，
-     * 所以这个值不参与 [CharmSolver]。
+     * 侧向限位：绳方向在**模型局部 X** 上的分量上限（`sin(角度)`，带符号，0 = 不限制）
      */
     @JvmField
     var lateralLimitSin: Float = 0f
 
     /**
-     * **枪身侧**（[blockedAxisSign] 指向的那一侧）的最大摆角（弧度），默认 35°。
-     *
-     * ⚠ 它只限制**朝枪身这一侧**的偏离：偏离到别的方位（无遮挡侧、正前、正后）时上限换成
-     * [maxAngleFree]，过渡是单边的（正前/正后**不在**中点，而是和最宽的一侧一样）。
-     * 旧的对称圆锥只剩兜底作用（见 [CharmSolver.clampSwingAngle]）。
+     * 枪身参考系的**全方位锥形**上限（弧度，`0` = 关闭）
+     */
+    @JvmField
+    var bodyMaxAngle: Float = 0f
+
+    /**
+     * **枪身侧**（[blockedAxisSign] 指向的那一侧）的最大摆角（弧度），默认 35°
      */
     @JvmField
     var maxAngle: Float = 0.611f
 
-    /**
-     * [maxAngle] 的余弦。
-     *
-     * ⚠ 现在**解算器不再读它**（上限逐帧在变，只能比角度）。保留是为了不破坏外部引用
-     * （离线测试台会读），[setMaxAngleDegrees] 仍会同步维护它。
-     */
     @JvmField
     var maxAngleCos: Float = 0.819f
 
     /**
-     * **非枪身侧**的最大摆角（弧度），默认 90°：无遮挡侧、正前、正后都用它。
-     *
-     * 只在 [blockedAxisSign] 不为 0（数据里写了 `LateralAngle`，即声明了哪一侧被枪身挡住）
-     * 时生效 —— 没声明侧别时无从谈起"哪一侧更窄"，圆锥保持对称的旧行为。
-     *
-     * ⚠ 它是**动态过冲的天花板，不是平衡点**：接近它时软限位已经把回正力放大到
-     * `1 + k` 倍，而驱动力 `∝cosθ` 还在变小，稳态解到不了这里（见 [CharmSolver.applySoftLimit]）。
+     * **非枪身侧**的最大摆角（弧度），默认 90°
      */
     @JvmField
     var maxAngleFree: Float = (Math.PI / 2).toFloat()
 
     /**
-     * 软限位强度 `k`（默认 3，`0` = 关闭，行为回到只有硬夹逼的旧版）。
-     *
-     * 偏离角 `θ` 处的额外回正 = `k·(θ/上限)²` 倍的重力回正 —— 越偏离越硬，
-     * 把质点减速在限位之前。上限别写太大：壁面附近的等效频率
-     * `ω_eff ≈ sqrt(g/L · 2k/上限)`，`k` 越大越接近 Verlet 的稳定边界（`ω·dt < 2`）。
+     * 软限位强度 `k` 默认 3，`0` = 关闭
      */
     @JvmField
     var limitStiffness: Float = 3f
@@ -490,10 +446,7 @@ class CharmParams {
     }
 
     /**
-     * 无遮挡侧的上限（度）。会钳到 `[maxAngle, 179°]`：比枪身侧还小等于没有开侧，
-     * 反而让过渡倒挂。
-     *
-     * ⚠ 必须在 [setMaxAngleDegrees] **之后**调用（它依赖 [maxAngle]）。
+     * 无遮挡侧的上限（度）。会钳到 `[maxAngle, 179°]`
      */
     fun setMaxAngleFreeDegrees(degrees: Double) {
         val rad = Math.toRadians(degrees.coerceIn(0.0, 179.0)).toFloat()
@@ -501,10 +454,7 @@ class CharmParams {
     }
 
     /**
-     * 等效重力 = `L · (2πf)²`。
-     *
-     * 这是 `ω² = g/L` 的反解：给定"想让它一秒摆几次"，不管摆长多少都能得到同样的观感。
-     * 数据里同时写了 `Gravity` 与 `Frequency` 时以 `Frequency` 为准。
+     * 等效重力 = `L · (2πf)²`
      */
     fun applyFrequency(frequency: Double) {
         val f = frequency.coerceAtLeast(MIN_FREQUENCY).toFloat()
@@ -519,17 +469,13 @@ class CharmParams {
 }
 
 /**
- * 相机运动量的**纯数学**部分。
- *
- * 单独拎出来是为了能脱离游戏跑自测（见 `build/verify` 里的临时测试台）：角速度的正负号
- * 完全靠矩阵约定推出来的，在这类代码里是重灾区，值得单独验一遍。
+ * 相机运动量的**纯数学**部分
  */
 object CharmFrameMath {
 
     private val scratchA = Matrix4f()
     private val scratchB = Matrix4f()
     private val scratchRot = Quaternionf()
-    private val scratchAxis = Vector3f()
 
     /**
      * 由两帧的「**视图 ← 世界**」旋转差分出**视图空间**的角速度

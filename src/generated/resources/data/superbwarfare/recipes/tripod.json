@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "a": {
+      "tag": "forge:ingots/steel"
+    },
+    "b": {
+      "item": "minecraft:iron_bars"
+    }
+  },
+  "pattern": [
+    " a ",
+    "bbb",
+    "bbb"
+  ],
+  "result": {
+    "item": "superbwarfare:tripod"
+  },
+  "show_notification": true
+}

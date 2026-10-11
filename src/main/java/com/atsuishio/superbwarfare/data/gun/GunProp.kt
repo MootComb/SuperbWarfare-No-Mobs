@@ -373,6 +373,9 @@ class GunProp<T, R>(
          * 如果以后哪天要做这种功能了，记得带上这段注释来打脸
          */
         @JvmField
+        val STAND_BEHIND = plainProp(DefaultGunData::standBehind)
+
+        @JvmField
         val ZOOM_TIME = plainProp(DefaultGunData::zoomTime)
 
         @JvmField
@@ -533,6 +536,7 @@ class GunProp<T, R>(
             modify(WEIGHT) { it.coerceAtLeast(1.0) }
             // 晃动倍率：负值会让呼吸摆动反向（晃动反而"变大"），钳到 0（完全无呼吸摆动）
             modify(SWAY) { it.coerceAtLeast(0.0) }
+            modify(STAND_BEHIND) { it.coerceAtLeast(0.0) }
 
             modify(MAGAZINE) {
                 if (modifier[PROJECTILE_AMOUNT] <= 0 && modifier[MELEE_DAMAGE] > 0) 0 else it.coerceAtLeast(0)

@@ -5,7 +5,7 @@
     "minecraft:dispenser",
     "superbwarfare:mortar_barrel",
     "superbwarfare:artillery_indicator",
-    "superbwarfare:mortar_bipod"
+    "superbwarfare:tripod"
   ],
   "result": {
     "entity": "superbwarfare:tow"

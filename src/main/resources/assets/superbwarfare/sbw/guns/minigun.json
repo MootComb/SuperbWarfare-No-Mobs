@@ -6,7 +6,8 @@
     "Fire": "animation.minigun.fire",
     "ReloadEmpty": "animation.minigun.reload",
     "Hold": "animation.minigun.hold",
-    "Edit": "animation.minigun.edit"
+    "Edit": "animation.minigun.edit",
+    "IdleDeploy": "animation.minigun.idle_deploy"
   },
   "ShootRecoil": {
     "Offset": [0.85, 0.8, 1.05],

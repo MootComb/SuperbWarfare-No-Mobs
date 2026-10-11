@@ -12,9 +12,9 @@
       "Value": 0.05
     },
     {
-      "Prop": "MaxDurability",
+      "Prop": "FuelPerAmmo",
       "Op": "Mul",
-      "Value": 1.05
+      "Value": 0.95
     },
     {
       "Prop": "MaxEnergy",

@@ -30,6 +30,13 @@ import kotlinx.serialization.Serializable
  * @param lateralAngle 侧向限位：限制朝模型局部 +X（玩家视角右侧）的偏转角度，负值改为限制 −X 侧，
  *   0 = 不限制，它的符号同时决定哪一侧算"枪身侧"，也就是 [maxAngle] 与 [maxAngleFree] 的过渡朝哪边收，
  *   注意模型烘焙时 X 轴取负，这里的 +X 对应 Blockbench 里的 −X
+ * @param bodyMaxAngle 枪身参考系的全方位锥形摆角上限（度），默认 0 = 关闭，非 0 时钳到 1~179。
+ *   量的是绳方向与"绑定姿态下的悬挂方向"（`CharmRig.restDir`，即挂点 → 挂件）之间的夹角，
+ *   两个向量都在**模型局部空间**里比，所以它不受世界重力、相机朝向与枪的动画姿态影响，只跟着挂点（枪身）走 ——
+ *   [maxAngle] 与 [maxAngleFree] 量的是与**世界下方**的夹角，玩家一抬头一压枪它们就跟着变。
+ *   与 [lateralAngle] 一样是**输出侧硬夹逼**（不产生力、不进积分），锥内的摆动与不开此项时完全相同，
+ *   超限时可见姿态沿锥面滑动、内部质点状态不变，所以锥收得比 [maxAngle] 紧太多会经常贴住。
+ *   典型用途：铃铛里烘着一根相对枪身固定的摆锤时，铃铛相对枪身的偏转不能超出铃铛口的范围
  * @param smoothing 输入平滑时间常数（秒），默认 0.06，用来压掉走路/飞行时 20Hz 位置插值带来的抖动，0 = 关闭
  */
 @Serializable
@@ -66,6 +73,9 @@ data class CharmInfo(
 
     @SerialName("LateralAngle")
     val lateralAngle: Double = 0.0,
+
+    @SerialName("BodyMaxAngle")
+    val bodyMaxAngle: Double = 0.0,
 
     @SerialName("Smoothing")
     val smoothing: Double = 0.06,

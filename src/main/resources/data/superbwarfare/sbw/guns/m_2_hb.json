@@ -7,7 +7,7 @@
   "Damage": 40,
   "Headshot": 2.0,
   "ZoomReload": false,
-  "Velocity": 15,
+  "Velocity": 20,
   "Magazine": [50, 100, 200],
   "Weight": 17,
   "DrawTime": 18,
@@ -35,7 +35,8 @@
   "RPM": 360,
   "HeatPerShoot": 2,
   "GunType": "MachineGun",
- "Deployable": true,
+  "Deployable": true,
+  "StandBehind": 1.0,
   "AvailableFireModes": [
     "Semi",
     "Auto"

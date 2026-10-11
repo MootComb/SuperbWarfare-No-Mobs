@@ -257,6 +257,21 @@
 					}
 				}
 			}
+		},
+		"animation.minigun.idle_deploy": {
+			"animation_length": 0.1,
+			"bones": {
+				"lefthand": {
+					"rotation": [165.91301, -362.52148, -232.66386],
+					"position": [6.0733, -10.84902, 19.96096],
+					"scale": [1, 1.5, 1]
+				},
+				"righthand": {
+					"rotation": [93.95017, 5.968, -173.12733],
+					"position": [-6.85, -11.75, 28.75],
+					"scale": [1, 1.5, 1]
+				}
+			}
 		}
 	},
 	"geckolib_format_version": 2

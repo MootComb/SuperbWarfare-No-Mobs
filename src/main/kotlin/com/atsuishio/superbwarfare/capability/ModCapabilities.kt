@@ -3,6 +3,7 @@ package com.atsuishio.superbwarfare.capability
 import com.atsuishio.superbwarfare.capability.entity.InfiniteAmmoCapability
 import com.atsuishio.superbwarfare.capability.living.PhosphorusFireCapability
 import com.atsuishio.superbwarfare.capability.living.RadiationCapability
+import com.atsuishio.superbwarfare.capability.player.PlayerDeployState
 import com.atsuishio.superbwarfare.capability.player.PlayerVariable
 import net.minecraftforge.common.capabilities.Capability
 import net.minecraftforge.common.capabilities.CapabilityManager
@@ -12,6 +13,10 @@ object ModCapabilities {
     @JvmField
     val PLAYER_VARIABLE: Capability<PlayerVariable> =
         CapabilityManager.get(object : CapabilityToken<PlayerVariable>() {})
+
+    @JvmField
+    val PLAYER_DEPLOY_STATE: Capability<PlayerDeployState> =
+        CapabilityManager.get(object : CapabilityToken<PlayerDeployState>() {})
 
     @JvmField
     val PHOSPHORUS_FIRE_CAPABILITY: Capability<PhosphorusFireCapability> =
