@@ -1,6 +1,6 @@
-function tick(tag, level, gunData, entity) {
-    const maxEnergy = gunData.getMaxEnergyStored()
+function modifyProperty(pmc, level, perkTag, gunDataProxy) {
+    const maxEnergy = pmc.get("MaxEnergy")
     if (maxEnergy > 0) {
-        gunData.receiveEnergy(Math.floor((1 + level * 0.4) * maxEnergy / 4000))
+        pmc.add("EnergyRegeneration", Math.floor((1 + level * 0.4) * maxEnergy / 4000))
     }
 }

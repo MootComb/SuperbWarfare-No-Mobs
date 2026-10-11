@@ -17,6 +17,7 @@
     "ZoomRate": 0.5,
     "Speed": 1.0
   },
+  "TriggerSound": null,
   "Model": {
     "Animation": "superbwarfare:animations/bedrock/gun/bocek.animation.json",
     "Model": "superbwarfare:models/bedrock/gun/bocek.geo.json",

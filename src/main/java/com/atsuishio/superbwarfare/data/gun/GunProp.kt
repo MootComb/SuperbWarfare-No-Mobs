@@ -62,6 +62,9 @@ class GunProp<T, R>(
         val MAX_EXTRACT_ENERGY = plainProp(DefaultGunData::maxExtractEnergy)
 
         @JvmField
+        val ENERGY_REGENERATION = plainProp(DefaultGunData::energyRegeneration)
+
+        @JvmField
         val RECOIL_X = plainProp(DefaultGunData::recoilX)
 
         @JvmField
@@ -75,6 +78,12 @@ class GunProp<T, R>(
 
         @JvmField
         val RECOIL_FORCE = plainProp(DefaultGunData::recoilForce)
+
+        @JvmField
+        val SNEAK_KNOCKBACK_RESISTANCE = plainProp(DefaultGunData::sneakKnockbackResistance)
+
+        @JvmField
+        val CRAWL_KNOCKBACK_RESISTANCE = plainProp(DefaultGunData::crawlKnockbackResistance)
 
         @JvmField
         val SHOOT_SHAKE = plainProp(DefaultGunData::shootShake)
@@ -521,6 +530,7 @@ class GunProp<T, R>(
                 val value = it.coerceIn(-1, maxEnergy)
                 if (value < 0) maxEnergy else value
             }
+            modify(ENERGY_REGENERATION) { it.coerceAtLeast(0) }
 
             modify(MELEE_DURATION) { it.coerceAtLeast(1) }
             modify(MELEE_ANGLE) { it.coerceIn(1, 180) }
@@ -536,6 +546,8 @@ class GunProp<T, R>(
             modify(WEIGHT) { it.coerceAtLeast(1.0) }
             // 晃动倍率：负值会让呼吸摆动反向（晃动反而"变大"），钳到 0（完全无呼吸摆动）
             modify(SWAY) { it.coerceAtLeast(0.0) }
+            modify(SNEAK_KNOCKBACK_RESISTANCE) { it.coerceIn(0.0, 1.0) }
+            modify(CRAWL_KNOCKBACK_RESISTANCE) { it.coerceIn(0.0, 1.0) }
             modify(STAND_BEHIND) { it.coerceAtLeast(0.0) }
 
             modify(MAGAZINE) {

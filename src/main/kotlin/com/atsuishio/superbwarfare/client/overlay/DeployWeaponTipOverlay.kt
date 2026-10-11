@@ -6,6 +6,7 @@ import com.atsuishio.superbwarfare.client.overlay.components.StringComponent
 import com.atsuishio.superbwarfare.event.DeployedWeaponHandler
 import com.atsuishio.superbwarfare.init.ModKeyMappings
 import com.atsuishio.superbwarfare.tools.localPlayer
+import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
 import net.minecraftforge.api.distmarker.Dist
 import net.minecraftforge.api.distmarker.OnlyIn
@@ -22,13 +23,13 @@ object DeployWeaponTipOverlay : CommonOverlay("deploy_weapon_tip") {
         val player = localPlayer ?: return false
         return super.shouldRender() &&
                 !DeployedWeaponHandler.isDeployed(player) &&
-                DeployedWeaponHandler.deployTarget(player) != null
+                DeployedWeaponHandler.deployTarget(player, OverlayTraceHandler.playerViewBlockResult) != null
     }
 
     override fun RenderContext.preRender() {
         TIP.component = Component.translatable(
             "tips.superbwarfare.deploy_weapon",
-            ModKeyMappings.INTERACT.translatedKeyMessage
+            Component.literal(" [${ModKeyMappings.INTERACT.key.displayName.string}] ").withStyle(ChatFormatting.AQUA)
         )
     }
 }

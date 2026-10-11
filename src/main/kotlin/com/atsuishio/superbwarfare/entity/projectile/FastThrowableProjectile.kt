@@ -707,7 +707,11 @@ abstract class FastThrowableProjectile : ThrowableItemProjectile, IFastMotionSyn
             child.setLife(getLife())
             child.setExplosionDestroy(hasExplosionDestroy())
             child.setBeast(isBeast())
-            child.setCustomGravity(getCustomGravity())
+
+            val gravity = this.getCustomGravity()
+            if (gravity != 0f) {
+                child.setCustomGravity(gravity)
+            }
             child.setEffects(getEffects().toList())
             child.setProjectileSplitCount(count - 1)
             child.setProjectileSplitAmount(getProjectileSplitAmount() - 1)

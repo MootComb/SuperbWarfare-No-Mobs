@@ -30,6 +30,7 @@
   "AmmoType": "superbwarfare:javelin_missile",
   "Icon": "superbwarfare:textures/gun_icon/javelin_icon.png",
   "AvailablePerks": [
+    "superbwarfare:cluster_bomb",
     "superbwarfare:powerful_attraction",
     "superbwarfare:intelligent_chip",
     "superbwarfare:monster_hunter",

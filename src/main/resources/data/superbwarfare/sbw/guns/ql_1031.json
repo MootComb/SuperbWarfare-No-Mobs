@@ -227,5 +227,6 @@
     "Grip": [
       "LowerRail"
     ]
-  }
+  },
+  "EnergyRegeneration": 5
 }

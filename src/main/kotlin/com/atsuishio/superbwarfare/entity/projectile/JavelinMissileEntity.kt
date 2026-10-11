@@ -186,6 +186,11 @@ open class JavelinMissileEntity : MissileProjectile, BasicGeoProjectileEntity {
         return 0.4f
     }
 
+    override fun canSplit(): Boolean = true
+
+    override fun createSplitProjectile(level: Level): FastThrowableProjectile =
+        MiniBombEntity(this.owner, level)
+
     companion object {
         @JvmField
         val TOP: EntityDataAccessor<Boolean> =

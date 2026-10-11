@@ -97,4 +97,9 @@ open class RpgRocketStandardEntity : FastThrowableProjectile, BasicGeoProjectile
     }
 
     override fun getHiddenTicks() = 1
+
+    override fun canSplit(): Boolean = true
+
+    override fun createSplitProjectile(level: Level): FastThrowableProjectile =
+        MiniBombEntity(this.owner, level)
 }

@@ -110,4 +110,9 @@ open class IglaMissileEntity : MissileProjectile, BasicGeoProjectileEntity {
     override fun getVolume(): Float {
         return 0.4f
     }
+
+    override fun canSplit(): Boolean = true
+
+    override fun createSplitProjectile(level: Level): FastThrowableProjectile =
+        MiniBombEntity(this.owner, level)
 }
