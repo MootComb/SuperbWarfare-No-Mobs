@@ -199,6 +199,21 @@ class Attachment(private val gun: GunData) {
         gun.invalidateProperties()
     }
 
+    fun getSkin(type: AttachmentType): String {
+        val tag = getTag(type) ?: return ""
+        return tag.getString(AttachmentDefinition.CURRENT_SKIN_ID).trim()
+    }
+
+    fun setSkin(type: AttachmentType, skinId: String?) {
+        if (!has(type)) return
+
+        val value = skinId?.trim().orEmpty()
+        if (getSkin(type) == value) return
+
+        getOrCreateTag(type).putString(AttachmentDefinition.CURRENT_SKIN_ID, value)
+        gun.invalidateProperties()
+    }
+
     /**
      * 读该槽位激光颜色的覆盖值。
      *

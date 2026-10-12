@@ -144,6 +144,9 @@
       "superbwarfare:pistol_laser"
     ]
   },
+  "HandGuard": {
+    "Grip": true
+  },
   "SoundInfo": {
     "Fire1P": "superbwarfare:aa_12_fire_1p",
     "Fire3P": "superbwarfare:aa_12_fire_3p",

@@ -6,6 +6,7 @@ import com.atsuishio.superbwarfare.data.gun.melee.MeleeAction.Companion.MeleeAct
 import com.atsuishio.superbwarfare.serialization.kserializer.SerializedSoundEvent
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 /**
  * 近战动作表（`MeleeActions`）里的一段。
@@ -118,7 +119,7 @@ data class MeleeAction(
     val effects: List<StringOrObject<MeleeEffectSpec>>? = null,
 ) : IDBasedData<MeleeAction> {
 
-    @kotlinx.serialization.Transient
+    @Transient
     var itemId: String = ""
 
     override fun getId() = itemId

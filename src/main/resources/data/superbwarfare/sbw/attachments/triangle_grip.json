@@ -20,5 +20,12 @@
   ],
   "Bone": "grip_pos",
   "Model": "superbwarfare:models/bedrock/attachment/triangle_grip.geo.json",
-  "Texture": "superbwarfare:textures/bedrock/attachment/triangle_grip.png"
+  "Texture": "superbwarfare:textures/bedrock/attachment/triangle_grip.png",
+  "Skins": [
+    {
+      "Id": "ql_1031",
+      "Name": "QL 1031",
+      "Texture": "superbwarfare:textures/bedrock/attachment/triangle_grip_ql_1031.png"
+    }
+  ]
 }

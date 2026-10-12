@@ -1,10 +1,8 @@
-package com.atsuishio.superbwarfare.melee
+package com.atsuishio.superbwarfare.data.gun.melee
 
 import com.atsuishio.superbwarfare.Mod
 import com.atsuishio.superbwarfare.config.client.DisplayConfig
 import com.atsuishio.superbwarfare.data.gun.GunData
-import com.atsuishio.superbwarfare.data.gun.melee.MeleeEffectTrigger
-import com.atsuishio.superbwarfare.data.gun.melee.ResolvedMeleeAction
 import com.atsuishio.superbwarfare.data.gun.subdata.Cooldown
 import com.atsuishio.superbwarfare.init.ModMeleeEffects
 import net.minecraft.server.level.ServerLevel
@@ -13,23 +11,7 @@ import net.minecraft.world.entity.player.Player
 import net.minecraft.world.phys.Vec3
 
 /**
- * 近战额外效果的**结算器**（服务端专用）。
- *
- * 用法是在一次近战报文里建一个实例，然后按实际发生的三件事调用：
- *
- * ```
- * val dispatcher = MeleeEffectDispatcher(level, attacker, data, index, action)
- * dispatcher.swing()                                     // 无论是否命中（Swing）
- * dispatcher.hit(target, position, damaged = true)        // 每个真的挨打的目标（Hit / FirstHit）
- * dispatcher.kill(target, position)                       // 目标被这一击打死（Kill）
- * ```
- *
- * 三条落地规则：
- * 1. **概率只在服务端 roll** —— 用的是 [ServerLevel.random]，客户端从不参与；
- * 2. **冷却写在枪械 NBT 上**（键 `effect:<key>`），**只有真的触发了才写**：
- *    冷却的语义是"发动过之后这段时间不再发动"，而不是"每隔 N tick 掷一次骰子"；
- * 3. `FirstHit` 每次挥击**只考虑一次**（第一个通过命中判定的目标），
- *    用 [firedOnce] 记账；`Hit`/`Kill` 则对每个目标各考虑一次。
+ * 近战额外效果的结算器（服务端专用）
  */
 class MeleeEffectDispatcher(
     private val level: ServerLevel,

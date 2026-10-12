@@ -1,8 +1,8 @@
 package com.atsuishio.superbwarfare.init
 
 import com.atsuishio.superbwarfare.Mod
-import com.atsuishio.superbwarfare.melee.MeleeEffectBehavior
-import com.atsuishio.superbwarfare.melee.MeleeEffectBehaviors
+import com.atsuishio.superbwarfare.data.gun.melee.MeleeEffectBehavior
+import com.atsuishio.superbwarfare.data.gun.melee.MeleeEffectBehaviors
 
 /**
  * 近战额外效果的**行为注册表**。

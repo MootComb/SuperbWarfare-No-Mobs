@@ -1,8 +1,6 @@
-package com.atsuishio.superbwarfare.melee
+package com.atsuishio.superbwarfare.data.gun.melee
 
 import com.atsuishio.superbwarfare.data.gun.GunData
-import com.atsuishio.superbwarfare.data.gun.melee.ResolvedMeleeAction
-import com.atsuishio.superbwarfare.data.gun.melee.ResolvedMeleeEffect
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.player.Player
@@ -39,24 +37,12 @@ class MeleeEffectContext(
 )
 
 /**
- * 一种近战额外行为（`sbw` 数据里 `Type` 指向的那个东西）。
- *
- * 实现放在 `MeleeEffectBehaviors` 里，注册进 `ModMeleeEffects`。
- * **只在服务端调用**：`MeleeEffectDispatcher` 已经从报文链路保证这一点。
+ * 一种近战额外行为
  */
 interface MeleeEffectBehavior {
-
-    /** 行为 id，小写、不带命名空间（`explosion` / `extra_damage` / …） */
     val id: String
 
-    /** 执行一次。**不允许抛异常**：拿不到的参数就安静地跳过，别把整次挥击弄崩 */
     fun apply(context: MeleeEffectContext)
 
-    /**
-     * 数据校验：返回问题描述（`null` = 合法）。
-     *
-     * 只检查"写了但明显不对"的情况（缺必填字段、数值越界），
-     * 由 `DataValidator` 在数据包 reload 后统一打日志。
-     */
     fun validate(effect: ResolvedMeleeEffect): String? = null
 }

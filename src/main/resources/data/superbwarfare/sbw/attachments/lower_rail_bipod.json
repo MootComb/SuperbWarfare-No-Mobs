@@ -11,5 +11,18 @@
   ],
   "Bipod": true,
   "Model": "superbwarfare:models/bedrock/attachment/lower_rail_bipod.geo.json",
-  "Texture": "superbwarfare:textures/bedrock/attachment/lower_rail_bipod.png"
+  "Texture": "superbwarfare:textures/bedrock/attachment/lower_rail_bipod.png",
+  "Skins": [
+    {
+      "Id": "ql_1031",
+      "Name": "QL 1031",
+      "Texture": "superbwarfare:textures/bedrock/attachment/lower_rail_bipod_ql_1031.png"
+    },
+    {
+      "Id": "trachelium",
+      "Name": "Trachelium",
+      "Model": "superbwarfare:models/bedrock/attachment/lower_rail_bipod_trachelium.geo.json",
+      "Texture": "superbwarfare:textures/bedrock/attachment/lower_rail_bipod_trachelium.png"
+    }
+  ]
 }

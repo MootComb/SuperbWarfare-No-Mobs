@@ -1,11 +1,13 @@
 {
   "values": [
+    "superbwarfare:acid_bullet",
     "superbwarfare:ap_bullet",
     "superbwarfare:aqua_bullet",
     "superbwarfare:blade_bullet",
     "superbwarfare:cluster_bomb",
     "superbwarfare:he_bullet",
     "superbwarfare:incendiary_bullet",
+    "superbwarfare:irradiation_bullet",
     "superbwarfare:jhp_bullet",
     "superbwarfare:longer_wire",
     "superbwarfare:micro_missile",

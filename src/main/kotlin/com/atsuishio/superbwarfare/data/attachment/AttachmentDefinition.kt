@@ -127,6 +127,12 @@ data class AttachmentDefinition(
      */
     @SerialName("Shield")
     val shield: ShieldInfo? = null,
+
+    /**
+     * 皮肤列表（见 [AttachmentSkinInfo]）：每一项可以换模型、换贴图，或不写某一项以沿用本体
+     */
+    @SerialName("Skins")
+    val skins: List<AttachmentSkinInfo> = emptyList(),
 ) : IDBasedData<AttachmentDefinition>, PropertyModifier<GunData, DefaultGunData> {
 
     /**
@@ -210,7 +216,42 @@ data class AttachmentDefinition(
     /** 吊坠参数，没配置时退回 [CharmInfo.DEFAULT] */
     fun charmInfo(): CharmInfo = charm ?: CharmInfo.DEFAULT
 
+    /** 该槽位实际装着的这件配件的皮肤，未设置或 id 已失效（数据包改名/删项）时返回 `null` */
+    fun skinOrNull(gun: GunData, slot: AttachmentType): AttachmentSkinInfo? =
+        skinOrNull(gun.attachment.getSkin(slot))
+
+    /** 指定皮肤 id 对应的皮肤，空 id 或找不到时返回 `null` */
+    fun skinOrNull(skinId: String): AttachmentSkinInfo? {
+        if (skinId.isBlank()) return null
+        return skins.firstOrNull { it.id == skinId }
+    }
+
+    /** 渲染用模型：皮肤覆盖优先，没覆盖或皮肤失效时退回 [model] */
+    fun modelOf(skin: AttachmentSkinInfo?): ResourceLocation? = skin?.model ?: model
+
+    /** 渲染用贴图：皮肤覆盖优先，没覆盖或皮肤失效时退回 [texture] */
+    fun textureOf(skin: AttachmentSkinInfo?): ResourceLocation? = skin?.texture ?: texture
+
+    fun modelOf(gun: GunData, slot: AttachmentType): ResourceLocation? = modelOf(skinOrNull(gun, slot))
+
+    fun textureOf(gun: GunData, slot: AttachmentType): ResourceLocation? = textureOf(skinOrNull(gun, slot))
+
+    /** 模型与贴图成套解析：任意一项取不到就返回 `null`，调用方不必再各判一次 */
+    fun resolveAssets(gun: GunData, slot: AttachmentType): AttachmentRenderAssets? {
+        val skin = skinOrNull(gun, slot)
+        val model = modelOf(skin) ?: return null
+        val texture = textureOf(skin) ?: return null
+        return AttachmentRenderAssets(model, texture)
+    }
+
     companion object {
+
+        /** 槽位 NBT 里存皮肤 id 的键，空值表示用本体模型贴图 */
+        const val CURRENT_SKIN_ID = "Skin"
+
+        /** 没设皮肤时对外显示的名字，与载具皮肤保持一致 */
+        const val DEFAULT_SKIN_ID = "vanilla"
+
         @JvmStatic
         fun from(id: String): AttachmentDefinition? = CustomData.ATTACHMENTS[id]
 
@@ -253,6 +294,14 @@ data class AttachmentDefinition(
         }
     }
 }
+
+/**
+ * 一件配件这一次要渲染用的模型与贴图，已按皮肤解析完毕
+ */
+data class AttachmentRenderAssets(
+    val model: ResourceLocation,
+    val texture: ResourceLocation,
+)
 
 /**
  * 一件装着的激光配件

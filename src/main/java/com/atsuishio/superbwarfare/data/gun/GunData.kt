@@ -504,6 +504,9 @@ class GunData private constructor(
             // 2. Gun item level modifiers
             item.modifyProperty(pmcInstance)
 
+            // 2.5 自定义护木：只在护木上的配件装上时生效，算在枪身那一层
+            getDefault().handGuard.modifyProperty(pmcInstance)
+
             // 3. Attachments
             attachmentJsonPropModifier.update(null as kotlinx.serialization.json.JsonObject?)
             for (instance in attachment.installed()) {

@@ -53,10 +53,10 @@ enum class AttachmentRenderMode {
  *   但刺刀与握把可以共存"这种非传递组合，所以这类规则写在这里（刺刀那一侧由配件自己的
  *   [AttachmentDefinition.isBayonet] 在 [declaredConflicts] 里补上，因为刺刀已并入枪口槽）
  * @param tagBucket 物品 tag 的桶名（`superbwarfare:attachment/<tagBucket>`），null 表示不生成 tag
- * @param icon 改装界面上的槽位图标（`textures/gui/attachment/<icon>.png`），界面目前还自己硬编码贴图，
- *   这里是给界面重写预留的槽位 → 图标映射
+ * @param icon 槽位图标（`textures/gui/attachment/<icon>.png`）。改装界面还没读它 —— 挂点按钮上画的是
+ *   "这个槽位现在装了什么配件"，登记在这里是为了让界面要用槽位图标时不必再把映射散在界面代码里
  * @param mountBone 挂载骨骼来源，只有 [AttachmentRenderMode.GENERIC] 的渲染会用到
- * @param focusBone 改装界面聚焦到该槽位时用的骨骼，null 表示不聚焦
+ * @param focusBone 改装界面用的骨骼 —— 聚焦到该槽位时看的位置，也是挂点按钮在屏幕上的落点，null 表示不聚焦
  * @param withdrawAmmoOnChange 换这个槽位的配件前是否要先把已装填的弹药退给玩家（只有弹匣槽位需要）
  */
 data class AttachmentSlot(
@@ -87,7 +87,8 @@ sealed interface AttachmentEditTarget {
  * 配件槽位注册表，见 [AttachmentSlot]
  *
  * 新增槽位后还要手写：物品注册、`sbw/attachments/<id>.json`、模型与贴图、语言文件
- * 改装界面暂未接入这张表，追加在 [EDIT_ORDER] 末尾的槽位没有界面按钮，只能用 `/sbw attachment` 安装
+ * 改装界面按 [AttachmentSlot.focusBone] 把挂点按钮摆到骨骼投影出的屏幕位置上：槽位只要登记了
+ * [AttachmentSlot.focusBone] 并进了 [EDIT_ORDER]，界面上就会自动出现它的按钮，不必再改界面代码
  */
 object AttachmentSlots {
 
@@ -289,6 +290,22 @@ object AttachmentSlots {
     /** 弹药类型那一项在 [EDIT_ORDER] 里的下标（车辆改装界面只支持这一项） */
     @JvmField
     val AMMO_TYPE_EDIT_INDEX: Int = EDIT_ORDER.indexOf(AttachmentEditTarget.AmmoType)
+
+    /**
+     * [type] 槽位在 [EDIT_ORDER] 里的下标，也就是报文里 `EditMessage.type` 的取值
+     *
+     * 没有登记（新增枚举但没进 [EDIT_ORDER]）时返回 -1。改装界面的挂点按钮用它设
+     * [com.atsuishio.superbwarfare.event.ClientEventHandler.editingAttachmentType]，
+     * 渲染器再按下标反查聚焦骨骼，两边共用同一张表
+     */
+    @JvmStatic
+    fun editIndex(type: AttachmentType): Int =
+        EDIT_ORDER.indexOfFirst { it is AttachmentEditTarget.Slot && it.slot.type == type }
+
+    /** [index]（[EDIT_ORDER] 下标）对应的槽位；越界或是弹种那一项时返回 `null` */
+    @JvmStatic
+    fun slotAt(index: Int): AttachmentType? =
+        (EDIT_ORDER.getOrNull(index) as? AttachmentEditTarget.Slot)?.slot?.type
 
     /** 取出 [type] 的登记项，未登记（新增枚举但忘了登记）时抛异常，早失败好过静默失效 */
     @JvmStatic

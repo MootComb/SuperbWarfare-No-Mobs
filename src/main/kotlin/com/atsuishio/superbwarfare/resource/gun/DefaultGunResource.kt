@@ -178,10 +178,6 @@ class DefaultGunResource : IDBasedData<DefaultGunResource> {
     @SerialName("UseCustomSprintAnimation")
     var useCustomSprintAnimation: Boolean = false
 
-    @JvmField
-    @SerialName("Attachments")
-    var attachmentInfo: AttachmentInfo = AttachmentInfo()
-
     // 枪身自带的弹药显示：参与压缩的骨骼，空列表表示不启用
     @JvmField
     @SerialName("AmmoBar")

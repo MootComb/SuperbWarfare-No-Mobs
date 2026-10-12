@@ -2,7 +2,7 @@
   "Spread": 3,
   "RecoilX": 0.0025,
   "RecoilY": 0.032,
-  "Damage": 24,
+  "Damage": 18,
   "Headshot": 2.5,
   "Velocity": 14,
   "Magazine": 6,
@@ -12,7 +12,8 @@
   "EmptyReloadTime": 65,
   "BypassesArmor": 0.5,
   "SoundRadius": 10,
-  "RPM": 240,
+  "ZoomReload": false,
+  "RPM": 120,
   "GunType": "Handgun",
   "AmmoType": [
     "@RifleAmmo",
@@ -43,7 +44,64 @@
       }
     }
   ],
+  "ClearHoldProgressAfterShoot": true,
   "Icon": "superbwarfare:textures/gun_icon/trachelium_icon.png",
+  "AvailableAttachments": {
+    "Scope": [
+      "superbwarfare:scope_handgun_red_dot",
+      "superbwarfare:scope_coyote",
+      "superbwarfare:scope_aimpoint_t2",
+      "superbwarfare:scope_eotech_551",
+      "superbwarfare:scope_okp_7",
+      "superbwarfare:scope_pkas",
+      "superbwarfare:scope_bruiser",
+      "superbwarfare:scope_ranger",
+      "superbwarfare:scope_1p_78",
+      "superbwarfare:scope_pk_a",
+      "superbwarfare:scope_acog",
+      "superbwarfare:scope_qmk171",
+      "superbwarfare:scope_hamr",
+      "superbwarfare:scope_elcan_4x",
+      "superbwarfare:scope_lpvo",
+      "superbwarfare:scope_sniper",
+      "superbwarfare:scope_winefox",
+      "superbwarfare:scope_spyglass"
+    ],
+    "Grip": [
+      "superbwarfare:vertical_grip",
+      "superbwarfare:grip_vertical_pineapple",
+      "superbwarfare:grip_vertical_bipod",
+      "superbwarfare:grip_rectangle_vertical",
+      "superbwarfare:triangle_grip",
+      "superbwarfare:steel_pipe_grip"
+    ],
+    "Stock": [
+      "superbwarfare:oem_stock_heavy"
+    ],
+    "Muzzle": [
+      "superbwarfare:meowlencer",
+      "superbwarfare:hissilencer",
+      "superbwarfare:silaowuncer",
+      "superbwarfare:loudspeaker",
+      "superbwarfare:handgun_silencer",
+      "superbwarfare:osprey_silencer",
+      "superbwarfare:steel_pipe_silencer",
+      "superbwarfare:milencer"
+    ],
+    "Charm": [
+      "#superbwarfare:attachment/charm"
+    ],
+    "LowerRail": [
+      "superbwarfare:lower_rail_bipod",
+      "superbwarfare:peq_15",
+      "superbwarfare:pistol_laser"
+    ],
+    "UpperRail": [
+      "superbwarfare:peq_15",
+      "superbwarfare:handgun_shield",
+      "superbwarfare:pistol_laser"
+    ]
+  },
   "AvailablePerks": [
     "@Ammo",
     "superbwarfare:heal_clip",
@@ -67,6 +125,28 @@
     "!superbwarfare:longer_wire",
     "!superbwarfare:cupid_arrow"
   ],
+  "HandGuard": {
+    "Grip": true,
+    "Rail": true,
+    "Scope": true,
+    "Modifiers": [
+      {
+        "Prop": "Velocity",
+        "Op": "Add",
+        "Value": 6
+      },
+      {
+        "Prop": "Damage",
+        "Op": "Add",
+        "Value": 4
+      },
+      {
+        "Prop": "Weight",
+        "Op": "Add",
+        "Value": 0.75
+      }
+    ]
+  },
   "SoundInfo": {
     "Fire1P": "superbwarfare:trachelium_fire_1p",
     "Fire3P": "superbwarfare:trachelium_fire_3p",

@@ -76,6 +76,8 @@ object ModPerks {
     lateinit var CLUSTER_BOMB: PERK
     lateinit var SUPER_HEAVY_BULLET: PERK
     lateinit var SHATTER_CAPS: PERK
+    lateinit var ACID_BULLET: PERK
+    lateinit var IRRADIATION_BULLET: PERK
     // @formatter:on
 
     /**
@@ -228,6 +230,12 @@ object ModPerks {
         }
         SHATTER_CAPS = autoRegistryObjects["shatter_caps"] ?: registerAmmoPerk("shatter_caps") {
             EmptyPerk("shatter_caps", Perk.Type.AMMO)
+        }
+        ACID_BULLET = autoRegistryObjects["acid_bullet"] ?: registerAmmoPerk("acid_bullet") {
+            EmptyPerk("acid_bullet", Perk.Type.AMMO)
+        }
+        IRRADIATION_BULLET = autoRegistryObjects["irradiation_bullet"] ?: registerAmmoPerk("irradiation_bullet") {
+            EmptyPerk("irradiation_bullet", Perk.Type.AMMO)
         }
 
         // Functional Perks

@@ -490,10 +490,8 @@ class ModSoundProvider(output: PackOutput, existingFileHelper: ExistingFileHelpe
         // -------------------- gun/trachelium --------------------
         group(
             "gun/trachelium", "trachelium_fire_1p", "trachelium_fire_3p", "trachelium_far", "trachelium_veryfar",
-            "trachelium_fire_1p_s", "trachelium_fire_3p_s",
+            "trachelium_fire_1p_s", "trachelium_fire_3p_s", "trachelium_bolt", "trachelium_open", "trachelium_ammo_in", "trachelium_close"
         )
-        register("trachelium_reload_empty", "gun/trachelium/trachelium_reload")
-        group("gun/trachelium", "trachelium_bolt")
 
         // -------------------- gun/vector --------------------
         group(

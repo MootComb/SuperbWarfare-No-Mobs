@@ -135,10 +135,8 @@
       "superbwarfare:muzzle_compensator_r_17",
       "superbwarfare:ar_silencer",
       "superbwarfare:loudspeaker",
-      "superbwarfare:silencer_qinglan",
       "superbwarfare:handgun_silencer",
-      "superbwarfare:osprey_silencer",
-      "superbwarfare:osprey_silencer_trachelium"
+      "superbwarfare:osprey_silencer"
     ],
     "SubWeapon": [
       "superbwarfare:sub_weapon_gp_25"
@@ -154,6 +152,21 @@
     "UpperRail": [
       "superbwarfare:peq_15",
       "superbwarfare:pistol_laser"
+    ]
+  },
+  "HandGuard": {
+    "Rail": true,
+    "Modifiers": [
+      {
+        "Prop": "Velocity",
+        "Op": "Add",
+        "Value": 2
+      },
+      {
+        "Prop": "Weight",
+        "Op": "Add",
+        "Value": 0.5
+      }
     ]
   },
   "SoundInfo": {

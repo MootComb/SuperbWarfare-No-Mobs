@@ -11,6 +11,14 @@
   "Bone": "scope_pos",
   "Model": "superbwarfare:models/bedrock/attachment/scope_lpvo.geo.json",
   "Texture": "superbwarfare:textures/bedrock/attachment/scope_lpvo.png",
+  "Skins": [
+    {
+      "Id": "ql_1031",
+      "Name": "QL 1031",
+      "Model": "superbwarfare:models/bedrock/attachment/scope_lpvo_ql_1031.geo.json",
+      "Texture": "superbwarfare:textures/bedrock/attachment/scope_lpvo_ql_1031.png"
+    }
+  ],
   "ScopeInfo": {
     "Type": "Scope",
     "Zoom": {

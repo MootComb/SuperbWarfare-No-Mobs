@@ -23,5 +23,12 @@
   "SoundRadiusMultiplier": 0.6,
   "MuzzleFlashScale": 0.35,
   "Model": "superbwarfare:models/bedrock/attachment/ar_silencer.geo.json",
-  "Texture": "superbwarfare:textures/bedrock/attachment/ar_silencer.png"
+  "Texture": "superbwarfare:textures/bedrock/attachment/ar_silencer.png",
+  "Skins": [
+    {
+      "Id": "ql_1031",
+      "Name": "QL 1031",
+      "Texture": "superbwarfare:textures/bedrock/attachment/ar_silencer_ql_1031.png"
+    }
+  ]
 }

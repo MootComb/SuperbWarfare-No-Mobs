@@ -335,6 +335,8 @@ data class DefaultGunData(
     val maxTargetHeight: Double = 114514.0,
     @SerialName("SoundInfo")
     val soundInfo: SoundInfo = SoundInfo(),
+    @SerialName("HandGuard")
+    val handGuard: HandGuardInfo = HandGuardInfo(),
     @SerialName("ShootAnimationTime")
     val shootAnimationTime: Int = 0,
     @SerialName("ShootAnimation")

@@ -15,6 +15,36 @@ class GunAnimation {
     @SerialName("Fire")
     var fire: String? = null
 
+    // 装了枪托时替换 Fire
+    @JvmField
+    @SerialName("FireStock")
+    var fireStock: String? = null
+
+    // 换上自定义护木时，下面几条的替身
+    @JvmField
+    @SerialName("IdleHandGuard")
+    var idleHandGuard: String? = null
+
+    @JvmField
+    @SerialName("FireHandGuard")
+    var fireHandGuard: String? = null
+
+    @JvmField
+    @SerialName("EditHandGuard")
+    var editHandGuard: String? = null
+
+    @JvmField
+    @SerialName("ReloadHandGuard")
+    var reloadHandGuard: String? = null
+
+    @JvmField
+    @SerialName("ReloadNormalHandGuard")
+    var reloadNormalHandGuard: String? = null
+
+    @JvmField
+    @SerialName("ReloadEmptyHandGuard")
+    var reloadEmptyHandGuard: String? = null
+
     @JvmField
     @SerialName("ChangeFireMode")
     var changeFireMode: String? = null

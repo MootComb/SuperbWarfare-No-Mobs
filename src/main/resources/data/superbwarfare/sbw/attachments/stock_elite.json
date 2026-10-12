@@ -25,5 +25,13 @@
   "Bone": "custom_stock_adapter",
   "UsesGunStock": false,
   "Model": "superbwarfare:models/bedrock/attachment/stock_elite.geo.json",
-  "Texture": "superbwarfare:textures/bedrock/attachment/stock_elite.png"
+  "Texture": "superbwarfare:textures/bedrock/attachment/stock_elite.png",
+  "Skins": [
+    {
+      "Id": "ql_1031",
+      "Name": "QL 1031",
+      "Model": "superbwarfare:models/bedrock/attachment/stock_elite_ql_1031.geo.json",
+      "Texture": "superbwarfare:textures/bedrock/attachment/stock_elite_ql_1031.png"
+    }
+  ]
 }

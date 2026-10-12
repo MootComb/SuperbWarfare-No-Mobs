@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "superbwarfare:item/silencer_qinglan"
+    "layer0": "superbwarfare:item/irradiation_bullet"
   }
 }

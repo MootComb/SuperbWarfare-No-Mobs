@@ -3119,9 +3119,19 @@
       "superbwarfare:gpws/too_low_terrain"
     ]
   },
+  "trachelium_ammo_in": {
+    "sounds": [
+      "superbwarfare:gun/trachelium/trachelium_ammo_in"
+    ]
+  },
   "trachelium_bolt": {
     "sounds": [
       "superbwarfare:gun/trachelium/trachelium_bolt"
+    ]
+  },
+  "trachelium_close": {
+    "sounds": [
+      "superbwarfare:gun/trachelium/trachelium_close"
     ]
   },
   "trachelium_far": {
@@ -3149,9 +3159,9 @@
       "superbwarfare:gun/trachelium/trachelium_fire_3p_s"
     ]
   },
-  "trachelium_reload_empty": {
+  "trachelium_open": {
     "sounds": [
-      "superbwarfare:gun/trachelium/trachelium_reload"
+      "superbwarfare:gun/trachelium/trachelium_open"
     ]
   },
   "trachelium_veryfar": {

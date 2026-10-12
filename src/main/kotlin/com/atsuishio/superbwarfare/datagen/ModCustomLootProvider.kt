@@ -482,6 +482,7 @@ class ModCustomLootProvider() : LootTableSubProvider {
                     ModItems.CHARM_SENPAI,
                     ModItems.CHARM_MRAHC,
                     ModItems.CHARM_EXPERIENCE_BOTTLE,
+                    ModItems.CHARM_TOTEM_OF_UNDYING,
                 )
             }
         }

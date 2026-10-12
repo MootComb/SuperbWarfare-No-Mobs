@@ -1,7 +1,6 @@
-package com.atsuishio.superbwarfare.melee
+package com.atsuishio.superbwarfare.data.gun.melee
 
 import com.atsuishio.superbwarfare.data.gun.GunProp
-import com.atsuishio.superbwarfare.data.gun.melee.ResolvedMeleeEffect
 import com.atsuishio.superbwarfare.init.ModDamageTypes
 import com.atsuishio.superbwarfare.init.ModMobEffects
 import com.atsuishio.superbwarfare.network.message.receive.ShakeClientMessage

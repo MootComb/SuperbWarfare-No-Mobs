@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.max
+import kotlin.math.sin
 
 /**
  * 近战横扫：在 [from] .. [to] 之间按固定步长采样若干次判定，取并集。
@@ -55,7 +56,7 @@ data class MeleeSweep(
 
     /** 采样点在视线两侧的最大外扩距离（用于粗筛 AABB 膨胀） */
     fun maxLateral(range: Double): Double = max(abs(from), abs(to)).let { deg ->
-        range * kotlin.math.sin(Math.toRadians(deg.coerceAtMost(179.0)))
+        range * sin(Math.toRadians(deg.coerceAtMost(179.0)))
     }
 
     companion object {

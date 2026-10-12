@@ -1,0 +1,216 @@
+<head>
+    <meta charset="utf-8">
+    <!-- mode=gui：文档 CSS 坐标 == MC GUI 坐标，Kotlin 侧才能直接把骨骼投影结果当 left/top 用 -->
+    <meta name="aui-viewport" content="mode=gui">
+    <!-- intercept：改枪时独占鼠标。不写的话每次点击都会穿透到底下的 Screen 和世界（切枪 / 挥手臂） -->
+    <meta name="aui-mouse-events" content="intercept">
+</head>
+
+<body>
+    <!--
+      空白处。它和挂点按钮 / 面板是兄弟节点（不是祖先），所以点按钮不会顺带点到它 ——
+      点它 = 取消聚焦、回到浮动预览。尺寸由 WeaponEditScreen 每帧按 GUI 尺寸写入。
+    -->
+    <div id="backdrop"></div>
+
+    <!--
+      挂点按钮。位置、显隐、"装了什么配件"全部由 WeaponEditScreen 每帧写入，这里只提供结构。
+      id 规则见 WeaponEditScreen.mountId()。
+    -->
+    <div id="mount-scope" class="mount"><slot render="item" size="18"><item>minecraft:air</item></slot><span class="label"></span></div>
+    <div id="mount-magazine" class="mount"><slot render="item" size="18"><item>minecraft:air</item></slot><span class="label"></span></div>
+    <div id="mount-muzzle" class="mount"><slot render="item" size="18"><item>minecraft:air</item></slot><span class="label"></span></div>
+    <div id="mount-stock" class="mount"><slot render="item" size="18"><item>minecraft:air</item></slot><span class="label"></span></div>
+    <div id="mount-grip" class="mount"><slot render="item" size="18"><item>minecraft:air</item></slot><span class="label"></span></div>
+    <div id="mount-subweapon" class="mount"><slot render="item" size="18"><item>minecraft:air</item></slot><span class="label"></span></div>
+    <div id="mount-charm" class="mount"><slot render="item" size="18"><item>minecraft:air</item></slot><span class="label"></span></div>
+    <div id="mount-lowerrail" class="mount"><slot render="item" size="18"><item>minecraft:air</item></slot><span class="label"></span></div>
+    <div id="mount-upperrail" class="mount"><slot render="item" size="18"><item>minecraft:air</item></slot><span class="label"></span></div>
+    <div id="mount-leftrail" class="mount"><slot render="item" size="18"><item>minecraft:air</item></slot><span class="label"></span></div>
+    <div id="mount-rightrail" class="mount"><slot render="item" size="18"><item>minecraft:air</item></slot><span class="label"></span></div>
+    <div id="mount-ammo_type" class="mount"><slot render="item" size="18"><item>minecraft:air</item></slot><span class="label"></span></div>
+
+    <!--
+      槽位面板：点开挂点按钮后在它旁边出现。
+      最上面一行是槽位名，接着一格是"这个槽位现在装的配件"，
+      再往下 4 排 × 9 格是从背包里筛出来的可装配件，第一个格子是"留空 / 卸下"。
+    -->
+    <div id="panel">
+        <div id="panel-title"></div>
+        <div id="panel-current"><slot render="item" size="20"><item>minecraft:air</item></slot></div>
+        <div id="panel-grid">
+            <div class="row">
+                <div id="cell-0" class="cell uninstall"><span class="slash">/</span></div>
+                <div id="cell-1" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
+                <div id="cell-2" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
+                <div id="cell-3" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
+                <div id="cell-4" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
+                <div id="cell-5" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
+                <div id="cell-6" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
+                <div id="cell-7" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
+                <div id="cell-8" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
+            </div>
+            <div class="row">
+                <div id="cell-9" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
+                <div id="cell-10" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
+                <div id="cell-11" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
+                <div id="cell-12" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
+                <div id="cell-13" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
+                <div id="cell-14" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
+                <div id="cell-15" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
+                <div id="cell-16" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
+                <div id="cell-17" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
+            </div>
+            <div class="row">
+                <div id="cell-18" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
+                <div id="cell-19" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
+                <div id="cell-20" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
+                <div id="cell-21" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
+                <div id="cell-22" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
+                <div id="cell-23" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
+                <div id="cell-24" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
+                <div id="cell-25" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
+                <div id="cell-26" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
+            </div>
+            <div class="row">
+                <div id="cell-27" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
+                <div id="cell-28" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
+                <div id="cell-29" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
+                <div id="cell-30" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
+                <div id="cell-31" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
+                <div id="cell-32" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
+                <div id="cell-33" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
+                <div id="cell-34" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
+                <div id="cell-35" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<style>
+    /*
+      尺寸是量好的：Kotlin 侧按固定宽高把面板钳在屏幕内，
+      WeaponEditScreen 的 PANEL_WIDTH / PANEL_HEIGHT 必须和这里对得上。
+
+        内容宽 162 = 9 格 × (16 + 左右各 1 的 margin)
+        总宽   176 = 162 + padding 6×2 + border 1×2
+        总高   122 = 标题 10 + 当前格 (20+2+4) + 网格 4×18 + padding 6×2 + border 1×2
+    */
+    #panel {
+        position: absolute;
+        display: none;
+        width: 162px;
+        padding: 6px;
+        background: rgba(14, 16, 20, 0.88);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        flex-direction: column;
+    }
+
+    #backdrop {
+        position: absolute;
+        display: block;
+        left: 0;
+        top: 0;
+    }
+
+    #panel-title {
+        height: 10px;
+        font-size: 8px;
+        color: #d8d8d8;
+    }
+
+    /* 这个槽位当前装的配件 */
+    #panel-current {
+        width: 20px;
+        height: 20px;
+        margin: 1px 1px 4px 1px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.22);
+    }
+
+    #panel-current.filled {
+        border: 1px solid #d8a34a;
+    }
+
+    #panel-grid {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .row {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .cell {
+        width: 16px;
+        height: 16px;
+        margin: 1px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .cell:hover {
+        border: 1px solid rgba(255, 255, 255, 0.55);
+        background: rgba(255, 255, 255, 0.16);
+    }
+
+    /* 已经装在枪上的那一个 */
+    .cell.selected {
+        border: 1px solid #d8a34a;
+    }
+
+    /* 第一格：留空 / 卸下 */
+    .cell.uninstall {
+        align-items: center;
+        justify-content: center;
+    }
+
+    .cell.uninstall .slash {
+        font-size: 12px;
+        color: #b0b0b0;
+    }
+
+    /*
+      挂点按钮。落点由 Kotlin 每帧写 left/top（按钮中心对准骨骼投影点，边长 18 + 边框 1×2 = 20），
+      这里只管样子。
+    */
+    .mount {
+        position: absolute;
+        display: none;
+        width: 18px;
+        height: 18px;
+        align-items: center;
+        justify-content: center;
+        background: rgba(14, 16, 20, 0.55);
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        border-radius: 10px;
+    }
+
+    .mount:hover {
+        border: 1px solid #ffffff;
+        background: rgba(40, 44, 52, 0.75);
+    }
+
+    /* 装了配件的挂点 */
+    .mount.filled {
+        border: 1px solid #d8a34a;
+    }
+
+    /* 当前聚焦的挂点 */
+    .mount.active {
+        border: 1px solid #ffd479;
+        background: rgba(70, 58, 30, 0.8);
+    }
+
+    .mount .label {
+        position: absolute;
+        top: 21px;
+        left: -11px;
+        width: 42px;
+        font-size: 7px;
+        color: #e6e6e6;
+        text-stroke: 1px #000000;
+        text-align: center;
+    }
+</style>

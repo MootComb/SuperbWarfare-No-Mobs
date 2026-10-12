@@ -156,8 +156,7 @@
       "superbwarfare:muzzle_zenit_dtk_1",
       "superbwarfare:muzzle_compensator_r_17",
       "superbwarfare:ar_silencer",
-      "superbwarfare:loudspeaker",
-      "superbwarfare:silencer_qinglan"
+      "superbwarfare:loudspeaker"
     ],
     "SubWeapon": [
       "superbwarfare:sub_weapon_gp_25"
@@ -175,6 +174,9 @@
       "superbwarfare:standard_gun_shield",
       "superbwarfare:pistol_laser"
     ]
+  },
+  "HandGuard": {
+    "Grip": true
   },
   "SoundInfo": {
     "Fire1P": "superbwarfare:qbz_95_fire_1p",

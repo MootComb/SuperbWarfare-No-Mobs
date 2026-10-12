@@ -177,14 +177,13 @@
       "superbwarfare:grip_vertical_pineapple",
       "superbwarfare:grip_vertical_bipod",
       "superbwarfare:grip_rectangle_vertical",
-      "superbwarfare:triangle_grip",
-      "superbwarfare:grip_cqr_gen2"
+      "superbwarfare:triangle_grip"
     ],
     "Stock": [
-      "superbwarfare:oem_stock_light",
-      "superbwarfare:oem_stock_heavy",
+      "superbwarfare:stock_elite",
       "superbwarfare:stock_ar_tactical",
       "superbwarfare:stock_str",
+      "superbwarfare:stock_prs",
       "superbwarfare:steel_pipe_stock"
     ],
     "Muzzle": [
@@ -198,8 +197,7 @@
       "superbwarfare:muzzle_zenit_dtk_1",
       "superbwarfare:muzzle_compensator_r_17",
       "superbwarfare:ar_silencer",
-      "superbwarfare:loudspeaker",
-      "superbwarfare:silencer_qinglan"
+      "superbwarfare:loudspeaker"
     ],
     "Charm": [
       "#superbwarfare:attachment/charm"
