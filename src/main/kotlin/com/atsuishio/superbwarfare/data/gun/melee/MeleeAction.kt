@@ -117,6 +117,10 @@ data class MeleeAction(
     /** 本段额外效果。写字符串 = 引用 `sbw/melee_effects` 预设，写对象 = 预设 + 覆盖 */
     @SerialName("Effects")
     val effects: List<StringOrObject<MeleeEffectSpec>>? = null,
+
+    /** 本段是"重击"段：枪的 `RightClickAction` 为 `HeavyStrike` 时打这一段，不参与连招下标轮转 */
+    @SerialName("Heavy")
+    val heavy: Boolean? = null,
 ) : IDBasedData<MeleeAction> {
 
     @Transient
@@ -130,6 +134,8 @@ data class MeleeAction(
 
     /** 本段声明的动画候选链（短名或全名）；没写时为空列表，调用方回退到 `GunAnimation.Melee` */
     fun animationCandidates(): List<String> = animation?.list.orEmpty()
+
+    fun isHeavy(): Boolean = heavy == true
 
     /**
      * 本段声明的额外效果（已拆掉 `StringOrObject` 包装）。

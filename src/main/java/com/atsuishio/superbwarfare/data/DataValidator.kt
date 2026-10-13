@@ -232,6 +232,20 @@ object DataValidator {
 
         require(data.meleeComboReset >= 0) { "MeleeComboReset must be >= 0, got ${data.meleeComboReset}" }
 
+        // 消耗只有在"真的能打出近战"时才有意义
+        if (data.consumeOnMeleeHit && data.meleeDamage <= 0) {
+            warn("ConsumeOnMeleeHit is true but MeleeDamage=${data.meleeDamage}; no melee hit can ever land")
+        }
+
+        // 冲锋撞人那一下可以有自己的 Duration/HitTime，但同样不能"永远打不到"
+        val charge = data.bayonetCharge
+        require(
+            charge.strikeHitTime <= 0 || charge.strikeDuration <= 0 || charge.strikeHitTime <= charge.strikeDuration
+        ) {
+            "BayonetCharge resolves at StrikeHitTime=${charge.strikeHitTime} but the strike lasts " +
+                    "StrikeDuration=${charge.strikeDuration} ticks; it would never hit"
+        }
+
         for ((index, action) in data.meleeActions.list.withIndex()) {
             require(action.duration == null || action.duration > 0) {
                 "MeleeActions[$index].Duration must be > 0 when written, got ${action.duration}"

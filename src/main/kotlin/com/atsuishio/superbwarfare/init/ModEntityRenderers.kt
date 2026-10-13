@@ -32,7 +32,6 @@ object ModEntityRenderers {
             registerEntityRenderer(ModEntities.CANNON_SHELL.get(), ::BasicProjectileRenderer)
             registerEntityRenderer(ModEntities.PROJECTILE.get(), ::ProjectileEntityRenderer)
             registerEntityRenderer(ModEntities.MK_42.get(), ::Mk42Renderer)
-            registerEntityRenderer(ModEntities.DRONE.get(), ::DroneRenderer)
             registerEntityRenderer(ModEntities.HAND_GRENADE.get(), ::BasicProjectileRenderer)
             registerEntityRenderer(ModEntities.RGO_GRENADE.get(), ::BasicProjectileRenderer)
             registerEntityRenderer(ModEntities.TYPE_88_CLUSTER_GRENADES.get(), ::BasicProjectileRenderer)

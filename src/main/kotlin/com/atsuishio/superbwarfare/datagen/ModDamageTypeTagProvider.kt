@@ -181,7 +181,6 @@ class ModDamageTypeTagProvider(
             ModDamageTypes.PROJECTILE_HIT,
             ModDamageTypes.GRAPESHOT_HIT,
             ModDamageTypes.CUSTOM_EXPLOSION,
-            ModDamageTypes.DRONE_HIT,
             ModDamageTypes.LASER,
             ModDamageTypes.LASER_HEADSHOT,
             ModDamageTypes.LASER_STATIC,

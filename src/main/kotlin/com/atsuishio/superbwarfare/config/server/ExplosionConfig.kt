@@ -161,29 +161,6 @@ object ExplosionConfig {
     }
 
     @JvmField
-    val LUNGE_MINE_EXPLOSION_DAMAGE = buildServerConfig {
-        push("Lunge Mine")
-
-        comment("The explosion damage of Lunge Mine")
-        comment("突刺爆雷的爆炸伤害")
-        defineInRange("lunge_mine_explosion_damage", 60, 1, Int.MAX_VALUE)
-    }
-
-    @JvmField
-    val LUNGE_MINE_ATTACK_DAMAGE = buildServerConfig {
-        comment("The attack damage of Lunge Mine")
-        comment("突刺爆雷的直击伤害")
-        defineInRange("lunge_mine_attack_damage", 600, 1, Int.MAX_VALUE)
-    }
-
-    @JvmField
-    val LUNGE_MINE_EXPLOSION_RADIUS = buildServerConfig {
-        comment("The explosion radius of Lunge Mine")
-        comment("突刺爆雷的爆炸半径")
-        defineInRange("lunge_mine_explosion_radius", 4, 1, Int.MAX_VALUE).also { pop() }
-    }
-
-    @JvmField
     val TYPE_88_CLUSTER_GRENADE_EXPLOSION_DAMAGE = buildServerConfig {
         push("Type 88 Cluster Grenades")
 

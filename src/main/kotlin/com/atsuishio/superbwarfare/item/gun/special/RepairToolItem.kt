@@ -6,7 +6,7 @@ import com.atsuishio.superbwarfare.data.gun.GunProp
 import com.atsuishio.superbwarfare.entity.mixin.ICustomKnockback
 import com.atsuishio.superbwarfare.entity.vehicle.base.VehicleEntity
 import com.atsuishio.superbwarfare.init.*
-import com.atsuishio.superbwarfare.item.gun.GeoGunItemV2
+import com.atsuishio.superbwarfare.item.gun.GeoGunItem
 import com.atsuishio.superbwarfare.network.message.receive.ClientIndicatorMessage
 import com.atsuishio.superbwarfare.tools.*
 import com.atsuishio.superbwarfare.world.phys.EntityResult
@@ -28,7 +28,7 @@ import net.minecraftforge.api.distmarker.Dist
 import net.minecraftforge.api.distmarker.OnlyIn
 
 @RegistryName("repair_tool")
-class RepairToolItem : GeoGunItemV2(Properties()) {
+class RepairToolItem : GeoGunItem(Properties()) {
 
     @OnlyIn(Dist.CLIENT)
     override fun armPose(

@@ -42,7 +42,6 @@ object KillMessageOverlay : CommonOverlay("kill_message") {
     private val BEAST = loc("textures/overlay/damage_types/beast.png")
     private val SHOCK = loc("textures/overlay/damage_types/shock.png")
     private val BURN = loc("textures/overlay/damage_types/burn.png")
-    private val DRONE = loc("textures/overlay/damage_types/drone.png")
     private val LASER = loc("textures/overlay/damage_types/laser.png")
     private val VEHICLE = loc("textures/overlay/damage_types/vehicle_strike.png")
 
@@ -353,8 +352,6 @@ object KillMessageOverlay : CommonOverlay("kill_message") {
                     icon = SHOCK
                 } else if (record.damageType === ModDamageTypes.BURN || record.damageType === DamageTypes.IN_FIRE || record.damageType === DamageTypes.ON_FIRE || record.damageType === DamageTypes.LAVA) {
                     icon = BURN
-                } else if (record.damageType === ModDamageTypes.DRONE_HIT) {
-                    icon = DRONE
                 } else if (record.damageType === ModDamageTypes.LASER_STATIC) {
                     icon = LASER
                 } else if (record.damageType === ModDamageTypes.VEHICLE_STRIKE) {

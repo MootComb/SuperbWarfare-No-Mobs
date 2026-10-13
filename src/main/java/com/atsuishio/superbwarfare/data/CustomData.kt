@@ -2,7 +2,6 @@ package com.atsuishio.superbwarfare.data
 
 import com.atsuishio.superbwarfare.data.CustomData.ATTACHMENTS
 import com.atsuishio.superbwarfare.data.attachment.AttachmentDefinition
-import com.atsuishio.superbwarfare.data.drone_attachment.DroneAttachmentData
 import com.atsuishio.superbwarfare.data.gun.DefaultGunData
 import com.atsuishio.superbwarfare.data.gun.GunData
 import com.atsuishio.superbwarfare.data.gun.ProjectileInfo
@@ -49,10 +48,6 @@ object CustomData {
         // data up through DATA_VERSION instead.
         GunData.DATA_VERSION++
     }
-
-    @JvmField
-    val DRONE_ATTACHMENT =
-        DataLoader.createData("sbw/drone_attachments", DroneAttachmentData::class.java)
 
     @JvmField
     val ATTACHMENTS = DataLoader.createData(

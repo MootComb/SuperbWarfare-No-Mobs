@@ -38,9 +38,9 @@ import net.minecraftforge.network.PacketDistributor
  *    玩家自己的实体不在自己的 tracking 集合里，且客户端在重生/换维度时不会重建本地玩家实体，
  *    因此这几处必须显式补发，否则客户端会一直留着旧值。
  *
- * 新增一个自动同步的 capability 只需要三步：实现 [SyncedCapability]、在
- * [ModSyncedCapabilities] 里登记、在写入点调用 [markDirty]。数据由 capability 自己用
- * `ByteBufEncoder` / `ByteBufDecoder` 编解码，框架只负责"什么时候发、发给谁、怎么打包"。
+ * 新增一个自动同步的 capability 只需要在 `ModCapabilities` 里登记一行：挂载、存档读写与
+ * 这里的登记都会自动完成；数据由 `CapabilityWrapper` 用 kotlinx 序列化器编解码，
+ * 框架只负责"什么时候发、发给谁、怎么打包"。
  *
  * 线程约束：注册表与脏集合只在服务端主线程读写（tick、命令、物品交互、效果事件都在主线程）。
  */

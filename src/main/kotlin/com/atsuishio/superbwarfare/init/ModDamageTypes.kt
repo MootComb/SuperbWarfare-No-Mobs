@@ -7,6 +7,7 @@ import net.minecraft.core.component.DataComponents
 import net.minecraft.core.registries.Registries
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceKey
+import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.damagesource.DamageType
 import net.minecraft.world.entity.Entity
@@ -40,7 +41,6 @@ object ModDamageTypes {
     @JvmField val MINE = registerDamageType("mine")
     @JvmField val BEAST = registerDamageType("beast")
     @JvmField val CUSTOM_EXPLOSION = registerDamageType("custom_explosion")
-    @JvmField val DRONE_HIT = registerDamageType("drone_hit")
     @JvmField val LASER_STATIC = registerDamageType("laser_static")
     @JvmField val VEHICLE_STRIKE = registerDamageType("vehicle_strike")
     @JvmField val AIR_CRASH = registerDamageType("air_crash")
@@ -155,11 +155,6 @@ object ModDamageTypes {
     }
 
     @JvmStatic
-    fun causeDroneHitDamage(registryAccess: RegistryAccess, directEntity: Entity?, attacker: Entity?): DamageSource {
-        return DamageMessages(registryAccess.registry(Registries.DAMAGE_TYPE).get().getHolderOrThrow(DRONE_HIT), directEntity, attacker)
-    }
-
-    @JvmStatic
     fun causeLaserDamage(registryAccess: RegistryAccess, directEntity: Entity?, attacker: Entity?): DamageSource {
         return DamageMessages(registryAccess.registry(Registries.DAMAGE_TYPE).get().getHolderOrThrow(LASER), directEntity, attacker)
     }
@@ -184,9 +179,13 @@ object ModDamageTypes {
         return DamageMessages(registryAccess.registry(Registries.DAMAGE_TYPE).get().getHolderOrThrow(AIR_CRASH), directEntity, attacker)
     }
 
+    /** 按数据里写的 id 取伤害类型；解析不到返回 `null` */
     @JvmStatic
-    fun causeLungeMineDamage(registryAccess: RegistryAccess, directEntity: Entity?, attacker: Entity?): DamageSource {
-        return DamageMessages(registryAccess.registry(Registries.DAMAGE_TYPE).get().getHolderOrThrow(LUNGE_MINE), directEntity, attacker)
+    fun causeDamageType(registryAccess: RegistryAccess, id: String, directEntity: Entity?, attacker: Entity?): DamageSource? {
+        val location = ResourceLocation.tryParse(id) ?: return null
+        val key = ResourceKey.create(Registries.DAMAGE_TYPE, location)
+        val holder = registryAccess.registry(Registries.DAMAGE_TYPE).get().getHolder(key).orElse(null) ?: return null
+        return DamageMessages(holder, directEntity, attacker)
     }
 
     @JvmStatic

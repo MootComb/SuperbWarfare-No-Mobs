@@ -112,11 +112,8 @@ object DeployedWeaponHandler {
         player.teleportTo(target.x, target.y, target.z)
         player.deltaMovement = Vec3.ZERO
 
-        val uuid = data.uuid?.toString()
-        PlayerDeployState.modify(player) {
-            it.tripodPos = tripod
-            it.gunUuid = uuid
-        }
+        val uuid = data.uuid
+        PlayerDeployState.modify(player) { it.copy(tripodPos = tripod, gunUuid = uuid) }
         return true
     }
 
@@ -144,10 +141,7 @@ object DeployedWeaponHandler {
     fun undeploy(player: Player) {
         if (player.level().isClientSide) return
 
-        PlayerDeployState.modify(player) {
-            it.tripodPos = null
-            it.gunUuid = null
-        }
+        PlayerDeployState.modify(player) { PlayerDeployState() }
     }
 
     @JvmStatic
@@ -182,7 +176,7 @@ object DeployedWeaponHandler {
         val item = stack.item as? GunItem
         val data = if (item == null) null else GunData.from(stack)
         val stillHolding = item != null && data != null && item.deployable(data) &&
-                cap.gunUuid != null && cap.gunUuid == data.uuid?.toString()
+                cap.gunUuid != null && cap.gunUuid == data.uuid
 
         if (!stillHolding || !player.isAlive || player.isPassenger || player.isSpectator ||
             player.level().getBlockState(tripod).block !is TripodBlock

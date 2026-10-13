@@ -18,7 +18,7 @@ import net.minecraft.world.phys.Vec3
  * @param actionIndex 本次锁存的连招下标（调试与 Perk 上下文用）
  * @param action 本段动作（完全展开）
  * @param effect 本次要执行的效果（已展开预设与内联覆盖）
- * @param target 触发目标；`Swing` 触发时为 `null`
+ * @param target 触发目标；`Swing` 触发、或目标是载具这类非生物时为 `null`
  * @param position 效果的作用点：命中点 ?: 目标位置 ?: 攻击者视线前方
  * @param damaged 这次攻击是否真的对这个目标造成了伤害（`Hit`/`Kill` 才有意义）
  * @param killed 这个目标是否被这一击打死（`Kill` 才有意义）

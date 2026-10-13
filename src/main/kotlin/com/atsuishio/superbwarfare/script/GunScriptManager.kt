@@ -1,7 +1,6 @@
 package com.atsuishio.superbwarfare.script
 
 import com.atsuishio.superbwarfare.client.model.gun.GeoGunModel
-import net.minecraft.world.item.ItemDisplayContext
 import net.minecraft.world.item.ItemStack
 import org.mozillaa.javascript.Context
 import org.mozillaa.javascript.Script
@@ -18,7 +17,7 @@ object GunScriptManager {
         scriptFunc: ScriptFunction,
         stack: ItemStack,
         model: GeoGunModel,
-        transformType: ItemDisplayContext,
+        transformType: ScriptTransform,
         partialTick: Float,
         renderer: Any
     ) {

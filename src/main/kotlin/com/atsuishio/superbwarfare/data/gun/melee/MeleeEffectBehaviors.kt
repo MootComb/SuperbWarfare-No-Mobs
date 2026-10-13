@@ -53,15 +53,14 @@ object MeleeEffectBehaviors {
             val effect = context.effect
             val radius = (effect.radius ?: DEFAULT_RADIUS).coerceAtLeast(0.0)
 
-            // Builder 的 directSource 就是"被排除在伤害之外的那个实体"：
-            // CustomExplosion 用 `level.getEntities(entity, aabb)` 取目标，攻击者天然不在列表里，
-            // 所以贴脸戳爆自己不会被自己的爆炸炸到（也不需要额外的自伤豁免）。
+            // 贴脸戳爆自己也要吃伤害：Builder 的 directSource 默认被排除在伤害之外
             CustomExplosion.Builder(context.attacker)
                 .damage((effect.damage ?: 0.0).toFloat())
                 .radius(radius.toFloat())
                 .position(context.position)
                 .destroyBlock(effect.destroyBlocks ?: false)
                 .fireTime(effect.fireTime ?: 0)
+                .includeDirectSource()
                 .explode()
         }
     }

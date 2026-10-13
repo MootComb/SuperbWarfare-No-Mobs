@@ -358,9 +358,6 @@ object ModEntities {
 
     // Special
     @JvmField
-    val DRONE = register("drone", misc(::DroneEntity).setTrackingRange(512).setUpdateInterval(1).sized(0.6f, 0.2f))
-
-    @JvmField
     val MORTAR = register("mortar", vehicle(::MortarEntity).sized(0.8f, 1.4f))
 
     @JvmField

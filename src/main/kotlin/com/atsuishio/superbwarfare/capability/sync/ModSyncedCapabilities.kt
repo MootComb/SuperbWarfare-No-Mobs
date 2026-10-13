@@ -1,41 +1,19 @@
 package com.atsuishio.superbwarfare.capability.sync
 
 import com.atsuishio.superbwarfare.capability.ModCapabilities
-import com.atsuishio.superbwarfare.capability.entity.InfiniteAmmoCapability
-import com.atsuishio.superbwarfare.capability.living.PhosphorusFireCapability
-import com.atsuishio.superbwarfare.capability.living.RadiationCapability
-import com.atsuishio.superbwarfare.capability.player.PlayerDeployState
-import com.atsuishio.superbwarfare.capability.player.PlayerVariable
-import kotlin.jvm.optionals.getOrNull
 
 /**
- * 所有参与自动同步的 capability 的登记入口。
+ * 把所有参与自动同步的 capability 登记进 [CapabilitySync]。
  *
- * 新增一个自动同步的 capability 时，在这里加一行 [CapabilitySync.register]，
- * 并在其写入点调用 [CapabilitySync.markDirty] 即可，无需再写同步包。
+ * 列表来自 [ModCapabilities.ALL]，因此新增一个 capability 时不需要改这里 ——
+ * 在 [ModCapabilities] 里登记一行就够了。
  */
 object ModSyncedCapabilities {
 
     /** 在 [net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent] 中调用一次 */
     fun register() {
-        CapabilitySync.register(InfiniteAmmoCapability.ID) { entity ->
-            entity.getCapability(ModCapabilities.INFINITE_AMMO_CAPABILITY).resolve().getOrNull()
-        }
-
-        CapabilitySync.register(PhosphorusFireCapability.ID) { entity ->
-            entity.getCapability(ModCapabilities.PHOSPHORUS_FIRE_CAPABILITY).resolve().getOrNull()
-        }
-
-        CapabilitySync.register(RadiationCapability.ID) { entity ->
-            entity.getCapability(ModCapabilities.RADIATION_CAPABILITY).resolve().getOrNull()
-        }
-
-        CapabilitySync.register(PlayerVariable.ID) { entity ->
-            entity.getCapability(ModCapabilities.PLAYER_VARIABLE).resolve().getOrNull()
-        }
-
-        CapabilitySync.register(PlayerDeployState.ID) { entity ->
-            entity.getCapability(ModCapabilities.PLAYER_DEPLOY_STATE).resolve().getOrNull()
+        for (capability in ModCapabilities.ALL) {
+            CapabilitySync.register(capability.id) { entity -> capability.syncedHolder(entity) }
         }
     }
 }

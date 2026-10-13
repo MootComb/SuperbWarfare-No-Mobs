@@ -91,7 +91,6 @@ class TacticalMapScreen : Screen(Component.translatable("container.superbwarfare
         private val ICON_AA = loc("textures/overlay/tactical_map/vehicle/aa.png")
         private val ICON_CAR = loc("textures/overlay/tactical_map/vehicle/car.png")
         private val ICON_ARTILLERY = loc("textures/overlay/tactical_map/vehicle/artillery.png")
-        private val ICON_DRONE = loc("textures/overlay/tactical_map/vehicle/drone.png")
         private val ICON_BOAT = loc("textures/overlay/tactical_map/vehicle/boat.png")
         private val ICON_DEFENSE = loc("textures/overlay/tactical_map/vehicle/defense.png")
         private val ICON_AIRSHIP = loc("textures/overlay/tactical_map/vehicle/airship.png")
@@ -1463,7 +1462,6 @@ class TacticalMapScreen : Screen(Component.translatable("container.superbwarfare
                 VehicleType.AA -> ICON_AA
                 VehicleType.TANK -> ICON_TANK
                 VehicleType.ARTILLERY -> ICON_ARTILLERY
-                VehicleType.DRONE -> ICON_DRONE
                 VehicleType.BOAT -> ICON_BOAT
                 VehicleType.DEFENSE -> ICON_DEFENSE
                 VehicleType.AIRSHIP -> ICON_AIRSHIP

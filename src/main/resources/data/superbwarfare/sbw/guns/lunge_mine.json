@@ -1,0 +1,55 @@
+{
+  "GunType": "Special",
+  "Icon": "superbwarfare:textures/gun_icon/lunge_mine_icon.png",
+  "ProjectileAmount": 0,
+  "AmmoType": "Infinity",
+  "MeleeDamage": 600,
+  "MeleeDamageType": "superbwarfare:lunge_mine",
+  "MeleeHeadshotDamageType": "superbwarfare:lunge_mine",
+  "MeleeDuration": 16,
+  "MeleeDamageTime": 5,
+  "MeleeAngle": 30,
+  "MeleeRange": 2.5,
+  "MeleeHeadshot": 1.5,
+  "MeleeLegshot": 0.75,
+  "ConsumeOnMeleeHit": true,
+  "MeleeHitbox": {
+    "Type": "Box",
+    "Range": 2,
+    "Width": 0.8,
+    "Height": 0.8,
+    "YOffset": 0,
+    "Occlusion": true
+  },
+  "MeleeActions": [
+    {
+      "Animation": "melee",
+      "Duration": 16,
+      "HitTime": 5,
+      "Effects": [
+        {
+          "Type": "superbwarfare:explosion",
+          "Chance": 1.0,
+          "Radius": 5.0,
+          "Damage": 100,
+          "DestroyBlocks": false
+        }
+      ]
+    }
+  ],
+  "RightClickAction": "BayonetCharge",
+  "BayonetCharge": {
+    "Duration": 180,
+    "Speed": 2,
+    "Cooldown": 300,
+    "Sound": "superbwarfare:lunge_mine_growl",
+    "StrikeDuration": 8,
+    "StrikeHitTime": 1
+  },
+  "Weight": 3,
+  "DrawTime": 8,
+  "DefaultFireMode": "Semi",
+  "AvailableFireModes": [
+    "Semi"
+  ]
+}

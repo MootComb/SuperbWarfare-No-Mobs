@@ -4,8 +4,9 @@ import com.atsuishio.superbwarfare.data.gun.GunData
 import com.atsuishio.superbwarfare.data.gun.GunProp
 import com.atsuishio.superbwarfare.data.gun.ShootParameters
 import com.atsuishio.superbwarfare.entity.projectile.JavelinMissileEntity
+import com.atsuishio.superbwarfare.init.ModRarities
 import com.atsuishio.superbwarfare.init.RegistryName
-import com.atsuishio.superbwarfare.item.gun.GeoGunItemV2
+import com.atsuishio.superbwarfare.item.gun.GeoGunItem
 import com.atsuishio.superbwarfare.network.message.receive.ShootClientMessage
 import com.atsuishio.superbwarfare.tools.ParticleTool.sendParticle
 import com.atsuishio.superbwarfare.tools.playLocalSound
@@ -15,12 +16,11 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundSource
 import net.minecraft.util.Mth
 import net.minecraft.world.entity.Entity
-import net.minecraft.world.item.Rarity
 import net.minecraft.world.phys.Vec3
 import org.joml.Vector3d
 
 @RegistryName("javelin")
-object JavelinItem : GeoGunItemV2(Properties().rarity(Rarity.EPIC)) {
+object JavelinItem : GeoGunItem(Properties().rarity(ModRarities.LEGENDARY)) {
 
     override fun useSpecialFireProcedure(data: GunData) = true
 

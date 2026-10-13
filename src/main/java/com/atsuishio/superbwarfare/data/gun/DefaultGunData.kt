@@ -393,6 +393,17 @@ data class DefaultGunData(
     // 近战生命汲取：枪械近战伤害命中生物时，按此比例给攻击者回血
     @SerialName("MeleeLifesteal")
     val meleeLifesteal: Double = 0.0,
+    @SerialName("MeleeDamageType")
+    val meleeDamageType: String = "superbwarfare:gun_melee",
+    @SerialName("MeleeHeadshotDamageType")
+    val meleeHeadshotDamageType: String = "superbwarfare:gun_melee_headshot",
+    @SerialName("RightClickAction")
+    val rightClickAction: RightClickAction = RightClickAction.AIM,
+    @SerialName("BayonetCharge")
+    val bayonetCharge: BayonetChargeInfo = BayonetChargeInfo(),
+    // 近战命中后消耗：非创造模式下，近战真的打到目标（含只挨了命中效果、没掉血的载具）就消耗掉这把枪
+    @SerialName("ConsumeOnMeleeHit")
+    val consumeOnMeleeHit: Boolean = false,
 ) : IDBasedData<DefaultGunData> {
     @Transient
     @kotlinx.serialization.Transient

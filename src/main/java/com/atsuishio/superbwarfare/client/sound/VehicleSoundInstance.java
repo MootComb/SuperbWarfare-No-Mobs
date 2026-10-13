@@ -2,7 +2,6 @@ package com.atsuishio.superbwarfare.client.sound;
 
 import com.atsuishio.superbwarfare.data.vehicle.subdata.EngineInfo;
 import com.atsuishio.superbwarfare.data.vehicle.subdata.VehicleType;
-import com.atsuishio.superbwarfare.entity.vehicle.DroneEntity;
 import com.atsuishio.superbwarfare.entity.vehicle.base.VehicleEntity;
 import com.atsuishio.superbwarfare.init.ModSounds;
 import com.atsuishio.superbwarfare.tools.VectorTool;
@@ -71,10 +70,6 @@ public abstract class VehicleSoundInstance extends AbstractTickableSoundInstance
             this.lastDistance = distance;
         } else {
             this.lastDistance = 0;
-        }
-
-        if (this.mobileVehicle instanceof DroneEntity drone && Minecraft.getInstance().gameRenderer.getMainCamera().getPosition().distanceToSqr(drone.position()) < 0.0625) {
-            pitch = 1;
         }
     }
 

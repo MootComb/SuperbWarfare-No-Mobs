@@ -2124,7 +2124,7 @@ open class VehicleEntity(pEntityType: EntityType<*>, pLevel: Level) : Entity(pEn
         if (this.level() is ServerLevel) {
             val holder = Holder.direct(ModSounds.INDICATION_VEHICLE.get())
             for (player in server!!.playerList.players) {
-                if (player == attacker && pHealAmount > 0 && this.health > 0 && send && (this !is DroneEntity)) {
+                if (player == attacker && pHealAmount > 0 && this.health > 0 && send) {
                     player.connection.send(
                         ClientboundSoundPacket(
                             holder,
@@ -4642,7 +4642,7 @@ open class VehicleEntity(pEntityType: EntityType<*>, pLevel: Level) : Entity(pEn
             vMove(movementType, movement)
         }
 
-        if (lastTickSpeed < 0.2 || collisionCoolDown > 0 || this is DroneEntity) return
+        if (lastTickSpeed < 0.2 || collisionCoolDown > 0) return
         val driver = this.lastDriver
 
         if (verticalCollision) {

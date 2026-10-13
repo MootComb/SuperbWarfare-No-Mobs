@@ -2,7 +2,6 @@ package com.atsuishio.superbwarfare.mixins;
 
 import com.atsuishio.superbwarfare.entity.vehicle.base.VehicleEntity;
 import com.atsuishio.superbwarfare.event.DeployedWeaponHandler;
-import com.atsuishio.superbwarfare.init.ModItems;
 import com.atsuishio.superbwarfare.item.gun.GunItem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -37,7 +36,7 @@ public class ItemInHandLayerMixin {
             }
             if (arm == HumanoidArm.LEFT) {
                 ItemStack mainHand = entity.getMainHandItem();
-                if (GunItem.isHeldWeapon(mainHand) || mainHand.is(ModItems.LUNGE_MINE.get())) {
+                if (GunItem.isHeldWeapon(mainHand)) {
                     ci.cancel();
                 }
             }

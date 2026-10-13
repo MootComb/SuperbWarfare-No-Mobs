@@ -1,217 +1,106 @@
+<!doctype html>
+<html>
 <head>
     <meta charset="utf-8">
-    <!-- mode=gui：文档 CSS 坐标 == MC GUI 坐标，Kotlin 侧才能直接把骨骼投影结果当 left/top 用 -->
-    <meta name="aui-viewport" content="mode=gui">
-    <!-- intercept：改枪时独占鼠标。不写的话每次点击都会穿透到底下的 Screen 和世界（切枪 / 挥手臂） -->
+    <meta name="aui-viewport" content="mode=gui,zoom=1,min-zoom=1,max-zoom=1,user-scalable=false">
     <meta name="aui-mouse-events" content="intercept">
 </head>
-
 <body>
-    <!--
-      空白处。它和挂点按钮 / 面板是兄弟节点（不是祖先），所以点按钮不会顺带点到它 ——
-      点它 = 取消聚焦、回到浮动预览。尺寸由 WeaponEditScreen 每帧按 GUI 尺寸写入。
-    -->
     <div id="backdrop"></div>
-
-    <!--
-      挂点按钮。位置、显隐、"装了什么配件"全部由 WeaponEditScreen 每帧写入，这里只提供结构。
-      id 规则见 WeaponEditScreen.mountId()。
-    -->
-    <div id="mount-scope" class="mount"><slot render="item" size="18"><item>minecraft:air</item></slot><span class="label"></span></div>
-    <div id="mount-magazine" class="mount"><slot render="item" size="18"><item>minecraft:air</item></slot><span class="label"></span></div>
-    <div id="mount-muzzle" class="mount"><slot render="item" size="18"><item>minecraft:air</item></slot><span class="label"></span></div>
-    <div id="mount-stock" class="mount"><slot render="item" size="18"><item>minecraft:air</item></slot><span class="label"></span></div>
-    <div id="mount-grip" class="mount"><slot render="item" size="18"><item>minecraft:air</item></slot><span class="label"></span></div>
-    <div id="mount-subweapon" class="mount"><slot render="item" size="18"><item>minecraft:air</item></slot><span class="label"></span></div>
-    <div id="mount-charm" class="mount"><slot render="item" size="18"><item>minecraft:air</item></slot><span class="label"></span></div>
-    <div id="mount-lowerrail" class="mount"><slot render="item" size="18"><item>minecraft:air</item></slot><span class="label"></span></div>
-    <div id="mount-upperrail" class="mount"><slot render="item" size="18"><item>minecraft:air</item></slot><span class="label"></span></div>
-    <div id="mount-leftrail" class="mount"><slot render="item" size="18"><item>minecraft:air</item></slot><span class="label"></span></div>
-    <div id="mount-rightrail" class="mount"><slot render="item" size="18"><item>minecraft:air</item></slot><span class="label"></span></div>
-    <div id="mount-ammo_type" class="mount"><slot render="item" size="18"><item>minecraft:air</item></slot><span class="label"></span></div>
-
-    <!--
-      槽位面板：点开挂点按钮后在它旁边出现。
-      最上面一行是槽位名，接着一格是"这个槽位现在装的配件"，
-      再往下 4 排 × 9 格是从背包里筛出来的可装配件，第一个格子是"留空 / 卸下"。
-    -->
+    <!-- AUI 负责挂点命中区域和图标布局；圆圈、外框与连线由 WeaponEditScreen 独立绘制。 -->
+    <div id="mount-layer" class="layer"></div>
+    <div id="icon-layer" class="layer"></div>
     <div id="panel">
-        <div id="panel-title"></div>
-        <div id="panel-current"><slot render="item" size="20"><item>minecraft:air</item></slot></div>
-        <div id="panel-grid">
-            <div class="row">
-                <div id="cell-0" class="cell uninstall"><span class="slash">/</span></div>
-                <div id="cell-1" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
-                <div id="cell-2" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
-                <div id="cell-3" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
-                <div id="cell-4" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
-                <div id="cell-5" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
-                <div id="cell-6" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
-                <div id="cell-7" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
-                <div id="cell-8" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
+        <div id="panel-header">
+            <div id="panel-current" class="attachment-icon">
+                <slot render="item" interactive="0" pointer="0" size="16" iconScale="1"><item>minecraft:air</item></slot>
             </div>
-            <div class="row">
-                <div id="cell-9" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
-                <div id="cell-10" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
-                <div id="cell-11" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
-                <div id="cell-12" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
-                <div id="cell-13" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
-                <div id="cell-14" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
-                <div id="cell-15" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
-                <div id="cell-16" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
-                <div id="cell-17" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
-            </div>
-            <div class="row">
-                <div id="cell-18" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
-                <div id="cell-19" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
-                <div id="cell-20" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
-                <div id="cell-21" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
-                <div id="cell-22" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
-                <div id="cell-23" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
-                <div id="cell-24" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
-                <div id="cell-25" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
-                <div id="cell-26" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
-            </div>
-            <div class="row">
-                <div id="cell-27" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
-                <div id="cell-28" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
-                <div id="cell-29" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
-                <div id="cell-30" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
-                <div id="cell-31" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
-                <div id="cell-32" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
-                <div id="cell-33" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
-                <div id="cell-34" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
-                <div id="cell-35" class="cell"><slot render="item" size="16"><item>minecraft:air</item></slot></div>
-            </div>
+            <div id="panel-name"></div>
+            <div id="panel-uninstall"><span>&#8595;</span></div>
+            <div id="panel-slot"></div>
         </div>
+        <!-- AUI 原生 overflow / scrollbar；列表按实际数量生成，没有固定格数上限。 -->
+        <div id="panel-scroll"><div id="panel-grid"></div><div id="panel-empty"></div></div>
     </div>
 </body>
-
 <style>
-    /*
-      尺寸是量好的：Kotlin 侧按固定宽高把面板钳在屏幕内，
-      WeaponEditScreen 的 PANEL_WIDTH / PANEL_HEIGHT 必须和这里对得上。
-
-        内容宽 162 = 9 格 × (16 + 左右各 1 的 margin)
-        总宽   176 = 162 + padding 6×2 + border 1×2
-        总高   122 = 标题 10 + 当前格 (20+2+4) + 网格 4×18 + padding 6×2 + border 1×2
-    */
-    #panel {
-        position: absolute;
-        display: none;
-        width: 162px;
-        padding: 6px;
-        background: rgba(14, 16, 20, 0.88);
-        border: 1px solid rgba(255, 255, 255, 0.18);
-        flex-direction: column;
-    }
-
-    #backdrop {
-        position: absolute;
-        display: block;
-        left: 0;
-        top: 0;
-    }
-
-    #panel-title {
-        height: 10px;
-        font-size: 8px;
-        color: #d8d8d8;
-    }
-
-    /* 这个槽位当前装的配件 */
-    #panel-current {
-        width: 20px;
-        height: 20px;
-        margin: 1px 1px 4px 1px;
-        background: rgba(255, 255, 255, 0.06);
-        border: 1px solid rgba(255, 255, 255, 0.22);
-    }
-
-    #panel-current.filled {
-        border: 1px solid #d8a34a;
-    }
-
-    #panel-grid {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .row {
-        display: flex;
-        flex-direction: row;
-    }
-
-    .cell {
-        width: 16px;
-        height: 16px;
-        margin: 1px;
-        background: rgba(255, 255, 255, 0.06);
-        border: 1px solid rgba(255, 255, 255, 0.14);
-    }
-
-    .cell:hover {
-        border: 1px solid rgba(255, 255, 255, 0.55);
-        background: rgba(255, 255, 255, 0.16);
-    }
-
-    /* 已经装在枪上的那一个 */
-    .cell.selected {
-        border: 1px solid #d8a34a;
-    }
-
-    /* 第一格：留空 / 卸下 */
-    .cell.uninstall {
-        align-items: center;
-        justify-content: center;
-    }
-
-    .cell.uninstall .slash {
-        font-size: 12px;
-        color: #b0b0b0;
-    }
-
-    /*
-      挂点按钮。落点由 Kotlin 每帧写 left/top（按钮中心对准骨骼投影点，边长 18 + 边框 1×2 = 20），
-      这里只管样子。
-    */
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; pointer-events: none; }
+    body { position: relative; color: #ffffff; font-size: 9px; }
+    #backdrop { position: absolute; inset: 0; pointer-events: auto; }
+    .layer { position: absolute; inset: 0; pointer-events: none; }
+    #mount-layer { z-index: 2; }
+    #icon-layer { z-index: 3; }
+    /* 挂点仅提供透明点击区域，悬停不再改变其几何尺寸或触发圆圈的 CSS 绘制。 */
     .mount {
-        position: absolute;
-        display: none;
-        width: 18px;
-        height: 18px;
-        align-items: center;
-        justify-content: center;
-        background: rgba(14, 16, 20, 0.55);
-        border: 1px solid rgba(255, 255, 255, 0.35);
-        border-radius: 10px;
+        position: absolute; display: none; box-sizing: border-box; width: 9px; height: 9px;
+        border: 0; border-radius: 4.5px; background: none;
+        align-items: center; justify-content: center; pointer-events: auto;
     }
-
-    .mount:hover {
-        border: 1px solid #ffffff;
-        background: rgba(40, 44, 52, 0.75);
+    .mount-label {
+        position: absolute; display: none; height: 11px; font-size: 7px; font-weight: normal;
+        color: #ffffff; text-stroke: 1px #000000; text-align: center; white-space: nowrap;
+        align-items: center; justify-content: center; pointer-events: none;
     }
-
-    /* 装了配件的挂点 */
-    .mount.filled {
-        border: 1px solid #d8a34a;
+    .mount-label.filled { color: #ffb43b; }
+    .attachment-icon, .cell {
+        position: absolute; display: none; box-sizing: border-box; width: 17px; height: 17px;
+        padding: 0; border: 0.5px solid #ffffff; background: rgba(13, 15, 19, 0.7);
+        align-items: center; justify-content: center; pointer-events: auto;
     }
-
-    /* 当前聚焦的挂点 */
-    .mount.active {
-        border: 1px solid #ffd479;
-        background: rgba(70, 58, 30, 0.8);
+    .attachment-icon:hover, .cell:hover { background: rgba(100, 110, 125, 0.75); border-color: #ffffff; }
+    .attachment-icon.active { box-shadow: inset 0 0 0 0.5px #ffffff; }
+    .attachment-icon.filled, .cell.selected { border-color: #ffb43b; }
+    .attachment-icon.filled.active, .cell.selected { box-shadow: inset 0 0 0 0.5px #ffb43b; }
+    /* 保留 0.5px 边框占位使物品居中，挂点图标的可见外框交给独立绘制阶段。 */
+    #icon-layer > .attachment-icon { border-color: transparent; box-shadow: none; }
+    slot, item { pointer-events: none; }
+    /* 覆盖 AUI global.css 的 18px 槽位和 slot > item 的 left/top: 1px。
+       CSS 自定义属性优先于 size/iconScale 属性，因此两种物品框都明确设置尺寸与缩放。 */
+    .attachment-icon > slot, .cell > slot {
+        --aui-slot-size: 16;
+        --aui-slot-icon-scale: 1;
+        width: 16px; height: 16px; flex-shrink: 0;
+        margin: 0; padding: 0; border: 0; background: none;
     }
-
-    .mount .label {
-        position: absolute;
-        top: 21px;
-        left: -11px;
-        width: 42px;
-        font-size: 7px;
-        color: #e6e6e6;
-        text-stroke: 1px #000000;
-        text-align: center;
-        white-space: nowrap;
+    .cell > slot {
+        --aui-slot-size: 15;
+        --aui-slot-icon-scale: 0.9375;
+        width: 15px; height: 15px;
     }
+    slot > item { left: 0; top: 0; width: 100%; height: 100%; }
+    /* 外框固定为 132 × 94；Kotlin 使用相同尺寸进行避让与边缘钳制。 */
+    #panel {
+        position: absolute; display: none; box-sizing: border-box; width: 132px; height: 94px;
+        border: 1px solid #ffffff; background: rgba(15, 17, 21, 0.76);
+        transform-origin: 0 0; pointer-events: auto; z-index: 4; font-weight: normal;
+    }
+    #panel-header { position: absolute; left: 5px; top: 5px; width: 120px; height: 34px; }
+    #panel-current { display: flex; left: 0; top: 0; }
+    #panel-name {
+        position: absolute; left: 22px; top: 1px; width: 98px; height: 14px;
+        font-size: 9px; font-weight: normal; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    #panel-uninstall {
+        position: absolute; display: flex; left: 0; top: 19px; width: 14px; height: 14px;
+        box-sizing: border-box; border: 1px solid #ffffff; align-items: center; justify-content: center;
+        background: rgba(0, 0, 0, 0.4); font-size: 12px;
+    }
+    #panel-uninstall span { pointer-events: none; }
+    #panel-uninstall:hover { background: rgba(255, 255, 255, 0.25); }
+    #panel-uninstall.disabled { opacity: 0.35; pointer-events: none; }
+    #panel-slot { position: absolute; left: 18px; top: 22px; width: 102px; font-size: 8px; color: #d0d0d0; }
+    #panel-scroll {
+        position: absolute; left: 5px; top: 44px; width: 120px; height: 44px;
+        box-sizing: border-box; border-top: 1px solid #ffffff; padding-top: 5px;
+        overflow-x: hidden; overflow-y: auto; scrollbar-gutter: stable;
+        scrollbar-width: 6px; scrollbar-color: #ffffff rgba(0, 0, 0, 0.55);
+    }
+    #panel-scroll::-webkit-scrollbar { width: 6px; }
+    #panel-scroll::-webkit-scrollbar-track { background-color: rgba(0, 0, 0, 0.55); }
+    #panel-scroll::-webkit-scrollbar-thumb { background-color: #ffffff; border-radius: 1px; }
+    #panel-grid { display: flex; flex-direction: column; gap: 4px; width: 96px; }
+    .row { display: flex; flex-direction: row; gap: 4px; height: 16px; flex-shrink: 0; }
+    .cell { position: relative; display: flex; width: 16px; height: 16px; padding: 0; flex-shrink: 0; }
+    #panel-empty { display: none; font-size: 9px; color: #bdbdbd; padding: 8px 0; }
 </style>
+</html>

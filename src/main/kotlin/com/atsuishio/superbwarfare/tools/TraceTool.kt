@@ -148,32 +148,6 @@ object TraceTool {
     }
 
     @JvmStatic
-    fun droneFindLookingEntity(entity: Entity, pos: Vec3, entityReach: Double, ticks: Float): Entity? {
-        val distance = entityReach * entityReach
-        var hitResult = entity.pick(entityReach, 1.0f, false)
-
-        val viewVec = entity.getViewVector(ticks)
-        val toVec = pos.add(viewVec.x * entityReach, viewVec.y * entityReach, viewVec.z * entityReach)
-        val aabb = entity.boundingBox.expandTowards(viewVec.scale(entityReach)).inflate(1.0)
-        val entityHitResult = ProjectileUtil.getEntityHitResult(
-            entity, pos, toVec, aabb,
-            {
-                !it.isSpectator && it.isAlive
-                        && (it !is Projectile) && SeekTool.BASIC_FILTER.test(it)
-                        && !it.type.`is`(ModTags.EntityTypes.DECOY) && SeekTool.NOT_IN_SMOKE.test(it)
-                        && it !== entity && it !== entity.vehicle
-            }, distance
-        )
-        if (entityHitResult != null) {
-            hitResult = entityHitResult
-        }
-        if (hitResult.type == HitResult.Type.ENTITY) {
-            return (hitResult as EntityHitResult).entity
-        }
-        return null
-    }
-
-    @JvmStatic
     fun cameraFindLookingEntity(player: Player, pos: Vec3, viewVec: Vec3, entityReach: Double): Entity? {
         var distance = entityReach * entityReach
         var hitResult = pickNew(pos, entityReach, viewVec, player)

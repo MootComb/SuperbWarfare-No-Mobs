@@ -39,7 +39,6 @@ object IFFOverlay : CommonOverlay("iff") {
     val FRIENDLY_ARTILLERY = loc("textures/overlay/teammate/friendly_artillery.png")
     val FRIENDLY_BOAT = loc("textures/overlay/teammate/friendly_boat.png")
     val FRIENDLY_DEFENSE = loc("textures/overlay/teammate/friendly_defense.png")
-    val FRIENDLY_DRONE = loc("textures/overlay/teammate/friendly_drone.png")
     val FRIENDLY_HELICOPTER = loc("textures/overlay/teammate/friendly_helicopter.png")
     val FRIENDLY_MINE = loc("textures/overlay/teammate/friendly_mine.png")
     val FRIENDLY_MISSILE = loc("textures/overlay/teammate/friendly_missile.png")
@@ -263,7 +262,6 @@ object IFFOverlay : CommonOverlay("iff") {
                 VehicleType.AA -> FRIENDLY_AA
                 VehicleType.TANK -> FRIENDLY_TANK
                 VehicleType.ARTILLERY -> FRIENDLY_ARTILLERY
-                VehicleType.DRONE -> FRIENDLY_DRONE
                 VehicleType.BOAT -> FRIENDLY_BOAT
                 VehicleType.DEFENSE -> FRIENDLY_DEFENSE
                 VehicleType.AIRSHIP -> FRIENDLY_AIRSHIP

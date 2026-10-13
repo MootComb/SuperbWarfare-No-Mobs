@@ -1,6 +1,5 @@
 package com.atsuishio.superbwarfare.network.message.send
 
-import com.atsuishio.superbwarfare.config.server.AttachmentConfig
 import com.atsuishio.superbwarfare.data.attachment.AttachmentSlots
 import com.atsuishio.superbwarfare.data.gun.GunData
 import com.atsuishio.superbwarfare.data.gun.value.AttachmentType
@@ -23,8 +22,9 @@ import net.minecraftforge.registries.ForgeRegistries
  * [attachmentId] 为空串表示卸下（界面上那个画了斜杠的"留空"格）。
  *
  * 与旧界面走 [EditMessage] 的"在可用列表里循环"不同，这里是**按件交换**：
- * 上装时从背包扣掉一个目标配件，同时把原来那件还给玩家；卸下时把配件还给玩家。
- * 也就是"界面上列出来的必须真的在背包里"。所有校验都在服务端重做一遍 ——
+ * 生存模式上装时从背包扣掉一个目标配件，同时把原来那件还给玩家；卸下时把配件还给玩家。
+ * 创造模式无需背包持有配件，安装不消耗物品，卸下或替换也不返还物品。
+ * 完全自由改装只放宽配件兼容范围，生存模式仍需持有并消耗配件。所有校验都在服务端重做一遍 ——
  * 客户端传来的 id 只是"想装哪个"，能不能装由 `GunData` + `AttachmentSlots` 说了算。
  */
 @RegisterPacket
@@ -50,7 +50,7 @@ data class AttachmentInstallMessage(
     }
 }
 
-/** 卸下 [type] 槽位的配件，并把配件物品还给玩家。槽位本来就是空的时什么都不做。 */
+/** 卸下 [type] 槽位的配件，仅在非创造模式返还物品。槽位本来就是空的时什么都不做。 */
 private fun uninstall(player: ServerPlayer, data: GunData, type: AttachmentType) {
     val current = data.attachment.id(type) ?: return
 
@@ -67,14 +67,14 @@ private fun uninstall(player: ServerPlayer, data: GunData, type: AttachmentType)
  *
  * 校验与 `/sbw attachment set` 同源（[GunData.canInstall] 要求配件数据存在、槽位匹配、
  * 不与已装的其它配件抢挂点，并且出现在这把枪的 `AvailableAttachments` 里），
- * 另外要求**背包里确实有这么一件**：装上时扣掉一件，原来那件还给玩家。
+ * 非创造模式另外要求**背包里确实有这么一件**：装上时扣掉一件，原来那件还给玩家。
  */
 private fun install(player: ServerPlayer, data: GunData, type: AttachmentType, id: ResourceLocation) {
     if (data.attachment.id(type) == id) return
     if (!data.canInstall(type, id)) return
     // 先扣背包再动枪：扣不出来（背包里没有 / 已经用完）就整笔取消，不留半成品状态。
-    // 完全自由改装模式不扣背包，与界面那边不筛背包对应。
-    if (!AttachmentConfig.fullyFreeAttachmentMode && !consumeOneAttachment(player, id)) return
+    // 创造模式可直接安装，生存模式在任何兼容配置下都需要背包中的配件。
+    if (!player.isCreative && !consumeOneAttachment(player, id)) return
 
     val previous = data.attachment.id(type)
     withdrawAmmoIfNeeded(player, data, type)
@@ -115,8 +115,9 @@ private fun isAttachment(stack: ItemStack, id: ResourceLocation): Boolean {
     return ResourceLocation.tryParse(provider.attachmentId) == id
 }
 
-/** 把配件物品还给玩家；背包塞不下就掉在脚下，不静默销毁。 */
+/** 非创造模式返还配件物品；背包塞不下就掉在脚下。 */
 private fun returnItem(player: ServerPlayer, id: ResourceLocation) {
+    if (player.isCreative) return
     val item = ForgeRegistries.ITEMS.getValue(id) ?: return
     val stack = ItemStack(item)
     if (!player.addItem(stack)) {

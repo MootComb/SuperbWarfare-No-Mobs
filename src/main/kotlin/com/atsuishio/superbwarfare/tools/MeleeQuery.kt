@@ -1,6 +1,7 @@
 package com.atsuishio.superbwarfare.tools
 
 import com.atsuishio.superbwarfare.data.gun.melee.*
+import com.atsuishio.superbwarfare.tools.MeleeQuery.DebugShape.*
 import com.atsuishio.superbwarfare.tools.MeleeQuery.LOS_EPSILON
 import com.atsuishio.superbwarfare.tools.MeleeQuery.SEGMENT_SAMPLES
 import com.atsuishio.superbwarfare.tools.MeleeQuery.boxHit
@@ -107,6 +108,9 @@ object MeleeQuery {
 
         /** 形状相交了，但 `Occlusion` 判定视线被方块挡住 */
         OCCLUSION("occlusion"),
+
+        /** 形状/遮挡都没过，靠 [resolve] 的 `forced` 强行算作命中 */
+        FORCED("forced"),
     }
 
     data class CandidateDiag(
@@ -140,9 +144,10 @@ object MeleeQuery {
         action: ResolvedMeleeAction,
         context: Context? = null,
         candidates: List<Entity>? = null,
+        forced: Entity? = null,
     ): DiagResult {
         val diags = ArrayList<CandidateDiag>()
-        val hits = resolve(level, attacker, action, context, candidates, diags)
+        val hits = resolve(level, attacker, action, context, candidates, diags, forced)
         return DiagResult(hits, diags)
     }
 
@@ -151,6 +156,7 @@ object MeleeQuery {
      *
      * @param candidates 粗筛结果；传 `null` 时由本方法按 [Context.reach] 自行粗筛
      * @param diagnostics 非空时收集每个候选的处置结果（调试用）
+     * @param forced 无论形状/遮挡如何都必须命中的目标（刺刀冲锋撞上的那个）
      */
     @JvmStatic
     @JvmOverloads
@@ -161,6 +167,7 @@ object MeleeQuery {
         context: Context? = null,
         candidates: List<Entity>? = null,
         diagnostics: MutableList<CandidateDiag>? = null,
+        forced: Entity? = null,
     ): List<Hit> {
         val player = attacker as? Player ?: return emptyList()
         val ctx = context ?: contextOf(player, action)
@@ -249,8 +256,26 @@ object MeleeQuery {
             }
         }
 
+        val forcedHit = resolveForcedHit(forced, byEntity, attacker, ctx, aimEnd, aimedTarget)
+        if (forcedHit != null) {
+            byEntity[forcedHit.entity] = forcedHit
+            if (diagnostics != null) {
+                diagByEntity[forcedHit.entity] = CandidateDiag(
+                    forcedHit.entity, RejectReason.FORCED, forcedHit.distance, forcedHit.angle,
+                    hitPos = forcedHit.hitPos,
+                )
+            }
+        }
+
         val sorted = sort(byEntity.values, action.sortBy)
-        val limited = if (action.maxTargets > 0) sorted.take(action.maxTargets) else sorted
+        val limited = when {
+            action.maxTargets <= 0 -> sorted
+            forcedHit == null -> sorted.take(action.maxTargets)
+            // 强行命中的目标不能被 MaxTargets 截掉
+            else -> sorted.take(action.maxTargets).let {
+                if (it.any { hit -> hit.entity === forcedHit.entity }) it else it.dropLast(1) + forcedHit
+            }
+        }
 
         if (diagnostics != null) {
             // 被 MaxTargets 截掉的也算"命中"，保留原始判定结论便于排查
@@ -258,6 +283,63 @@ object MeleeQuery {
         }
 
         return limited.mapIndexed { index, hit -> hit.copy(order = index) }
+    }
+
+    /**
+     * [resolve] 的 `forced` 那一份 [Hit]，条件不满足时返回 `null`。
+     *
+     * 冲锋刺击是"撞上去"而不是"扫到"：目标在触发的那一 tick 已经被准星射线量过一遍，
+     * 所以这里只复查"还算不算一个合法目标"（见 [isChargeTarget] 与距离），
+     * 形状与遮挡都不再挡它 —— 触发者必须挨打。
+     */
+    private fun resolveForcedHit(
+        target: Entity?,
+        already: Map<Entity, Hit>,
+        attacker: Entity,
+        context: Context,
+        aimEnd: Vec3,
+        aimedTarget: Entity?,
+    ): Hit? {
+        val entity = target?.takeIf { isChargeTarget(attacker, it) } ?: return null
+        if (already.containsKey(entity)) return null
+
+        val box = entity.boundingBox
+        if (box.xsize <= 0.0 || box.ysize <= 0.0 || box.zsize <= 0.0) return null
+
+        val hitPos = closestPointInBox(box, context.eyePos)
+        if (hitPos.distanceTo(context.eyePos) > context.reach + FORCED_REACH_MARGIN) return null
+
+        val zonePos = closestSegmentToBox(context.eyePos, aimEnd, box).second
+        val delta = context.eyePos.vectorTo(hitPos)
+        val aimed = entity === aimedTarget
+
+        return Hit(
+            entity = entity,
+            hitPos = hitPos,
+            zonePos = zonePos,
+            distance = delta.length(),
+            angle = angleBetween(lookVector(context.yaw, context.pitch), delta),
+            sampleIndex = 0,
+            order = 0,
+            aimed = aimed,
+            headshot = aimed && isHeadshot(entity, zonePos),
+            legshot = isLegshot(entity, zonePos),
+        )
+    }
+
+    /**
+     * 能不能作为刺刀冲锋的刺击目标。
+     *
+     * 触发侧（`GunChargeHandler`）与结算侧（[resolveForcedHit]）用的是同一个判据，
+     * 所以"撞上就必定打中"：不合法的东西压根不会触发这一击，而是继续冲锋窗口。
+     * 只有三件事不算数——自己、自己骑着的载具、同队；**不走** `BASIC_FILTER`
+     * （C4 / 阔剑 / 盔甲架这类也照戳，本来就是刺雷的正常目标）。
+     */
+    @JvmStatic
+    fun isChargeTarget(attacker: Entity, target: Entity?): Boolean {
+        if (target == null || target === attacker || target === attacker.vehicle) return false
+        if (target.isRemoved) return false
+        return !SeekTool.IN_SAME_TEAM.test(attacker, target)
     }
 
     /**
@@ -832,6 +914,9 @@ object MeleeQuery {
     private const val LOS_EPSILON = 1.0E-4
     private const val SEGMENT_SAMPLES = 8
     private const val SUBDIVISION_SAMPLES = 8
+
+    /** 强行命中的距离容差：量的是"眼睛到目标碰撞箱最近点"，比触及距离再放宽一点 */
+    private const val FORCED_REACH_MARGIN = 1.0
 
     /** 打头判定相对 `eyeHeight` 的下容差 */
     const val HEADSHOT_MARGIN_BELOW = 0.25

@@ -1,0 +1,17 @@
+{
+  "Icon": "superbwarfare:textures/gun_icon/lunge_mine_icon.png",
+  "SlotIcon": "superbwarfare:textures/item/lunge_mine_icon.png",
+  "UseCustomSprintAnimation": true,
+  "Animation": {
+    "Idle": "animation.lunge_mine.idle",
+    "Melee": "animation.lunge_mine.melee",
+    "Run": "animation.lunge_mine.sprint",
+    "BayonetCharge": "animation.lunge_mine.bayonet_charge",
+    "BayonetChargeHit": "animation.lunge_mine.bayonet_charge_hit"
+  },
+  "Model": {
+    "Animation": "superbwarfare:animations/bedrock/gun/lunge_mine.animation.json",
+    "Model": "superbwarfare:models/bedrock/gun/lunge_mine.geo.json",
+    "Texture": "superbwarfare:textures/bedrock/gun/lunge_mine.png"
+  }
+}

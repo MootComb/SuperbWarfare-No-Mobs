@@ -1,6 +1,7 @@
 package com.atsuishio.superbwarfare.client.gun
 
 import com.atsuishio.superbwarfare.data.gun.GunData
+import net.minecraft.world.entity.Entity
 import net.minecraft.world.item.ItemStack
 import java.util.*
 
@@ -55,6 +56,15 @@ object GunActionLock {
         /** 本段动作的持续 tick（动画按它拉伸） */
         var meleeDuration: Int = 0
 
+        /** 本段的结算点：`meleeTicks` 递减到它就打（= `Duration - HitTime`） */
+        var meleeHitTick: Int = 0
+
+        /** 本段挥击是不是刺刀冲锋打出来的（决定用 `Animation.BayonetChargeHit` 换掉本段 clip） */
+        var meleeFromBayonetCharge: Boolean = false
+
+        /** 冲锋撞上的目标：本段无论如何都要打中它；结算后清掉 */
+        var meleeChargeTarget: Entity? = null
+
         /** 距离上一次近战结束过了多少 tick（用于 `MeleeComboReset` 窗口判定） */
         var sinceLastMelee: Int = 0
 
@@ -96,6 +106,9 @@ object GunActionLock {
             meleeHitResolved = false
             meleeActionIndex = 0
             meleeDuration = 0
+            meleeHitTick = 0
+            meleeFromBayonetCharge = false
+            meleeChargeTarget = null
             sinceLastMelee = 0
         }
 

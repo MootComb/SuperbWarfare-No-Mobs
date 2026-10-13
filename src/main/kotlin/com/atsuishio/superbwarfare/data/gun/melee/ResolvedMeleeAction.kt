@@ -77,7 +77,8 @@ data class ResolvedMeleeAction(
      * 本段实际生效的结算下标，**从挥击开始算第几 tick**。
      *
      * 就是 `duration - hitTime`：`meleeTicks` 从 [duration] 每 tick 递减，
-     * 递减 [hitTime] 次之后正好等于 `duration - hitTime`（见 `MeleeClientHandler.tickActiveSwing`）。
+     * 递减 [hitTime] 次之后正好等于 `duration - hitTime`。
+     * 刺刀冲锋那一下会用 `BayonetCharge.Strike*` 覆写这一组量（见 `MeleeClientHandler`）。
      *
      * 收敛到 `[0, duration]`，不会越界。
      */

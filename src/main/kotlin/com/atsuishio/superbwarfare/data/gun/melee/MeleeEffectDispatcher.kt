@@ -6,6 +6,7 @@ import com.atsuishio.superbwarfare.data.gun.GunData
 import com.atsuishio.superbwarfare.data.gun.subdata.Cooldown
 import com.atsuishio.superbwarfare.init.ModMeleeEffects
 import net.minecraft.server.level.ServerLevel
+import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.phys.Vec3
@@ -28,7 +29,8 @@ class MeleeEffectDispatcher(
     fun swing() = dispatch(MeleeEffectTrigger.SWING)
 
     /**
-     * `Hit` / `FirstHit`：每个通过判定并真的挨打的目标各一次。
+     * `Hit` / `FirstHit`：每个通过判定并真的挨打的目标各一次。**非生物目标（载具等）也要走**，
+     * 只带命中点——需要 `LivingEntity` 的效果在派发时不带目标，自己就成空操作了。
      *
      * `FirstHit` 先派发 —— 它只在**第一个**挨打的目标身上被考虑，
      * 所以必须在这次调用里就消耗掉，否则第二个目标会把它再排一次队。
@@ -36,9 +38,10 @@ class MeleeEffectDispatcher(
      * @param position 效果作用点（命中点优先；没有就退化成目标位置）
      * @param damaged 这一击是否真的造成了伤害
      */
-    fun hit(target: LivingEntity, position: Vec3?, damaged: Boolean = true) {
-        dispatch(MeleeEffectTrigger.FIRST_HIT, target, position, damaged = damaged)
-        dispatch(MeleeEffectTrigger.HIT, target, position, damaged = damaged)
+    fun hit(target: Entity, position: Vec3?, damaged: Boolean = true) {
+        val living = target as? LivingEntity
+        dispatch(MeleeEffectTrigger.FIRST_HIT, living, position, damaged = damaged)
+        dispatch(MeleeEffectTrigger.HIT, living, position, damaged = damaged)
     }
 
     /** `Kill`：目标被这一击打死。 */

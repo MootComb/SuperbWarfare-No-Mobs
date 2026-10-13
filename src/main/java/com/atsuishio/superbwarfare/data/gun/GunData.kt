@@ -372,7 +372,7 @@ class GunData private constructor(
     /**
      * 本发正在生效的充能射击档位（[ChargeAction]），`null` 表示按普通射击算。
      *
-     * 只活在**一次开火的调用栈**里：[com.atsuishio.superbwarfare.item.gun.GunItem.shootInternal]
+     * 只活在**一次开火的调用栈**里：[GunItem.shootInternal]
      * 开火前设、开火后清，所以既不写 NBT、也不会影响其它枪。
      */
     @Transient

@@ -7,7 +7,7 @@ import kotlinx.serialization.serializer
 /**
  * kotlinx 版的数据编解码桥。
  *
- * [IDBasedData] 是 Java 接口且带 Java 实现类（如 `DroneAttachmentData`），
+ * [IDBasedData] 是 Java 接口且带 Java 实现类（如 `DefaultGunData`），
  * Kotlin 接口的默认实现无法被 Java 实现类继承（除非改 jvm-default 编译选项），
  * 所以把实现放在这里，由接口的 default 方法转发。
  */

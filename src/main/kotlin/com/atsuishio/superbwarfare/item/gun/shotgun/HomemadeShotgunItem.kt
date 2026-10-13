@@ -2,14 +2,14 @@ package com.atsuishio.superbwarfare.item.gun.shotgun
 
 import com.atsuishio.superbwarfare.data.gun.ShootParameters
 import com.atsuishio.superbwarfare.init.RegistryName
-import com.atsuishio.superbwarfare.item.gun.GeoGunItemV2
+import com.atsuishio.superbwarfare.item.gun.GeoGunItem
 import com.atsuishio.superbwarfare.tools.ParticleTool.sendParticle
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.Rarity
 
 @RegistryName("homemade_shotgun")
-object HomemadeShotgunItem : GeoGunItemV2(Properties().rarity(Rarity.COMMON)) {
+object HomemadeShotgunItem : GeoGunItem(Properties().rarity(Rarity.COMMON)) {
 
     override fun beforeShoot(parameters: ShootParameters) {
         super.beforeShoot(parameters)

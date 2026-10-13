@@ -14,8 +14,7 @@ import net.neoforged.fml.common.EventBusSubscriber
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent
 
-// TODO 替换掉之前的GunGeoItem，给这个的V2去掉
-open class GeoGunItemV2(properties: Properties) : GunItem(properties) {
+open class GeoGunItem(properties: Properties) : GunItem(properties) {
 
     @EventBusSubscriber
     companion object {

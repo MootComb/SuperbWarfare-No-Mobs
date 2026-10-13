@@ -4,7 +4,7 @@ import com.atsuishio.superbwarfare.data.gun.GunData
 import com.atsuishio.superbwarfare.data.gun.GunProp
 import com.atsuishio.superbwarfare.data.gun.ShootParameters
 import com.atsuishio.superbwarfare.init.RegistryName
-import com.atsuishio.superbwarfare.item.gun.GeoGunItemV2
+import com.atsuishio.superbwarfare.item.gun.GeoGunItem
 import com.atsuishio.superbwarfare.network.message.receive.ShootClientMessage
 import com.atsuishio.superbwarfare.tools.ParticleTool.sendParticle
 import com.atsuishio.superbwarfare.tools.playLocalSound
@@ -18,7 +18,7 @@ import net.minecraft.world.phys.Vec3
 import org.joml.Vector3d
 
 @RegistryName("igla_9k38")
-object IglaItem : GeoGunItemV2(Properties().rarity(Rarity.EPIC)) {
+object IglaItem : GeoGunItem(Properties().rarity(Rarity.EPIC)) {
 
     override fun useSpecialFireProcedure(data: GunData) = true
     override fun shootBullet(parameters: ShootParameters): Boolean {

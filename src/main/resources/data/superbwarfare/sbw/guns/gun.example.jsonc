@@ -37,6 +37,72 @@
   "MeleeDuration": 16,
   // In which tick will melee damage be applied
   "MeleeDamageTime": 6,
+  // Damage type applied on a melee hit, must be a registered damage type id
+  "MeleeDamageType": "superbwarfare:gun_melee",
+  // Damage type applied when the melee hit is a headshot
+  "MeleeHeadshotDamageType": "superbwarfare:gun_melee_headshot",
+  // Consume the gun on a landed melee hit (non-creative players only)
+  // "Landed" includes targets whose damage was refused but still ran the MeleeActions effects,
+  // so a one-shot weapon like the lunge mine is spent as soon as its warhead goes off
+  "ConsumeOnMeleeHit": false,
+  /*
+   * Melee swing sections. A section may override any global Melee* field above:
+   *   Animation, Duration, HitTime, Hitbox, Sweep, DamageMultiplier, RangeMultiplier,
+   *   MaxTargets, Falloff, SortBy, Knockback, BypassesArmor, Headshot, Legshot,
+   *   Durability, Cooldown, Swing (sound), Hit (sound), Heavy
+   * "Effects" entries run on the server once the section connects. An entry either references a
+   * preset in `data/<ns>/sbw/melee_effects/<id>.json` or names a behavior directly, and every
+   * field written on the entry overrides the preset:
+   *   "superbwarfare:warhead_stab"                                    // preset only
+   *   { "Effect": "superbwarfare:warhead_stab", "Chance": 0.35 }       // preset + overrides
+   *   { "Type": "superbwarfare:explosion", "Chance": 1.0,
+   *     "Radius": 4.0, "Damage": 60, "DestroyBlocks": false }          // inline, no preset
+   * Trigger: "Hit" (default), "FirstHit", "Swing", "Kill"
+   * The rpg's blast stays the preset `warhead_stab` (Radius 4.0 / Damage 60); a gun with its own
+   * numbers writes them inline like the above -- see lunge_mine.json, whose blast is tunable on
+   * its own. An explosion also hurts the wielder standing inside its radius.
+   */
+  "MeleeActions": [
+    {
+      "Animation": "hit",
+      "Duration": 16,
+      "HitTime": 6,
+      "Effects": [
+        {
+          "Type": "superbwarfare:explosion",
+          "Chance": 1.0,
+          "Radius": 4.0,
+          "Damage": 60
+        }
+      ]
+    }
+  ],
+  /*
+   * Behavior of right click
+   * Available values: "Aim", "HeavyStrike", "BayonetCharge"
+   * "HeavyStrike" performs the MeleeActions section marked with "Heavy": true (the first section when none is marked)
+   * "BayonetCharge" runs the BayonetCharge block below instead of aiming
+   */
+  "RightClickAction": "Aim",
+  /*
+   * Only used when RightClickAction is "BayonetCharge"
+   * Duration: how long the charge window lasts, in ticks
+   * Speed: amplifier of the speed effect given during the charge (0 = Speed I)
+   * Cooldown: cooldown in ticks before another charge can be started
+   * Sound: played when the charge starts
+   * StrikeDuration: length of the strike landing on a target, in ticks
+   * StrikeHitTime: tick of the strike (counted from its start) at which the hit resolves
+   * StrikeDuration/StrikeHitTime are independent of MeleeActions.Duration/HitTime;
+   * omit them (or write 0) to reuse the section that the strike plays
+   */
+  "BayonetCharge": {
+    "Duration": 180,
+    "Speed": 2,
+    "Cooldown": 300,
+    "Sound": "superbwarfare:lunge_mine_growl",
+    "StrikeDuration": 15,
+    "StrikeHitTime": 7
+  },
   /*
    * Default projectile data
    * Can be pure String like "Projectile": "superbwarfare:projectile"

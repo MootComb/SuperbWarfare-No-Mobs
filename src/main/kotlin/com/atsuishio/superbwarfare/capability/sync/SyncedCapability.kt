@@ -13,7 +13,9 @@ import com.atsuishio.superbwarfare.serialization.ByteBufEncoder
  * 数据直接写进 mod 自带的 [ByteBufEncoder] / [ByteBufDecoder]（底层是 `FriendlyByteBuf`），
  * 不经过 NBT，也不经过 kotlinx 序列化。
  *
- * 示例见 `InfiniteAmmoCapability`、`PhosphorusFireCapability` 与 `PlayerVariable`。
+ * 具体的数据类通常**不用**实现本接口：`com.atsuishio.superbwarfare.capability.CapabilityWrapper`
+ * 已经用 kotlinx 序列化器把 [writeSync] / [readSync] 实现好了，登记与挂载则由
+ * `ModCapabilities` 统一完成。
  */
 interface SyncedCapability {
 

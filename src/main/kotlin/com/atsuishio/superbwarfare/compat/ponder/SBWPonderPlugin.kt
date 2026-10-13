@@ -18,7 +18,6 @@ object SBWPonderPlugin : PonderPlugin {
         ContainerPonderScene.register(helper)
         CreativeChargingStationPonderScene.register(helper)
         DpsGeneratorDeployerPonderScene.register(helper)
-        DronePonderScene.register(helper)
         JumpPadPonderScene.register(helper)
         TargetDeployerPonderScene.register(helper)
         VehicleAssemblingTablePonderScene.register(helper)

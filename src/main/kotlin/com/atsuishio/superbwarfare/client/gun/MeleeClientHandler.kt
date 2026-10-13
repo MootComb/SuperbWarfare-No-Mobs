@@ -17,6 +17,7 @@ import com.atsuishio.superbwarfare.network.message.send.MeleeAttackMessage
 import com.atsuishio.superbwarfare.tools.MeleeQuery
 import com.atsuishio.superbwarfare.tools.sendPacketToServer
 import net.minecraft.world.InteractionHand
+import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
 
@@ -46,6 +47,10 @@ object MeleeClientHandler {
      * @param drawTime              切枪进度；未完成时不接受输入
      * @param canOperate            载具禁手 / 非游戏内 / 改装界面等外部门禁是否通过
      * @param skipStateTick         调用方是否已经推进过动作锁计时（避免一 tick 走两步）
+     * @param requestedIndex        强制打第几段（`< 0` = 按连招轮转）；右键重击与刺刀冲锋用它
+     * @param chargeStrike          本段是不是刺刀冲锋的撞人那一下（动画层据此换 clip）
+     * @param chargeTarget          冲锋撞上的那个目标；结算时强行算命中
+     * @return 这一 tick 是否真的起了一次挥击（右键冲锋要靠它决定是否收窗口）
      */
     fun tick(
         player: Player,
@@ -56,15 +61,18 @@ object MeleeClientHandler {
         drawTime: Double,
         canOperate: Boolean,
         skipStateTick: Boolean = false,
-    ) {
+        requestedIndex: Int = -1,
+        chargeStrike: Boolean = false,
+        chargeTarget: Entity? = null,
+    ): Boolean {
         val subWeaponJustPressed = subWeaponFireKeyDown && !subWeaponKeyWasDown
         subWeaponKeyWasDown = subWeaponFireKeyDown
 
         // 切换请求的兜底超时也要在任何提前 return 之前推进（丢一次包不该把 G 永久锁死）
         SubWeaponClientHandler.tick(data = null)
 
-        val item = stack.item as? GunItem ?: return
-        if (!GunItem.isOperable(stack)) return
+        val item = stack.item as? GunItem ?: return false
+        if (!GunItem.isOperable(stack)) return false
 
         val data = GunData.from(stack)
         val state = GunActionLock.of(data)
@@ -78,7 +86,7 @@ object MeleeClientHandler {
 
         if (state.meleeTicks > 0) {
             tickActiveSwing(player, data, state)
-            return
+            return false
         }
 
         val fromSubWeaponKey = subWeaponFireKeyDown && !meleeKeyDown
@@ -91,22 +99,26 @@ object MeleeClientHandler {
             }
 
             SubWeaponClientHandler.request(player, data, target)
-            return
+            return false
         }
 
-        // V 是唯一的近战入口（外加"近战型枪按住左键"这一条独立路径）
-        val wantsMelee = meleeKeyDown || (data.meleeOnly() && holdingFireKey)
-        if (!wantsMelee) return
+        // V 是唯一的近战入口（外加"近战型枪按住左键"与右键行为这两条独立路径）
+        val wantsMelee = meleeKeyDown || requestedIndex >= 0 || (data.meleeOnly() && holdingFireKey)
+        if (!wantsMelee) return false
 
-        if (!item.hasMeleeAttack(data)) return
-        if (!canOperate) return
-        if (drawTime >= 0.01) return
-        if (state.isLocked) return
-        if (GunActionLock.of(operated).blocks(GunAction.MELEE)) return
-        if (operated.busyForMelee()) return
+        if (!item.hasMeleeAttack(data)) return false
+        if (!canOperate) return false
+        if (drawTime >= 0.01) return false
+        if (state.isLocked) return false
+        if (GunActionLock.of(operated).blocks(GunAction.MELEE)) return false
+        if (operated.busyForMelee()) return false
 
-        triggerSwing(player, data, state)
+        return triggerSwing(player, data, state, requestedIndex, chargeStrike, chargeTarget)
     }
+
+    /** 标了 `"Heavy": true` 的那一段的下标；没标就是第 0 段 */
+    fun indexOfHeavy(data: GunData): Int =
+        data.meleeActions().indexOfFirst { it.isHeavy() }.takeIf { it >= 0 } ?: 0
 
     /**
      * 这把枪现在**正忙**（换弹 / 拉栓 / 蓄力），近战入口必须被拒
@@ -140,27 +152,42 @@ object MeleeClientHandler {
         player: Player,
         data: GunData,
         state: GunActionLock.State,
-    ) {
-        // ① 连招下标：窗口内再挥击进下一段，超时回到第 0 段
+        requestedIndex: Int = -1,
+        chargeStrike: Boolean = false,
+        chargeTarget: Entity? = null,
+    ): Boolean {
+        // ① 连招下标：窗口内再挥击进下一段，超时回到第 0 段；被强制指定时直接用那一段
         val actions = data.meleeActions()
         val comboReset = data.get(GunProp.MELEE_COMBO_RESET)
         val inComboWindow = state.sinceLastMelee < comboReset
-        val index = if (inComboWindow) (state.meleeActionIndex + 1) % actions.size else 0
+        val index = when {
+            requestedIndex >= 0 -> requestedIndex.coerceAtMost((actions.size - 1).coerceAtLeast(0))
+            inComboWindow -> (state.meleeActionIndex + 1) % actions.size
+            else -> 0
+        }
 
         val action = data.resolveMeleeAction(index)
 
         // ② 本段冷却
-        if (action.cooldown > 0 && data.cooldown.isCoolingDown(Cooldown.meleeKey(index))) return
+        if (action.cooldown > 0 && data.cooldown.isCoolingDown(Cooldown.meleeKey(index))) return false
 
-        // ③ 动作占用（时长 = 本段 Duration）
-        if (!state.acquire(GunAction.MELEE, action.duration)) return
+        // ③ 冲锋那一下的时长与结算点独立于动作表（数据里没写就跟着那一段走）
+        val charge = if (chargeStrike) data.get(GunProp.BAYONET_CHARGE) else null
+        val duration = charge?.strikeDuration?.takeIf { it > 0 } ?: action.duration
+        val hitTime = charge?.strikeHitTime?.takeIf { it >= 0 } ?: action.hitTime
+
+        // ④ 动作占用（时长 = 本段的 Duration）
+        if (!state.acquire(GunAction.MELEE, duration)) return false
 
         state.meleeActionIndex = index
-        state.meleeDuration = action.duration
-        state.meleeTicks = action.duration
+        state.meleeDuration = duration
+        state.meleeTicks = duration
+        state.meleeHitTick = (duration - hitTime).coerceIn(0, duration)
         state.meleeHitResolved = false
+        state.meleeFromBayonetCharge = chargeStrike
+        state.meleeChargeTarget = chargeTarget.takeIf { chargeStrike }
 
-        // ⑥ 通知动画侧"新的一次挥击开始了"。按住 V 连续挥击时状态一直是 MELEE，
+        // ⑤ 通知动画侧"新的一次挥击开始了"。按住 V 连续挥击时状态一直是 MELEE，
         //    光靠状态切换判断的话动画只会播第一段（见 [swingSerial] 的说明）。
         swingSerial++
 
@@ -168,29 +195,32 @@ object MeleeClientHandler {
             data.cooldown.set(Cooldown.meleeKey(index), action.cooldown)
         }
 
-        // ④ 挥击音效（客户端本地播放；动作级 Swing 覆盖枪的 MeleeSound.Swing）
+        // ⑥ 挥击音效（客户端本地播放；动作级 Swing 覆盖枪的 MeleeSound.Swing）
         player.playSound(action.swing ?: data.get(GunProp.MELEE_SOUND).swing, 1f, 1f)
 
-        // ⑤ 与旧的帧驱动开火冷却对齐：挥击期间不该顺手打出一发
-        ClientEventHandler.fireCooldown = (action.duration + 4).toDouble()
+        // ⑦ 与旧的帧驱动开火冷却对齐：挥击期间不该顺手打出一发
+        ClientEventHandler.fireCooldown = (duration + 4).toDouble()
 
         debugLog {
-            "melee swing: gun=${data.id} index=$index duration=${action.duration} " +
-                    "hitTime=${action.hitTime} comboWindow=$inComboWindow"
+            "melee swing: gun=${data.id} index=$index duration=$duration " +
+                    "hitTime=$hitTime comboWindow=$inComboWindow charge=${charge != null}"
         }
+
+        return true
     }
 
     /**
-     * 推进当前这一段的计时，到 `HitTime` 那一 tick 结算
+     * 推进当前这一段的计时，到锁存的结算 tick 结算
      */
     private fun tickActiveSwing(player: Player, data: GunData, state: GunActionLock.State) {
         if (state.meleeHitResolved) return
-
-        val action = data.resolveMeleeAction(state.meleeActionIndex)
-        if (state.meleeTicks > action.hitTickFromStart) return
+        if (state.meleeTicks > state.meleeHitTick) return
 
         state.meleeHitResolved = true
-        resolveHit(player, data, action, state.meleeActionIndex)
+        val forced = state.meleeChargeTarget
+        state.meleeChargeTarget = null
+
+        resolveHit(player, data, data.resolveMeleeAction(state.meleeActionIndex), state.meleeActionIndex, forced)
     }
 
     private fun resolveHit(
@@ -198,16 +228,17 @@ object MeleeClientHandler {
         data: GunData,
         action: ResolvedMeleeAction,
         actionIndex: Int,
+        forced: Entity? = null,
     ) {
         val context = MeleeQuery.contextOf(player, action)
 
         // 开 debug 日志时走带诊断的版本：能直接看到"候选是谁、卡在哪一步"
         val diag = if (DisplayConfig.MELEE_DEBUG_LOG.get()) {
-            MeleeQuery.resolveDiag(player.level(), player, action, context)
+            MeleeQuery.resolveDiag(player.level(), player, action, context, forced = forced)
         } else {
             null
         }
-        val hits = diag?.hits ?: MeleeQuery.resolve(player.level(), player, action, context)
+        val hits = diag?.hits ?: MeleeQuery.resolve(player.level(), player, action, context, forced = forced)
 
         player.swing(InteractionHand.MAIN_HAND)
 
@@ -220,7 +251,14 @@ object MeleeClientHandler {
         )
 
         if (diag != null) {
-            debugLog { describeMeleeResult(action, context, hits, diag) }
+            debugLog {
+                describeMeleeResult(action, context, hits, diag) +
+                        if (forced != null) {
+                            " forced=${forced.type} landed=${hits.any { it.entity === forced }}"
+                        } else {
+                            ""
+                        }
+            }
         }
     }
 
@@ -294,9 +332,11 @@ object MeleeClientHandler {
     fun installDebugHooks() {
         MeleeDebugHooks.install { player, data, index ->
             // 本地也把下标锁存过去，让动画跟着切到被 force 的那一段
+            val action = data.resolveMeleeAction(index)
             val state = GunActionLock.of(data)
             state.meleeActionIndex = index
-            state.meleeDuration = data.resolveMeleeAction(index).duration
+            state.meleeDuration = action.duration
+            state.meleeHitTick = action.hitTickFromStart
 
             forceSwing(player, data, index)
         }

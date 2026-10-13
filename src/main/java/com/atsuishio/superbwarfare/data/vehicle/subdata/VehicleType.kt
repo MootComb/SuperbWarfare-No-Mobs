@@ -35,9 +35,6 @@ enum class VehicleType {
     @SerialName("Boat")
     BOAT,
 
-    @SerialName("Drone")
-    DRONE,
-
     @SerialName("Special")
     SPECIAL,
 

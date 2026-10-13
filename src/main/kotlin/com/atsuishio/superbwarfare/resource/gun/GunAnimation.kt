@@ -99,6 +99,11 @@ class GunAnimation {
     @SerialName("Hold")
     var hold: String? = null
 
+    // 常驻循环动画，任何状态下都播，垫在所有层之下
+    @JvmField
+    @SerialName("Loop")
+    var loop: String? = null
+
     // 循环开火动画
     @JvmField
     @SerialName("FireLoop")
@@ -142,13 +147,20 @@ class GunAnimation {
     @SerialName("Run")
     var run: String? = null
 
+    // 刺刀冲锋（`RightClickAction: "BayonetCharge"`）窗口内的循环动画，冲锋时顶掉 [run]
+    @JvmField
+    @SerialName("BayonetCharge")
+    var bayonetCharge: String? = null
+
+    // 冲锋撞到目标那一下的挥击动画，只替换本段的 [melee]（时长/判定/效果仍走动作表）
+    @JvmField
+    @SerialName("BayonetChargeHit")
+    var bayonetChargeHit: String? = null
+
     // 近战动画 clip 名
     @JvmField
     @SerialName("Melee")
     var melee: SingleOrList<String>? = null
-
-    /** 第一支近战 clip 名；没配或配成空列表时返回 `null`（老 GeckoLib 路径用） */
-    fun firstMeleeName(): String? = melee?.list?.firstOrNull()
 
     /**
      * 换弹 clip 名

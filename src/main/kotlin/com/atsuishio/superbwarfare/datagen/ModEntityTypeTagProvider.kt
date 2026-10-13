@@ -149,7 +149,6 @@ class ModEntityTypeTagProvider(
             ModEntities.AIR_SHEEP.get(),
             ModEntities.HAPPIEST_GHAST.get(),
             ModEntities.KIROV.get(),
-            ModEntities.DRONE.get(),
             ModEntities.MORTAR.get(),
             ModEntities.VEHICLE_ASSEMBLING_TABLE.get(),
             ModEntities.SODAYO_PICK_UP.get(),

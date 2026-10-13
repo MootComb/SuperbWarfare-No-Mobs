@@ -2,13 +2,13 @@ package com.atsuishio.superbwarfare.item.gun.launcher
 
 import com.atsuishio.superbwarfare.data.gun.ShootParameters
 import com.atsuishio.superbwarfare.init.RegistryName
-import com.atsuishio.superbwarfare.item.gun.GeoGunItemV2
+import com.atsuishio.superbwarfare.item.gun.GeoGunItem
 import com.atsuishio.superbwarfare.tools.ParticleTool.sendParticle
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.world.item.Rarity
 
 @RegistryName("rpg")
-object RpgItem : GeoGunItemV2(Properties().rarity(Rarity.RARE)) {
+object RpgItem : GeoGunItem(Properties().rarity(Rarity.RARE)) {
     override fun shootBullet(parameters: ShootParameters): Boolean {
         if (!super.shootBullet(parameters)) return false
 
