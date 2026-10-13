@@ -4,11 +4,13 @@ import com.atsuishio.superbwarfare.config.server.AttachmentConfig
 import com.atsuishio.superbwarfare.data.attachment.AttachmentSlots
 import com.atsuishio.superbwarfare.data.gun.GunData
 import com.atsuishio.superbwarfare.data.gun.value.AttachmentType
+import com.atsuishio.superbwarfare.init.ModSounds
 import com.atsuishio.superbwarfare.item.attachment.AttachmentProvider
 import com.atsuishio.superbwarfare.item.gun.GunItem
 import com.atsuishio.superbwarfare.ksp.annotation.RegisterPacket
 import com.atsuishio.superbwarfare.network.PayloadContext
 import com.atsuishio.superbwarfare.network.ServerPacketPayload
+import com.atsuishio.superbwarfare.tools.playLocalSound
 import kotlinx.serialization.Serializable
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.level.ServerPlayer
@@ -57,6 +59,7 @@ private fun uninstall(player: ServerPlayer, data: GunData, type: AttachmentType)
     data.save()
 
     returnItem(player, current)
+    player.playLocalSound(ModSounds.ATTACHMENT_REMOVE.get(), 1f, 1f)
 }
 
 /**
@@ -79,6 +82,7 @@ private fun install(player: ServerPlayer, data: GunData, type: AttachmentType, i
     data.save()
 
     previous?.let { returnItem(player, it) }
+    player.playLocalSound(ModSounds.ATTACHMENT_SET.get(), 1f, 1f)
 }
 
 /** 换这个槽位的配件前先把已装填的弹药退还给玩家（目前只有弹匣槽位需要）。 */

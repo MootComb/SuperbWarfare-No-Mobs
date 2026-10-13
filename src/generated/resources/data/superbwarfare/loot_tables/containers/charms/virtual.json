@@ -19,6 +19,10 @@
         {
           "type": "minecraft:item",
           "name": "superbwarfare:charm_sui_container"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "superbwarfare:charm_swiss_coil"
         }
       ],
       "rolls": 1.0

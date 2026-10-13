@@ -495,6 +495,7 @@ class ModCustomLootProvider() : LootTableSubProvider {
                     ModItems.CHARM_LILY,
                     ModItems.CHARM_HIRU_HEAD,
                     ModItems.CHARM_SUI_CONTAINER,
+                    ModItems.CHARM_SWISS_COIL,
                 )
             }
         }

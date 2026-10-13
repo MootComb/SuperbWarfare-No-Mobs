@@ -828,6 +828,12 @@
 				"0.3333": {
 					"effect": "superbwarfare:trachelium_open"
 				},
+				"1.1167": {
+					"effect": "superbwarfare:trachelium_bullet_drop"
+				},
+				"1.4333": {
+					"effect": "trachelium_bullet_drop"
+				},
 				"1.8333": {
 					"effect": "superbwarfare:trachelium_ammo_in"
 				},
@@ -2202,6 +2208,12 @@
 				},
 				"0.3333": {
 					"effect": "superbwarfare:trachelium_open"
+				},
+				"1.1167": {
+					"effect": "superbwarfare:trachelium_bullet_drop"
+				},
+				"1.4333": {
+					"effect": "trachelium_bullet_drop"
 				},
 				"1.8333": {
 					"effect": "superbwarfare:trachelium_ammo_in"

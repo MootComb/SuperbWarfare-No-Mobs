@@ -12,7 +12,7 @@
       "Value": 0.05
     },
     {
-      "Prop": "ReloadTime",
+      "Prop": "NormalReloadTime",
       "Op": "Mul",
       "Value": 0.95
     }

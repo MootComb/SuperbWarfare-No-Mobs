@@ -331,7 +331,7 @@ open class ClientAttachmentImageTooltip(tooltip: AttachmentImageComponent) : Cli
             "RecoilTime",
             "RecoilX",
             "RecoilY",
-            "ReloadTime",
+            "NormalReloadTime",
             "SoundRadius",
             "Spread",
             "Sway",
@@ -339,7 +339,7 @@ open class ClientAttachmentImageTooltip(tooltip: AttachmentImageComponent) : Cli
             "ZoomTime",
             "DrawTime",
             "Gravity",
-            "ReloadTime",
+            "EmptyReloadTime",
             "ZoomSpreadRate",
             "FuelPerAmmo",
         )

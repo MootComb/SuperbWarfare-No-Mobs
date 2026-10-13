@@ -63,6 +63,8 @@ object ModSounds {
 
     @JvmField val EDIT_MODE = register("edit_mode")
     @JvmField val EDIT = register("edit")
+    @JvmField val ATTACHMENT_SET = register("attachment_set")
+    @JvmField val ATTACHMENT_REMOVE = register("attachment_remove")
     @JvmField val SHELL_CASING_NORMAL = register("shell_casing_normal")
     @JvmField val SHELL_CASING_SHOTGUN = register("shell_casing_shotgun")
     @JvmField val SHELL_CASING_50CAL = register("shell_casing_50cal")

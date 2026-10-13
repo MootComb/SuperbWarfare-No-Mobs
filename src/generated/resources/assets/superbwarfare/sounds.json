@@ -263,6 +263,16 @@
       "superbwarfare:annihilator/annihilator_veryfar"
     ]
   },
+  "attachment_remove": {
+    "sounds": [
+      "superbwarfare:attachment_remove"
+    ]
+  },
+  "attachment_set": {
+    "sounds": [
+      "superbwarfare:attachment_set"
+    ]
+  },
   "aurelia_sceptre_fire_1p": {
     "sounds": [
       "superbwarfare:gun/aurelia_sceptre/aurelia_sceptre_fire_1p"
@@ -3127,6 +3137,11 @@
   "trachelium_bolt": {
     "sounds": [
       "superbwarfare:gun/trachelium/trachelium_bolt"
+    ]
+  },
+  "trachelium_bullet_drop": {
+    "sounds": [
+      "superbwarfare:gun/trachelium/trachelium_bullet_drop"
     ]
   },
   "trachelium_close": {
