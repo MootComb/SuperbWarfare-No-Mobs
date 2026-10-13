@@ -56,7 +56,7 @@ class ModItemModelProvider(output: PackOutput, existingFileHelper: ExistingFileH
         gunItemV2(ModItems.RPG)
         gunItemV2(ModItems.RPK)
         gunItemV2(ModItems.SECONDARY_CATACLYSM)
-        gunItem(ModItems.SENTINEL)
+        gunItemV2(ModItems.SENTINEL)
         gunItemV2(ModItems.SKS)
         gunItemV2(ModItems.SVD)
         gunItemV2(ModItems.TASER)
@@ -74,7 +74,7 @@ class ModItemModelProvider(output: PackOutput, existingFileHelper: ExistingFileH
         gunItemV2(ModItems.M_1897)
         gunItemV2(ModItems.RAUBTIER)
 
-        gunItem(ModItems.BEAST_GUN_TEST)
+//        gunItem(ModItems.BEAST_GUN_TEST)
 
         simpleItem(ModItems.VEHICLE_GUN)
         withExistingParent(ModItems.EMPTY_GUN.id.path, ResourceLocation.withDefaultNamespace("item/generated"))

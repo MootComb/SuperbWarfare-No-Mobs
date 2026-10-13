@@ -463,8 +463,8 @@ class ModSoundProvider(output: PackOutput, existingFileHelper: ExistingFileHelpe
         group(
             "gun/sentinel", "sentinel_fire_1p", "sentinel_fire_3p", "sentinel_charge_fire_1p",
             "sentinel_charge_fire_3p", "sentinel_far", "sentinel_veryfar", "sentinel_charge_far",
-            "sentinel_charge_veryfar", "sentinel_reload_normal", "sentinel_reload_empty", "sentinel_charge",
-            "sentinel_bolt",
+            "sentinel_charge_veryfar", "sentinel_mag_out", "sentinel_mag_in", "sentinel_bolt_close",
+            "sentinel_bolt_open",
         )
 
         // -------------------- gun/sks --------------------

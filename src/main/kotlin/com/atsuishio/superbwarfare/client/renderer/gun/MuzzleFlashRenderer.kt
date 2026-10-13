@@ -37,19 +37,6 @@ object MuzzleFlashRenderer {
         return timer > 0.0 && timer < MAX_VISIBLE_TIME
     }
 
-    /**
-     * 枪口挂点在**枪模型空间**里的变换。挂点三选一，**互斥**而不是层层回退：
-     * 1. [subWeaponFlareTransform]：副武器开火（`ClientEventHandler.subWeaponFireRotTimer > 0`）——
-     *    只取**副武器模型自己的** `flare` 骨骼；没解析到就返回 `null`（调用方什么都别画），
-     *    绝不会退回主武器的枪口（榴弹从下挂筒里出去，枪管前端不该喷火）；
-     * 2. [attachmentMuzzleTransform]：枪口配件自带枪口（消音器/制退器这类）；
-     * 3. 主武器模型的 `flare`（退回 `muzzle_flash`）骨骼，再叠数据里的 `FlarePosition`。
-     *
-     * 枪口焰和子弹的虚拟出膛点共用它 —— 弹体必须从火焰钻出来的那一格钻出来，
-     * 这份解析只该有一个出处。
-     *
-     * @return `null` = 这一帧没有可用的枪口
-     */
     fun resolveFlareTransform(
         model: GeoGunModel,
         stack: ItemStack,
@@ -76,17 +63,6 @@ object MuzzleFlashRenderer {
         return transform
     }
 
-    /**
-     * 画一簇枪口焰。
-     *
-     * 挂点由 [resolveFlareTransform] 解析（副武器 `flare` / 枪口配件的枪口 / 主武器 `flare`），
-     * 可见窗口由 [isFiring] 判定；两者都按各自的 KDoc。
-     *
-     * @param muzzleFlashScale 枪口配件的火焰缩放（`AttachmentDefinition.MuzzleFlashScale`）
-     * @param subWeaponFlareTransform 副武器模型的 `flare` 骨骼在枪姿态空间里的变换
-     *   （`GeoGunRenderer.resolveSubWeaponFlareTransform`）
-     * @param subWeaponFlashScale 副武器定义里的 `MuzzleFlashScale`
-     */
     fun render(
         poseStack: PoseStack,
         model: GeoGunModel,

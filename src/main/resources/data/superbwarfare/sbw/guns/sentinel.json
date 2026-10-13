@@ -1,18 +1,17 @@
 {
-  "DefaultZoom": 3,
-  "Spread": 6,
-  "OpenBolt": true,
+  "Spread": 8,
+  "TacticalReload": true,
   "HasBarrelBullet": true,
-  "RecoilX": 0.003,
-  "RecoilY": 0.018,
+  "RecoilX": 0.004,
+  "RecoilY": 0.013,
   "MaxEnergy": 24000,
   "Damage": 45,
-  "Magazine": 5,
+  "Magazine": [5, 7, 10],
   "Headshot": 3,
   "Velocity": 30,
   "BoltActionTime": 22,
   "RPM": 120,
-  "Weight": 7,
+  "Weight": 6,
   "DrawTime": 14,
   "ZoomTime": 9,
   "MeleeDamage": 5,
@@ -44,8 +43,8 @@
     }
   ],
   "ZoomSpreadRate": 0.005,
-  "NormalReloadTime": 59,
-  "EmptyReloadTime": 89,
+  "NormalReloadTime": [53, 53, 60],
+  "EmptyReloadTime": [70, 70, 78],
   "BypassesArmor": 0.8,
   "SoundRadius": 20,
   "GunType": "Sniper",
@@ -53,6 +52,21 @@
     "Type": "Sniper"
   },
   "AmmoType": "@SniperAmmo",
+  "ChargeAction": [
+    {
+      "OneShotCost": 3000,
+      "Override": {
+        "Damage": 60,
+        "Velocity": 32,
+        "SoundInfo": {
+          "Fire1P": "superbwarfare:sentinel_charge_fire_1p",
+          "Fire3P": "superbwarfare:sentinel_charge_fire_3p",
+          "Fire3PFar": "superbwarfare:sentinel_charge_far",
+          "Fire3PVeryFar": "superbwarfare:sentinel_charge_veryfar"
+        }
+      }
+    }
+  ],
   "Icon": "superbwarfare:textures/gun_icon/sentinel_icon.png",
   "AvailablePerks": [
     "@Ammo",
@@ -74,19 +88,39 @@
     "!superbwarfare:longer_wire",
     "!superbwarfare:cupid_arrow"
   ],
+  "AvailableAttachments": {
+    "Scope": [
+      "superbwarfare:scope_coyote",
+      "superbwarfare:scope_aimpoint_t2",
+      "superbwarfare:scope_eotech_551",
+      "superbwarfare:scope_okp_7",
+      "superbwarfare:scope_pkas",
+      "superbwarfare:scope_bruiser",
+      "superbwarfare:scope_ranger",
+      "superbwarfare:scope_1p_78",
+      "superbwarfare:scope_pk_a",
+      "superbwarfare:scope_acog",
+      "superbwarfare:scope_qmk171",
+      "superbwarfare:scope_hamr",
+      "superbwarfare:scope_elcan_4x",
+      "superbwarfare:scope_lpvo",
+      "superbwarfare:scope_sniper",
+      "superbwarfare:scope_winefox",
+      "superbwarfare:steel_pipe_scope",
+      "superbwarfare:scope_spyglass"
+    ],
+    "Magazine": [
+      "superbwarfare:magazine_extend",
+      "superbwarfare:magazine_extend_pro"
+    ],
+    "Charm": [
+      "#superbwarfare:attachment/charm"
+    ]
+  },
   "SoundInfo": {
     "Fire1P": "superbwarfare:sentinel_fire_1p",
     "Fire3P": "superbwarfare:sentinel_fire_3p",
     "Fire3PFar": "superbwarfare:sentinel_far",
-    "Fire3PVeryFar": "superbwarfare:sentinel_veryfar",
-    "ReloadNormal": "superbwarfare:sentinel_reload_normal",
-    "ReloadEmpty": "superbwarfare:sentinel_reload_empty",
-    "Bolt": "superbwarfare:sentinel_bolt",
-    "CancellableSounds": [
-      "superbwarfare:sentinel_reload_normal",
-      "superbwarfare:sentinel_reload_empty",
-      "superbwarfare:sentinel_bolt",
-      "superbwarfare:sentinel_charge"
-    ]
+    "Fire3PVeryFar": "superbwarfare:sentinel_veryfar"
   }
 }
