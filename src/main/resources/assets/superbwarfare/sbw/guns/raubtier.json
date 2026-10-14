@@ -12,5 +12,6 @@
     "Model": "superbwarfare:models/bedrock/gun/raubtier.geo.json",
     "Texture": "superbwarfare:textures/bedrock/gun/raubtier.png"
   },
-  "HideCrosshairWhenZoom": false
+  "HideCrosshairWhenZoom": false,
+  "SprintOffset": [12, 0, 0]
 }

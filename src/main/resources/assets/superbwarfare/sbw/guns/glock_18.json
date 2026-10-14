@@ -13,6 +13,7 @@
     "ReloadEmpty": "animation.glock_18.reload_empty",
     "HoldOpen": "animation.glock_18.hold_open"
   },
+  "SprintOffset": [0, 4, 4],
   "ShootRecoil": {
     "Offset": [1.0, 1.0, 1.0],
     "Rotation": [3.0, 1.0, 1.0],

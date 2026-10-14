@@ -18,6 +18,7 @@
     "ZoomRate": 1.0,
     "Speed": 1.0
   },
+  "SprintOffset": [10, 0, 0],
   "ZoomingTranslateMultiply": 1.0,
   "Model": {
     "Animation": "superbwarfare:animations/bedrock/gun/m_2_hb.animation.json",

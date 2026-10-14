@@ -30,8 +30,8 @@
         {
           "Type": "superbwarfare:explosion",
           "Chance": 1.0,
-          "Radius": 5.0,
-          "Damage": 100,
+          "Radius": 4.0,
+          "Damage": 80,
           "DestroyBlocks": false
         }
       ]

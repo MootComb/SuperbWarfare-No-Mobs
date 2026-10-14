@@ -12,7 +12,7 @@
   "RPM": 60,
   "Headshot": 0,
   "EmptyReloadTime": 58,
-  "GunType": "Special",
+  "GunType": "Handgun",
   "Projectile": "superbwarfare:taser_bullet",
   "AmmoType": {
     "Ammo": [

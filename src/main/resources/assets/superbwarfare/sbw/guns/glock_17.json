@@ -15,6 +15,7 @@
     "ZoomRate": 0.8,
     "Speed": 1.4
   },
+  "SprintOffset": [0, 4, 4],
   "Model": {
     "Animation": "superbwarfare:animations/bedrock/gun/glock_17.animation.json",
     "Model": "superbwarfare:models/bedrock/gun/glock_17.geo.json",

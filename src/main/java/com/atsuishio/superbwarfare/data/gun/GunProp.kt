@@ -96,6 +96,9 @@ class GunProp<T, R>(
         val SWAY = plainProp(DefaultGunData::sway)
 
         @JvmField
+        val SPRINT_TRANSITION_SPEED = plainProp(DefaultGunData::sprintTransitionSpeed)
+
+        @JvmField
         val SPREAD = plainProp(DefaultGunData::spread)
 
         @JvmField
@@ -546,6 +549,7 @@ class GunProp<T, R>(
             modify(WEIGHT) { it.coerceAtLeast(1.0) }
             // 晃动倍率：负值会让呼吸摆动反向（晃动反而"变大"），钳到 0（完全无呼吸摆动）
             modify(SWAY) { it.coerceAtLeast(0.0) }
+            modify(SPRINT_TRANSITION_SPEED) { it.coerceIn(0.1, 10.0) }
             modify(SNEAK_KNOCKBACK_RESISTANCE) { it.coerceIn(0.0, 1.0) }
             modify(CRAWL_KNOCKBACK_RESISTANCE) { it.coerceIn(0.0, 1.0) }
             modify(STAND_BEHIND) { it.coerceAtLeast(0.0) }

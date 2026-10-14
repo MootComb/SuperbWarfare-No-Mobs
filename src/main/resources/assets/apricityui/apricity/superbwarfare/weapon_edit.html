@@ -21,8 +21,11 @@
             </div>
             <div id="panel-slot"></div>
         </div>
-        <!-- AUI 原生 overflow / scrollbar；列表按实际数量生成，没有固定格数上限。 -->
-        <div id="panel-scroll"><div id="panel-grid"></div><div id="panel-empty"></div></div>
+        <!-- AUI 原生 overflow / scrollbar；Kotlin 复用可见区域附近的格子，保留完整列表滚动高度。 -->
+        <div id="panel-list">
+            <div id="panel-scroll"><div id="panel-space"></div></div>
+            <div id="panel-items"><div id="panel-grid"></div><div id="panel-empty"></div></div>
+        </div>
     </div>
 </body>
 <style>
@@ -70,16 +73,16 @@
         width: 15px; height: 15px;
     }
     slot > item { left: 0; top: 0; width: 100%; height: 100%; }
-    /* 外框固定为 132 × 94；Kotlin 使用相同尺寸进行避让与边缘钳制。 */
+    /* 外框固定为 180 × 112；Kotlin 使用相同尺寸进行避让与边缘钳制。 */
     #panel {
-        position: absolute; display: none; box-sizing: border-box; width: 132px; height: 94px;
+        position: absolute; display: none; box-sizing: border-box; width: 180px; height: 112px;
         border: 1px solid #ffffff; background: rgba(15, 17, 21, 0.76);
         transform-origin: 0 0; pointer-events: auto; z-index: 4; font-weight: normal;
     }
-    #panel-header { position: absolute; left: 5px; top: 5px; width: 120px; height: 34px; }
+    #panel-header { position: absolute; left: 5px; top: 5px; width: 168px; height: 34px; }
     #panel-current { display: flex; left: 0; top: 0; }
     #panel-name {
-        position: absolute; left: 22px; top: 1px; width: 98px; height: 14px;
+        position: absolute; left: 22px; top: 1px; width: 146px; height: 14px;
         font-size: 9px; font-weight: normal; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     /* 卸下按钮是 28×28 的整张图（自带外框和底色），缩到 14×14 占位，不再叠 CSS 边框。 */
@@ -90,9 +93,12 @@
     #panel-uninstall > texture { width: 14px; height: 14px; pointer-events: none; }
     #panel-uninstall:hover { opacity: 0.75; }
     #panel-uninstall.disabled { opacity: 0.35; pointer-events: none; }
-    #panel-slot { position: absolute; left: 18px; top: 22px; width: 102px; font-size: 8px; color: #d0d0d0; }
+    #panel-slot { position: absolute; left: 18px; top: 22px; width: 150px; font-size: 8px; color: #d0d0d0; }
+    #panel-list {
+        position: absolute; left: 5px; top: 44px; width: 168px; height: 62px;
+    }
     #panel-scroll {
-        position: absolute; left: 5px; top: 44px; width: 120px; height: 44px;
+        position: absolute; left: 0; top: 0; width: 168px; height: 62px;
         box-sizing: border-box; border-top: 1px solid #ffffff; padding-top: 5px;
         overflow-x: hidden; overflow-y: auto; scrollbar-gutter: stable;
         scrollbar-width: 6px; scrollbar-color: #ffffff rgba(0, 0, 0, 0.55);
@@ -100,8 +106,13 @@
     #panel-scroll::-webkit-scrollbar { width: 6px; }
     #panel-scroll::-webkit-scrollbar-track { background-color: rgba(0, 0, 0, 0.55); }
     #panel-scroll::-webkit-scrollbar-thumb { background-color: #ffffff; border-radius: 1px; }
-    #panel-grid { display: flex; flex-direction: column; gap: 4px; width: 96px; }
-    .row { display: flex; flex-direction: row; gap: 4px; height: 16px; flex-shrink: 0; }
+    /* 8 × 16 + 7 × 4 = 156px；扣除上边框与上内边距后，列表正好显示 56px（3 排）。 */
+    #panel-space { width: 156px; height: 0; pointer-events: none; }
+    /* 格子不作为滚动容器的后代，避免 AUI 在绘制阶段推进滚动动画后越过已经准备的窗口。 */
+    #panel-items { position: absolute; left: 0; top: 6px; width: 156px; height: 56px; overflow: hidden; pointer-events: none; }
+    /* Kotlin 将高度同步为完整列表高度，不能保持为 0，否则 AUI 会连同格子一起裁掉。 */
+    #panel-grid { position: relative; top: 0; width: 156px; height: 56px; }
+    .row { position: absolute; left: 0; top: 0; display: flex; flex-direction: row; gap: 4px; width: 156px; height: 16px; }
     .cell { position: relative; display: flex; width: 16px; height: 16px; padding: 0; flex-shrink: 0; }
     #panel-empty { display: none; font-size: 9px; color: #bdbdbd; padding: 8px 0; }
 </style>

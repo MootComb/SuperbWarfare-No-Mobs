@@ -16,7 +16,7 @@
     "Speed": 1.0
   },
   "ZoomingTranslateMultiply": 1.0,
-  "SprintOffset": [4, 0, 0],
+  "SprintOffset": [6, 7, 0],
   "Model": {
     "Animation": "superbwarfare:animations/bedrock/gun/minigun.animation.json",
     "Model": "superbwarfare:models/bedrock/gun/minigun.geo.json",

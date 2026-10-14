@@ -39,11 +39,17 @@ object AvailableAttachments {
     @Volatile
     private var cacheVersion = Int.MIN_VALUE
 
+    /** 标签重载代数，供界面的候选列表缓存判断失效。 */
+    @Volatile
+    var reloadGeneration: Long = 0
+        private set
+
     /** 丢掉全部解析结果；标签重载后也要走这里，否则 `#标签` 可能被缓存成空表。 */
     @JvmStatic
     fun invalidate() {
         cache.clear()
         cacheVersion = Int.MIN_VALUE
+        reloadGeneration++
     }
 
     /** 解析 [gun] 的 [slot] 槽位声明；没写声明时返回空列表。 */

@@ -10,7 +10,7 @@
   "Magazine": 2,
   "ZoomSpreadRate": 0.75,
   "ProjectileAmount": 12,
-  "Weight": 1,
+  "Weight": 3,
   "DrawTime": 7,
   "ZoomTime": 3,
   "NormalReloadTime": 66,

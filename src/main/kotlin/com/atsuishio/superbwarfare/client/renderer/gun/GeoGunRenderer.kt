@@ -451,7 +451,8 @@ open class GeoGunRenderer : AbstractGeoItemRendererV2() {
                 sprintOffset.x,
                 sprintOffset.y,
                 sprintOffset.z,
-                resource.useCustomSprintAnimation
+                // 有 Animation.Run 的枪不走程序性奔跑（连进出过渡片段一起关）
+                resource.useCustomSprintAnimation || resource.animation?.run != null
             )
 
             val shootRecoil = resource.shootRecoil

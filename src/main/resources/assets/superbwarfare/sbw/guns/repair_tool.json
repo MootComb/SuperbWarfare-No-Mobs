@@ -19,6 +19,7 @@
     "FireLoopFadeOut": 0.3,
     "Edit": "animation.repair_tool.edit"
   },
+  "SprintOffset": [0, 2, 0],
   "HasSmoke": true,
   "FlareSize": 0.1,
   "Smoke": {

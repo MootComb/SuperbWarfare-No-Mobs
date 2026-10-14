@@ -320,6 +320,7 @@ open class ClientAttachmentImageTooltip(tooltip: AttachmentImageComponent) : Cli
             "MeleeLifesteal",
             "SneakKnockbackResistance",
             "CrawlKnockbackResistance",
+            "SprintTransitionSpeed",
         )
 
         val LOWER_IS_BETTER = setOf(
