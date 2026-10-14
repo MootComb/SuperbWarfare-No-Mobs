@@ -16,9 +16,12 @@ object AttachmentAdjustments {
     const val MIN_OFFSET = -10.0
     const val MAX_OFFSET = 10.0
 
-    fun canRotate(type: AttachmentType): Boolean =
-        type != AttachmentType.MAGAZINE && type != AttachmentType.CHARM &&
-            (AttachmentConfig.fullyFreeAttachmentMode || type == AttachmentType.MUZZLE)
+    fun canRotate(gun: GunData, type: AttachmentType): Boolean {
+        if (type == AttachmentType.MAGAZINE || type == AttachmentType.CHARM) return false
+        if (AttachmentConfig.fullyFreeAttachmentMode) return true
+        return type == AttachmentType.MUZZLE &&
+            gun.attachment.id(type)?.let(AttachmentDefinition::from)?.canRotate == true
+    }
 
     fun canOffset(type: AttachmentType): Boolean = type != AttachmentType.MAGAZINE &&
         (AttachmentConfig.fullyFreeAttachmentMode || when (type) {

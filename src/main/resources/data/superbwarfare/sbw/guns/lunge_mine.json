@@ -39,6 +39,7 @@
   ],
   "RightClickAction": "BayonetCharge",
   "BayonetCharge": {
+    "RequiresBayonet": false,
     "Duration": 180,
     "Speed": 2,
     "Cooldown": 300,

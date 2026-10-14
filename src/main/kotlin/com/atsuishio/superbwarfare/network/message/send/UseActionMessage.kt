@@ -13,16 +13,23 @@ import net.minecraft.sounds.SoundEvent
 import net.minecraft.sounds.SoundSource
 import net.minecraft.world.entity.player.Player
 
-/** 右键行为（`RightClickAction`）里需要服务端权威的那部分；`active` 只有冲锋用（false = 本地收窗口） */
+/** 右键行为里需要服务端权威的那部分；收窗口（`active = false`）时带上客户端折算好的冷却长度 */
 @RegisterPacket
 @Serializable
-data class UseActionMessage(val action: RightClickAction, val active: Boolean = true) : ServerPacketPayload() {
+data class UseActionMessage(
+    val action: RightClickAction,
+    val active: Boolean = true,
+    val cooldownTicks: Int = 0
+) : ServerPacketPayload() {
     override fun PayloadContext.handler() {
         val player = sender()
 
-        // 收窗口跟手里拿着什么无关：换枪取消时手上已经不是那把枪了
+        // 收窗口跟手里拿着什么无关：换枪取消时手上已经不是那把枪了，所以冷却长度由客户端带过来
         if (action == RightClickAction.BAYONET_CHARGE && !active) {
             ChargeWindowHandler.clear(player)
+            if (cooldownTicks > 0) {
+                player.persistentData.putInt(CHARGE_COOLDOWN, player.tickCount + cooldownTicks)
+            }
             return
         }
 
@@ -35,7 +42,7 @@ data class UseActionMessage(val action: RightClickAction, val active: Boolean = 
 
         if (action == RightClickAction.BAYONET_CHARGE) {
             val charge = data.get(GunProp.BAYONET_CHARGE)
-            if (charge.duration <= 0) return
+            if (!charge.canCharge(data)) return
             if (onChargeCooldown(player, charge.cooldown)) return
 
             charge.sound?.let {
@@ -46,9 +53,6 @@ data class UseActionMessage(val action: RightClickAction, val active: Boolean = 
                 )
             }
             ChargeWindowHandler.start(player, charge)
-            if (charge.cooldown > 0) {
-                player.persistentData.putInt(CHARGE_COOLDOWN, player.tickCount + charge.cooldown)
-            }
         }
     }
 

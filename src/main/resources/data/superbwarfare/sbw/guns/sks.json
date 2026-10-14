@@ -167,11 +167,6 @@
       "superbwarfare:pistol_laser"
     ]
   },
-  "AttachmentConflicts": {
-    "Grip": [
-      "LowerRail"
-    ]
-  },
   "HandGuard": {
     "Grip": true
   },

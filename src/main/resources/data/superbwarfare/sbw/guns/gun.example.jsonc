@@ -85,15 +85,27 @@
    */
   "RightClickAction": "Aim",
   /*
-   * Declaring this block is what makes a gun chargeable, by right click when
+   * Declaring this block enables charging with a bayonet installed, by right click when
    * RightClickAction is "BayonetCharge", otherwise by pressing the bayonet charge
    * key (default C) while sprinting
    * Duration: how long the charge window lasts, in ticks (0 or omitted = not chargeable)
+   * RequiresBayonet: true by default; the installed Muzzle attachment must declare
+   * IsBayonet: true. Set false for weapons with a built-in bayonet or charge ability
+   * (such as secondary_cataclysm and lunge_mine); Duration must still be positive
    * Speed: level of the temporary movement speed modifier held during the charge,
    * same maths as the vanilla Speed effect (+20% per level, 0 = +20%); the
    * modifier is removed the moment the charge ends
-   * Cooldown: cooldown in ticks before another charge can be started (kept as
-   * a per player variable, not as a vanilla item cooldown, so the gun stays usable)
+   * Cooldown: FULL cooldown length in ticks, i.e. what the cooldown bar fills up in.
+   * The cooldown only starts when the charge window ends (not when it is triggered), and
+   * it lasts that fraction of Cooldown which the window actually spent: a charge cut
+   * short (a landed strike) carries its progress over, so spending 80% of the window
+   * only costs 80% of the cooldown. That fraction is floored at half, so even a charge
+   * that barely started costs half of Cooldown and its cooldown bar starts halfway up.
+   * If the window expires without triggering an attack, recovery starts from an empty
+   * bar at twice the normal speed, taking half of Cooldown. An attack triggered on the
+   * final tick still uses the normal attack cooldown; cancelling also uses normal speed.
+   * Kept as a per player variable, not as a vanilla item cooldown, so the gun stays usable
+   * while it runs
    * Sound: played when the charge starts, broadcast to everyone within 32 blocks
    * (a fixed 32 block range, so the " <range>" suffix of a SoundEvent is ignored here)
    * StrikeDuration: length of the strike landing on a target, in ticks
@@ -105,6 +117,7 @@
    * omit it (or write 0) to reuse the damage of the section that the strike plays
    */
   "BayonetCharge": {
+    "RequiresBayonet": true,
     "Duration": 180,
     "Speed": 2,
     "Cooldown": 300,

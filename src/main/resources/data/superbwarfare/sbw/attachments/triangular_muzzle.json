@@ -2,6 +2,7 @@
   "Slot": "Muzzle",
   "Level": 1,
   "Bone": "muzzle_pos",
+  "CanRotate": true,
   "Modifiers": [
     {
       "Prop": "ProjectileAmount",

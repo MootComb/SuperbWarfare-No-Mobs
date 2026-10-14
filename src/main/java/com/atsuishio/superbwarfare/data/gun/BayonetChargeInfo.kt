@@ -1,5 +1,7 @@
 package com.atsuishio.superbwarfare.data.gun
 
+import com.atsuishio.superbwarfare.data.attachment.AttachmentDefinition
+import com.atsuishio.superbwarfare.data.gun.value.AttachmentType
 import com.atsuishio.superbwarfare.serialization.kserializer.SerializedSoundEvent
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -32,4 +34,13 @@ data class BayonetChargeInfo(
     /** 撞人那一下的绝对伤害（不乘 `MeleeDamage`、不吃配件加成）：非正数 = 跟那一段的伤害走 */
     @SerialName("StrikeDamage")
     val strikeDamage: Double = -1.0,
-)
+
+    /** 默认需要安装刺刀型枪口配件；自带刺刀或冲锋能力的武器可显式关闭 */
+    @SerialName("RequiresBayonet")
+    val requiresBayonet: Boolean = true,
+) {
+    /** 客户端启动、服务端启动和冲锋伤害结算共用的资格检查。 */
+    fun canCharge(data: GunData): Boolean = duration > 0 &&
+            (!requiresBayonet || data.attachment.id(AttachmentType.MUZZLE)
+                ?.let { AttachmentDefinition.from(it)?.isBayonet } == true)
+}

@@ -91,6 +91,10 @@ data class AttachmentDefinition(
     @SerialName("IsBayonet")
     val isBayonet: Boolean = false,
 
+    /** 普通模式下是否允许调整枪口配件角度；完全自由改装模式忽略此开关。 */
+    @SerialName("CanRotate")
+    val canRotate: Boolean = false,
+
     @SerialName("Modifiers")
     val modifiers: List<AttachmentModifier> = emptyList(),
 
