@@ -16,7 +16,9 @@
                 <slot render="item" interactive="0" pointer="0" size="16" iconScale="1"><item>minecraft:air</item></slot>
             </div>
             <div id="panel-name"></div>
-            <div id="panel-uninstall"><span>&#8595;</span></div>
+            <div id="panel-uninstall">
+                <texture src="superbwarfare:textures/overlay/edit/remove_attachment.png" />
+            </div>
             <div id="panel-slot"></div>
         </div>
         <!-- AUI 原生 overflow / scrollbar；列表按实际数量生成，没有固定格数上限。 -->
@@ -80,13 +82,13 @@
         position: absolute; left: 22px; top: 1px; width: 98px; height: 14px;
         font-size: 9px; font-weight: normal; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
+    /* 卸下按钮是 28×28 的整张图（自带外框和底色），缩到 14×14 占位，不再叠 CSS 边框。 */
     #panel-uninstall {
         position: absolute; display: flex; left: 0; top: 19px; width: 14px; height: 14px;
-        box-sizing: border-box; border: 1px solid #ffffff; align-items: center; justify-content: center;
-        background: rgba(0, 0, 0, 0.4); font-size: 12px;
+        box-sizing: border-box; align-items: center; justify-content: center;
     }
-    #panel-uninstall span { pointer-events: none; }
-    #panel-uninstall:hover { background: rgba(255, 255, 255, 0.25); }
+    #panel-uninstall > texture { width: 14px; height: 14px; pointer-events: none; }
+    #panel-uninstall:hover { opacity: 0.75; }
     #panel-uninstall.disabled { opacity: 0.35; pointer-events: none; }
     #panel-slot { position: absolute; left: 18px; top: 22px; width: 102px; font-size: 8px; color: #d0d0d0; }
     #panel-scroll {
