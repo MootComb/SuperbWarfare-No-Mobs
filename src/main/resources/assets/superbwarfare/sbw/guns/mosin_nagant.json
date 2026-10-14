@@ -10,7 +10,9 @@
     "Bolt": "animation.mosin_nagant.bolt",
     "Edit": "animation.mosin_nagant.edit",
     "CloseStrike": "animation.mosin_nagant.close_strike",
-    "Melee": "animation.mosin_nagant.hit"
+    "Melee": "animation.mosin_nagant.hit",
+    "BayonetCharge": "animation.mosin_nagant.bayonet_charge",
+    "BayonetChargeHit": "animation.mosin_nagant.bayonet_charge_hit"
   },
   "ShootRecoil": {
     "Offset": [1.0, 1.0, 3.5],

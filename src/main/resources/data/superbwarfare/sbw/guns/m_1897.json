@@ -33,6 +33,15 @@
       "Legshot": 0.75
     }
   ],
+  "BayonetCharge": {
+    "Duration": 180,
+    "Speed": 2,
+    "Cooldown": 300,
+    "Sound": "superbwarfare:lunge_mine_growl",
+    "StrikeDuration": 18,
+    "StrikeHitTime": 1,
+    "StrikeDamage": 50
+  },
   "Velocity": 10,
   "Magazine": 6,
   "ZoomSpreadRate": 0.75,

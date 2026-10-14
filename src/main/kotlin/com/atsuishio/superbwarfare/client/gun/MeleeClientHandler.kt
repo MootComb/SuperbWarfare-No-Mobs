@@ -220,7 +220,14 @@ object MeleeClientHandler {
         val forced = state.meleeChargeTarget
         state.meleeChargeTarget = null
 
-        resolveHit(player, data, data.resolveMeleeAction(state.meleeActionIndex), state.meleeActionIndex, forced)
+        resolveHit(
+            player,
+            data,
+            data.resolveMeleeAction(state.meleeActionIndex),
+            state.meleeActionIndex,
+            forced,
+            state.meleeFromBayonetCharge,
+        )
     }
 
     private fun resolveHit(
@@ -229,6 +236,7 @@ object MeleeClientHandler {
         action: ResolvedMeleeAction,
         actionIndex: Int,
         forced: Entity? = null,
+        chargeStrike: Boolean = false,
     ) {
         val context = MeleeQuery.contextOf(player, action)
 
@@ -247,6 +255,7 @@ object MeleeClientHandler {
                 source = MeleeAttackMessage.SOURCE_MAIN,
                 actionIndex = actionIndex,
                 targets = hits.map { it.toPayload() },
+                chargeStrike = chargeStrike,
             )
         )
 

@@ -10,7 +10,9 @@
     "Edit": "animation.ak_12.edit",
     "ReloadNormalDrum": "animation.ak_12.reload_normal_drum",
     "ReloadEmptyDrum": "animation.ak_12.reload_empty_drum",
-    "Melee": "animation.ak_12.hit"
+    "Melee": "animation.ak_12.hit",
+    "BayonetCharge": "animation.ak_12.bayonet_charge",
+    "BayonetChargeHit": "animation.ak_12.bayonet_charge_hit"
   },
   "ShootRecoil": {
     "Offset": [0.85, 0.8, 0.45],

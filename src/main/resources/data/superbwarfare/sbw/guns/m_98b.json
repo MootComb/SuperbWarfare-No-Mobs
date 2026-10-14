@@ -121,7 +121,8 @@
     "UpperRail": [
       "superbwarfare:peq_15",
       "superbwarfare:standard_gun_shield",
-      "superbwarfare:pistol_laser"
+      "superbwarfare:pistol_laser",
+      "superbwarfare:hyperion_shield_module"
     ],
     "LeftRail": [
       "superbwarfare:peq_15",

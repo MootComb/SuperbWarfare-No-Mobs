@@ -15,7 +15,9 @@
     "Iterative": "animation.secondary_cataclysm.iterative_load",
     "Finish": "animation.secondary_cataclysm.finish",
     "Edit": "animation.secondary_cataclysm.edit",
-    "Melee": "animation.secondary_cataclysm.bayonet_hit"
+    "Melee": "animation.secondary_cataclysm.bayonet_hit",
+    "BayonetCharge": "animation.secondary_cataclysm.bayonet_charge",
+    "BayonetChargeHit": "animation.secondary_cataclysm.bayonet_charge_hit"
   },
   "ShootRecoil": {
     "Offset": [1.0, 1.0, 3.5],

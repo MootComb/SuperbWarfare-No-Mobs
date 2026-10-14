@@ -5,6 +5,7 @@ import com.atsuishio.superbwarfare.capability.ModCapabilities.registered
 import com.atsuishio.superbwarfare.capability.entity.InfiniteAmmoCapability
 import com.atsuishio.superbwarfare.capability.living.PhosphorusFireCapability
 import com.atsuishio.superbwarfare.capability.living.RadiationCapability
+import com.atsuishio.superbwarfare.capability.player.PlayerChargeState
 import com.atsuishio.superbwarfare.capability.player.PlayerDeployState
 import com.atsuishio.superbwarfare.capability.player.PlayerVariable
 import net.minecraft.resources.ResourceLocation
@@ -81,6 +82,14 @@ object ModCapabilities {
         id = PlayerDeployState.ID,
         target = AttachTarget.PLAYER,
         token = object : CapabilityToken<PlayerDeployState.Holder>() {},
+    )
+
+    /** 刺刀冲锋状态：同样不落盘，同步给所有看得见该玩家的客户端 */
+    @JvmField
+    val PLAYER_CHARGE_STATE = register<PlayerChargeState, PlayerChargeState.Holder>(
+        id = PlayerChargeState.ID,
+        target = AttachTarget.PLAYER,
+        token = object : CapabilityToken<PlayerChargeState.Holder>() {},
     )
 
     /**

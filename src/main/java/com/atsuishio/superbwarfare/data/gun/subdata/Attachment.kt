@@ -1,6 +1,7 @@
 package com.atsuishio.superbwarfare.data.gun.subdata
 
 import com.atsuishio.superbwarfare.config.server.AttachmentConfig
+import com.atsuishio.superbwarfare.data.attachment.AttachmentAdjustments
 import com.atsuishio.superbwarfare.data.attachment.AttachmentDefinition
 import com.atsuishio.superbwarfare.data.attachment.AttachmentSlots
 import com.atsuishio.superbwarfare.data.gun.GunData
@@ -170,15 +171,24 @@ class Attachment(private val gun: GunData) {
     }
 
     fun getRotation(type: AttachmentType): Double {
+        if (type == AttachmentType.MAGAZINE || type == AttachmentType.CHARM) return 0.0
         val tag = getTag(type) ?: return 0.0
         if (!tag.contains("Rotation")) return 0.0
-        return tag.getDouble("Rotation").coerceIn(0.0, 360.0)
+        val rotation = tag.getDouble("Rotation")
+        if (!rotation.isFinite()) return 0.0
+        // 兼容旧的 0..360 存档：270° 在新滑块里显示为 -90°，保持原来的朝向。
+        val wrapped = rotation % 360.0
+        return when {
+            wrapped > 180.0 -> wrapped - 360.0
+            wrapped < -180.0 -> wrapped + 360.0
+            else -> wrapped
+        }
     }
 
     fun setRotation(type: AttachmentType, rotation: Double) {
-        if (!has(type)) return
+        if (type == AttachmentType.MAGAZINE || type == AttachmentType.CHARM || !has(type) || !rotation.isFinite()) return
 
-        val value = rotation.coerceIn(0.0, 360.0)
+        val value = rotation.coerceIn(AttachmentAdjustments.MIN_ROTATION, AttachmentAdjustments.MAX_ROTATION)
         if (getRotation(type) == value) return
 
         getOrCreateTag(type).putDouble("Rotation", value)
@@ -186,16 +196,22 @@ class Attachment(private val gun: GunData) {
     }
 
     fun getOffset(type: AttachmentType): Double {
+        if (type == AttachmentType.MAGAZINE) return 0.0
         val tag = getTag(type) ?: return 0.0
         if (!tag.contains("Offset")) return 0.0
-        return tag.getDouble("Offset")
+        val offset = tag.getDouble("Offset").takeIf { it.isFinite() } ?: 0.0
+        val range = AttachmentAdjustments.offsetRange(gun, type)
+        return offset.coerceIn(range.start, range.endInclusive)
     }
 
     fun setOffset(type: AttachmentType, offset: Double) {
-        if (!has(type)) return
-        if (getOffset(type) == offset) return
+        if (type == AttachmentType.MAGAZINE || !has(type) || !offset.isFinite()) return
+        val range = AttachmentAdjustments.offsetRange(gun, type)
+        val value = offset.coerceIn(range.start, range.endInclusive)
+        // 比较原始存档值：读侧钳制后的相等不能阻止把旧的越界值真正修正回 NBT。
+        if ((getTag(type)?.getDouble("Offset") ?: 0.0) == value) return
 
-        getOrCreateTag(type).putDouble("Offset", offset)
+        getOrCreateTag(type).putDouble("Offset", value)
         gun.invalidateProperties()
     }
 

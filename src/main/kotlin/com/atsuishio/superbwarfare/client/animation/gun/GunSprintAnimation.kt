@@ -14,12 +14,15 @@ import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.acos
 
-// 第一人称奔跑的程序性动画。关键帧读自 animations/bedrock/gun/gun_move_simple.animation.json 的 `sprint_simple`，
-// 采样规则与引擎（MAE 的 ArrayInterpolatableChannel + Vector3fCubicSplineInterpolator）逐字对齐。
+// 第一人称奔跑与行走摆动的程序性动画。关键帧读自 animations/bedrock/gun/gun_move_simple.animation.json
+// （`sprint_simple` / `walk_simple`），采样规则与引擎（MAE 的 ArrayInterpolatableChannel + Vector3fCubicSplineInterpolator）逐字对齐。
 object GunSprintAnimation {
 
     // 样张里驱动第一人称奔跑的那段循环片段
     private const val LOOP_CLIP = "sprint_simple"
+
+    // 行走摆动：一条纯偏移片段（两端归零），叠在静止姿势上
+    private const val WALK_CLIP = "walk_simple"
 
     // 进出奔跑的过渡片段，它们的曲线就是缓入缓出的曲线
     private const val IN_CLIP = "sprint_in_simple"
@@ -50,6 +53,10 @@ object GunSprintAnimation {
     var LENGTH = DEFAULT_LENGTH
         private set
 
+    // 行走样张一整个循环的时长（秒），行走相位的模数
+    var WALK_LENGTH = DEFAULT_LENGTH
+        private set
+
     // 循环接缝（第 0 帧）= 旋转的滞空姿势
     var BASE_ROTATION = Vector3f()
         private set
@@ -70,6 +77,9 @@ object GunSprintAnimation {
 
     private var rotationTrack: Track? = null
     private var positionTrack: Track? = null
+
+    private var walkRotationTrack: Track? = null
+    private var walkPositionTrack: Track? = null
 
     private var inRotationTrack: Track? = null
     private var inPositionTrack: Track? = null
@@ -97,6 +107,12 @@ object GunSprintAnimation {
         BASE_ROTATION = Vector3f(rotationAt(0f, Vector3f()))
         BASE_POSITION = meanPosition()
         FIRE_READY_WEIGHT = fireReadyWeight()
+
+        val walk = animations?.get(WALK_CLIP)
+        walkRotationTrack = trackOf(walk, true)
+        walkPositionTrack = trackOf(walk, false)
+        // 行走相位拿它当模数，样张缺了也得是个正数
+        WALK_LENGTH = lengthOf(walk, walkRotationTrack ?: walkPositionTrack).let { if (it > 0f) it else DEFAULT_LENGTH }
 
         val incoming = animations?.get(IN_CLIP)
         inRotationTrack = trackOf(incoming, true)
@@ -173,6 +189,16 @@ object GunSprintAnimation {
 
     fun positionAt(t: Float, dest: Vector3f): Vector3f {
         val track = positionTrack ?: return dest.set(0f, 0f, 0f)
+        return track.sample(t, dest)
+    }
+
+    fun walkRotationAt(t: Float, dest: Vector3f): Vector3f {
+        val track = walkRotationTrack ?: return dest.set(0f, 0f, 0f)
+        return toInternal(track.sample(t, dest), dest)
+    }
+
+    fun walkPositionAt(t: Float, dest: Vector3f): Vector3f {
+        val track = walkPositionTrack ?: return dest.set(0f, 0f, 0f)
         return track.sample(t, dest)
     }
 

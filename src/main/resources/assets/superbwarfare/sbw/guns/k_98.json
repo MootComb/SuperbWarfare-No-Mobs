@@ -11,7 +11,9 @@
     "Bolt": "animation.k_98.bolt",
     "Edit": "animation.k_98.edit",
     "CloseStrike": "animation.k_98.close_strike",
-    "Melee": "animation.k_98.hit"
+    "Melee": "animation.k_98.hit",
+    "BayonetCharge": "animation.k_98.bayonet_charge",
+    "BayonetChargeHit": "animation.k_98.bayonet_charge_hit"
   },
   "ShootRecoil": {
     "Offset": [1.0, 1.0, 3.5],

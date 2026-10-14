@@ -37,6 +37,15 @@
       "Legshot": 0.75
     }
   ],
+  "BayonetCharge": {
+    "Duration": 180,
+    "Speed": 2,
+    "Cooldown": 300,
+    "Sound": "superbwarfare:lunge_mine_growl",
+    "StrikeDuration": 18,
+    "StrikeHitTime": 1,
+    "StrikeDamage": 50
+  },
   "Weight": 5,
   "DrawTime": 12,
   "ZoomTime": 7,
@@ -162,7 +171,8 @@
     "UpperRail": [
       "superbwarfare:peq_15",
       "superbwarfare:standard_gun_shield",
-      "superbwarfare:pistol_laser"
+      "superbwarfare:pistol_laser",
+      "superbwarfare:hyperion_shield_module"
     ]
   },
   "AttachmentConflicts": {

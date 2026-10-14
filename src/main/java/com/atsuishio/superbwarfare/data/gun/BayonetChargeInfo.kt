@@ -4,16 +4,17 @@ import com.atsuishio.superbwarfare.serialization.kserializer.SerializedSoundEven
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-/** 刺刀冲锋（`RightClickAction: "BayonetCharge"`）的参数，和开火蓄力的 `ChargeAction` 无关 */
+/** 刺刀冲锋的参数，和开火蓄力的 `ChargeAction` 无关；没写这块（`Duration <= 0`）= 这把枪不能冲锋 */
 @Serializable
 data class BayonetChargeInfo(
     @SerialName("Duration")
-    val duration: Int = 180,
+    val duration: Int = 0,
 
-    /** 迅捷等级（amplifier，0 = 迅捷 I） */
+    /** 冲锋期间的移速加成等级，和原版迅捷一个算法（每级 +20%）；0 = +20% */
     @SerialName("Speed")
     val speed: Int = 2,
 
+    /** 再次冲锋前的冷却（tick）：记在玩家身上，不用原版物品冷却 */
     @SerialName("Cooldown")
     val cooldown: Int = 300,
 
@@ -27,4 +28,8 @@ data class BayonetChargeInfo(
     /** 撞人那一下从挥击开始算第几 tick 结算：负数 = 跟那一段的 `HitTime` 走 */
     @SerialName("StrikeHitTime")
     val strikeHitTime: Int = -1,
+
+    /** 撞人那一下的绝对伤害（不乘 `MeleeDamage`、不吃配件加成）：非正数 = 跟那一段的伤害走 */
+    @SerialName("StrikeDamage")
+    val strikeDamage: Double = -1.0,
 )

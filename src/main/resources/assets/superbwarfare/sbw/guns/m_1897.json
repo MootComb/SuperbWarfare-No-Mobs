@@ -11,7 +11,9 @@
     "Finish": "animation.m_1897.finish",
     "Bolt": "animation.m_1897.bolt",
     "Melee": "animation.m_1897.hit",
-    "CloseStrike": "animation.m_1897.close_strike"
+    "CloseStrike": "animation.m_1897.close_strike",
+    "BayonetCharge": "animation.m_1897.bayonet_charge",
+    "BayonetChargeHit": "animation.m_1897.bayonet_charge_hit"
   },
   "ShootRecoil": {
     "Offset": [1.0, 1.0, 3.5],

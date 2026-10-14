@@ -10,7 +10,9 @@
     "ReloadNormalDrum": "animation.sks.reload_normal_drum",
     "ReloadEmptyDrum": "animation.sks.reload_empty_drum",
     "HoldOpen": "animation.sks.hold_open",
-    "Melee": "animation.sks.hit"
+    "Melee": "animation.sks.hit",
+    "BayonetCharge": "animation.sks.bayonet_charge",
+    "BayonetChargeHit": "animation.sks.bayonet_charge_hit"
   },
   "ShootRecoil": {
     "Offset": [0.7, 1.0, 0.5],

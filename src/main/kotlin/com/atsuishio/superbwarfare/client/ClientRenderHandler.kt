@@ -94,6 +94,7 @@ object ClientRenderHandler {
         event.registerBelowAll(AmmoCountOverlay.ID, AmmoCountOverlay)
         event.registerBelowAll(CrossHairOverlay.ID, CrossHairOverlay)
         event.registerBelowAll(HeatBarOverlay.ID, HeatBarOverlay)
+        event.registerAbove(Mod.loc(CrossHairOverlay.ID), GunShieldOverlay.ID, GunShieldOverlay)
         event.registerBelowAll(RedTriangleOverlay.ID, RedTriangleOverlay)
         event.registerBelowAll(HandsomeFrameOverlay.ID, HandsomeFrameOverlay)
         event.registerBelowAll(SpyglassRangeOverlay.ID, SpyglassRangeOverlay)

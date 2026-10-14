@@ -475,6 +475,11 @@
 					"rotation": [0, 0, -45]
 				},
 				{
+					"name": "ammo_pos",
+					"parent": "bullet9",
+					"pivot": [0.00172, 0.20057, -5.5691]
+				},
+				{
 					"name": "body10",
 					"parent": "bullet9",
 					"pivot": [0.00037, 0.20133, -4.22862]

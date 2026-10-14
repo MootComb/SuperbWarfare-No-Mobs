@@ -299,6 +299,8 @@ data class DefaultGunData(
 
     @SerialName("AttachmentConflicts")
     val attachmentConflicts: Map<String, List<String>> = emptyMap(),
+    @SerialName("RailInfo")
+    val railInfo: RailInfo = RailInfo(),
     @SerialName("DamageReduce")
     val damageReduce: DamageReduce = DamageReduce(),
     // 自然情况下每tick减少的热量

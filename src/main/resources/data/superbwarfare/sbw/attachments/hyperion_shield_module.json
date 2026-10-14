@@ -1,0 +1,29 @@
+{
+  "Slot": "UpperRail",
+  "Level": 3,
+  "Modifiers": [
+    {
+      "Prop": "MaxEnergy",
+      "Op": "Add",
+      "Value": 80000
+    },
+    {
+      "Prop": "Weight",
+      "Op": "Add",
+      "Value": 1.0
+    }
+  ],
+  "Model": "superbwarfare:models/bedrock/attachment/hyperion_shield_module.geo.json",
+  "Texture": "superbwarfare:textures/bedrock/attachment/hyperion_shield_module.png",
+  "Shield": {
+    "Durability": 400.0,
+    "Resist": 80.0,
+    "CoverAngle": 150.0,
+    "RechargeRate": 50.0,
+    "RechargeDelay": 60,
+    "BrokenLockout": 40,
+    "EnergyPerCharge": 50,
+    "BreakOverflow": 0.0,
+    "RechargeSound": "superbwarfare:bullet_supply"
+  }
+}
