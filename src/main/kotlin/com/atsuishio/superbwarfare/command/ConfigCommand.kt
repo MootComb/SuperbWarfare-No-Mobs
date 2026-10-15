@@ -3,6 +3,7 @@ package com.atsuishio.superbwarfare.command
 import com.atsuishio.superbwarfare.command.builder.CommandNode
 import com.atsuishio.superbwarfare.command.builder.boolArg
 import com.atsuishio.superbwarfare.command.builder.buildCommand
+import com.atsuishio.superbwarfare.config.RealisticShootModeSync
 import com.atsuishio.superbwarfare.config.server.*
 import net.minecraft.network.chat.Component
 import net.neoforged.neoforge.common.ModConfigSpec
@@ -46,7 +47,9 @@ val CONFIG_COMMAND = buildCommand("config") {
     booleanConfig(MiscConfig::HIDE_COMBAT_HUD)
     booleanConfig(MiscConfig::SMOKE_HIDE_TARGET)
     booleanConfig(MiscConfig::THROW_MEDICAL_KIT)
-    booleanConfig(MiscConfig::REALISTIC_SHOOT_MODE)
+    booleanConfig(MiscConfig::REALISTIC_SHOOT_MODE) {
+        RealisticShootModeSync.broadcast()
+    }
 
     booleanConfig(SyncConfig::SYNC_ENTITY_OVER_RANGE)
     booleanConfig(SyncConfig::ENABLE_RENDER_SYNCED_ENTITIES)

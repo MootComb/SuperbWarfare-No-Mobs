@@ -8,7 +8,7 @@
   "ZoomTime": 10,
   "BypassesArmor": 0.25,
   "Velocity": 24,
-  "RPM": 120,
+  "RPM": 200,
   "DefaultFireMode": "Charge",
   "AvailableFireModes": [
     {

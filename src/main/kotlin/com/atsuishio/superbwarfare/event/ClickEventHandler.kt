@@ -519,15 +519,21 @@ object ClickEventHandler {
             val chargeConfig = fireModeInfo.chargeConfig()
 
             if (!data.meleeOnly()) {
-                if (chargeConfig != null && item.canShoot(data, player)) {
-                    ClientEventHandler.chargeActive = true
+                if (chargeConfig != null) {
+                    // 空弹或装箭期间也记住按住左键；就绪后自动开始蓄力，松手仍由 release 清除。
+                    ClientEventHandler.chargeActive = item.canShoot(data, player)
                     ClientEventHandler.chargeProgress = 0.0
                     ClientEventHandler.chargePower = 0.0
                     ClientEventHandler.holdingFireKeyTicks = 0
+                    ClientEventHandler.holdingFireKeyTicks0 = 0f
                     ClientEventHandler.shouldPlayDischargeSound = true
+                    if (ClientEventHandler.drawTime < 0.01) {
+                        ClientEventHandler.holdingFireKey = true
+                        player.setSprinting(false)
+                    }
 
                     val chargeSound = resource.chargeSound
-                    if (chargeSound != null) {
+                    if (chargeSound != null && ClientEventHandler.chargeActive) {
                         player.playSound(chargeSound, 1f, 1f)
                     }
                 }
