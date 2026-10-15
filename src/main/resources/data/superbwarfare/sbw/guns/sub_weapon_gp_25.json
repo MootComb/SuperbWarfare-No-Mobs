@@ -13,6 +13,7 @@
   "DrawTime": 1,
   "ZoomTime": 1,
   "EmptyReloadTime": 30,
+  "SoundRadius": 12,
   "RPM": 120,
   "GunType": "CurvedLauncher",
   "Gravity": 0.07,

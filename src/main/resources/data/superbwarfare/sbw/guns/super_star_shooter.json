@@ -12,6 +12,7 @@
   "DrawTime": 29,
   "ZoomTime": 21,
   "EmptyReloadTime": 109,
+  "SoundRadius": 6,
   "RPM": 300,
   "Gravity": 0,
   "DefaultZoom": 1.25,

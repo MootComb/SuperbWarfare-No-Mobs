@@ -4274,12 +4274,12 @@
 				{
 					"name": "ground",
 					"parent": "positioning",
-					"pivot": [0, -3.28483, -0.6051]
+					"pivot": [0, -6.78483, -0.6051]
 				},
 				{
 					"name": "fixed",
 					"parent": "positioning",
-					"pivot": [1.2102, 6.22388, -0.30256],
+					"pivot": [-0.7898, 1.22388, 1.69744],
 					"rotation": [0, -90, 0]
 				}
 			]

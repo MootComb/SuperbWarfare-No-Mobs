@@ -8107,7 +8107,7 @@
 				{
 					"name": "upper_rail_pos",
 					"parent": "positioning2",
-					"pivot": [0, 4.88579, -8.36493],
+					"pivot": [0, 4.88579, -12.11493],
 					"rotation": [0, 0, -180]
 				},
 				{
@@ -8166,12 +8166,12 @@
 				{
 					"name": "ground",
 					"parent": "positioning",
-					"pivot": [0, -2.73736, -0.50425]
+					"pivot": [0, -8.98736, -2.25425]
 				},
 				{
 					"name": "fixed",
 					"parent": "positioning",
-					"pivot": [1.0085, 5.18657, -0.25213],
+					"pivot": [-0.7415, 2.18657, -1.25213],
 					"rotation": [0, -90, 0]
 				}
 			]

@@ -4400,17 +4400,17 @@
 				{
 					"name": "thirdperson_hand",
 					"parent": "positioning",
-					"pivot": [0, 0, -0.5]
+					"pivot": [0, 0.25, 1.5]
 				},
 				{
 					"name": "ground",
 					"parent": "positioning",
-					"pivot": [0, -2.73736, -0.50425]
+					"pivot": [0, -5.73736, -0.50425]
 				},
 				{
 					"name": "fixed",
 					"parent": "positioning",
-					"pivot": [1.0085, 5.18657, -0.25213],
+					"pivot": [-1.2415, 1.18657, -0.25213],
 					"rotation": [0, -90, 0]
 				}
 			]

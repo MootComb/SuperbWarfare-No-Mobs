@@ -33,6 +33,7 @@
       "#superbwarfare:attachment/charm"
     ]
   },
+  "SoundRadius": 4,
   "SoundInfo": {
     "Fire1P": "superbwarfare:taser_fire_1p",
     "Fire3P": "superbwarfare:taser_fire_3p"

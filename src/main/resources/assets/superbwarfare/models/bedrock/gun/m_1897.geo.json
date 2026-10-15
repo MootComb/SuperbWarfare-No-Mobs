@@ -10486,8 +10486,8 @@
 				{
 					"name": "fixed",
 					"parent": "positioning",
-					"pivot": [0, 0.6, -3.4],
-					"rotation": [0, 90, 0]
+					"pivot": [0, 0.6, -0.4],
+					"rotation": [0, -90, 0]
 				},
 				{
 					"name": "ground",

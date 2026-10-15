@@ -9489,17 +9489,17 @@
 				{
 					"name": "thirdperson_hand",
 					"parent": "positioning",
-					"pivot": [0, -1.5, 1]
+					"pivot": [0, -1.25, 8.25]
 				},
 				{
 					"name": "ground",
 					"parent": "positioning",
-					"pivot": [0, -5.98736, 0.49575]
+					"pivot": [0, -6.98736, 0.49575]
 				},
 				{
 					"name": "fixed",
 					"parent": "positioning",
-					"pivot": [1.0085, 5.18657, -0.25213],
+					"pivot": [-0.9915, 1.18657, 4.74787],
 					"rotation": [0, -90, 0]
 				}
 			]

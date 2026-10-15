@@ -29,6 +29,7 @@ import com.atsuishio.superbwarfare.resource.gun.DefaultGunResource
 import com.atsuishio.superbwarfare.resource.gun.GunResource
 import com.atsuishio.superbwarfare.resource.gun.pojo.ItemDisplayInfo
 import com.atsuishio.superbwarfare.resource.model.AttachmentModelReloadListener
+import com.atsuishio.superbwarfare.resource.model.GunModelReloadListener
 import com.atsuishio.superbwarfare.script.GunScriptManager
 import com.atsuishio.superbwarfare.tools.ActiveGun
 import com.atsuishio.superbwarfare.tools.RenderDistanceHelper
@@ -481,6 +482,8 @@ open class GeoGunRenderer : AbstractGeoItemRendererV2() {
             if (zoomPivot != null) {
                 poseStack.translate(-zoomPivot.x, -zoomPivot.y, -zoomPivot.z)
             }
+        } else if (!useLod) {
+            applyLoopLayerPose(stack, model, partialTick)
         }
         applyCustomAnimations(stack, model, transformType, partialTick)
         applyCustomAnimationsByScript(stack, model, transformType, partialTick)
@@ -1590,6 +1593,19 @@ open class GeoGunRenderer : AbstractGeoItemRendererV2() {
             2 -> GeoGunModel.MAGAZINE_EXTEND_PRO_BONE
             else -> GeoGunModel.MAGAZINE_STANDARD_BONE
         }
+    }
+
+    private fun applyLoopLayerPose(stack: ItemStack, model: GeoGunModel, partialTick: Float) {
+        val resource = GunResource.compute(stack)
+        val clipName = resource.animation?.loop ?: return
+        val animationFile = resource.getModel().animation ?: return
+        val clip = GunModelReloadListener.getAnimation(animationFile)
+            ?.firstOrNull { it.name == clipName } ?: return
+        val end = clip.specifiedEndTimeS
+        if (end <= 0f) return
+        val gameTime = Minecraft.getInstance().level?.gameTime ?: return
+        val seconds = (gameTime + partialTick) / 20f
+        model.applyPose(BLENDER.blend(model.getBindPose(), clip.evaluate(seconds % end)))
     }
 
     open fun applyCustomAnimations(

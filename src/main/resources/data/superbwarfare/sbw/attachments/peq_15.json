@@ -16,6 +16,11 @@
       "Prop": "Weight",
       "Op": "Add",
       "Value": 1.25
+    },
+    {
+      "Prop": "SprintTransitionSpeed",
+      "Op": "Mul",
+      "Value": 1.3
     }
   ],
   "Model": "superbwarfare:models/bedrock/attachment/peq_15.geo.json",

@@ -10808,12 +10808,12 @@
 				{
 					"name": "ground",
 					"parent": "positioning",
-					"pivot": [0, -2.73736, -0.50425]
+					"pivot": [0, -10.73736, -1.50425]
 				},
 				{
 					"name": "fixed",
 					"parent": "positioning",
-					"pivot": [1.0085, 5.18657, -0.25213],
+					"pivot": [-0.9915, -0.81343, -1.25213],
 					"rotation": [0, -90, 0]
 				}
 			]
