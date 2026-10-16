@@ -1,5 +1,6 @@
 package com.atsuishio.superbwarfare.data.attachment
 
+import com.atsuishio.superbwarfare.init.ModSounds
 import com.atsuishio.superbwarfare.serialization.kserializer.SerializedSoundEvent
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -49,7 +50,7 @@ data class ShieldInfo(
 
     /** 破碎时的音效 id */
     @SerialName("BreakSound")
-    val breakSound: SerializedSoundEvent? = SoundEvents.SHIELD_BREAK,
+    val breakSound: SerializedSoundEvent? = ModSounds.SHIELD_BREAK.get(),
 
     /** 开始恢复时的音效 id，一次恢复只播一次，且只播给自己听 */
     @SerialName("RechargeSound")

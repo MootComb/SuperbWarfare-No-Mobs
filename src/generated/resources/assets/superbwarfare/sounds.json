@@ -890,6 +890,13 @@
       "superbwarfare:bullet/metal_05"
     ]
   },
+  "hit_shield": {
+    "sounds": [
+      "superbwarfare:gun_shield/hit_shield_1",
+      "superbwarfare:gun_shield/hit_shield_2",
+      "superbwarfare:gun_shield/hit_shield_3"
+    ]
+  },
   "hit_water": {
     "sounds": [
       "superbwarfare:bullet/water_01",
@@ -2839,6 +2846,11 @@
         "attenuation_distance": 96,
         "name": "superbwarfare:shell_fly"
       }
+    ]
+  },
+  "shield_break": {
+    "sounds": [
+      "superbwarfare:gun_shield/shield_break"
     ]
   },
   "shock": {

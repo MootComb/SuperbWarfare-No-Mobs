@@ -18,6 +18,8 @@ object ModSounds {
 
     @JvmField val TRIGGER_CLICK = register("trigger_click")
     @JvmField val HIT = register("hit")
+    @JvmField val HIT_SHIELD = register("hit_shield")
+    @JvmField val SHIELD_BREAK = register("shield_break")
     @JvmField val TARGET_DOWN = register("targetdown")
     @JvmField val INDICATION = register("indication")
     @JvmField val INDICATION_VEHICLE = register("indication_vehicle")
