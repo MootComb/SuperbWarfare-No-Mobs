@@ -189,8 +189,6 @@
     "Fire3PFar": "superbwarfare:ak_47_far",
     "Fire3PVeryFar": "superbwarfare:ak_47_veryfar",
     "Fire1PSilent": "superbwarfare:ak_47_fire_1p_s",
-    "Fire3PSilent": "superbwarfare:ak_47_fire_3p_s",
-    "Fire3PFarSilent": "superbwarfare:ak_12_far_s",
-    "Fire3PVeryFarSilent": "superbwarfare:ak_12_veryfar_s"
+    "Fire3PSilent": "superbwarfare:ak_47_fire_3p_s"
   }
 }

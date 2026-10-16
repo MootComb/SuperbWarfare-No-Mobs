@@ -658,6 +658,12 @@
       "superbwarfare:electric"
     ]
   },
+  "empty": {
+    "sounds": [
+      "superbwarfare:empty"
+    ],
+    "subtitle": "subtitle.superbwarfare.empty"
+  },
   "epic_explosion_close": {
     "sounds": [
       "superbwarfare:explosion/epic_explosion_close_01",

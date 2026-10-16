@@ -15,12 +15,10 @@
     "SoundInfo": {
       "Fire1P": "superbwarfare:miya",
       "Fire3P": "superbwarfare:miya",
-      "Fire3PFar": "superbwarfare:miya",
-      "Fire3PVeryFar": "superbwarfare:miya",
-      "Fire1PSilent": "superbwarfare:miya",
-      "Fire3PSilent": "superbwarfare:miya",
-      "Fire3PFarSilent": "superbwarfare:miya",
-      "Fire3PVeryFarSilent": "superbwarfare:miya"
+      "Fire3PFar": "superbwarfare:empty",
+      "Fire3PVeryFar": "superbwarfare:empty",
+      "Fire1PSilent": "superbwarfare:empty",
+      "Fire3PSilent": "superbwarfare:empty"
     }
   },
   "Model": "superbwarfare:models/bedrock/attachment/milencer.geo.json",

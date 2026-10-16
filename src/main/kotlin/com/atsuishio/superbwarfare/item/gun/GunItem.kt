@@ -738,12 +738,12 @@ abstract class GunItem(properties: Properties) : Item(properties.stacksTo(1)), I
             shooter.playSound(sound3p, soundRadius * 0.4f, pitch)
         }
 
-        val soundFar = if (isSilent) soundInfo.fire3PFarSilent else soundInfo.fire3PFar
+        val soundFar = soundInfo.fire3PFar
         if (soundFar != null) {
             shooter.playSound(soundFar, soundRadius * 0.7f, pitch)
         }
 
-        val soundVeryFar = if (isSilent) soundInfo.fire3PVeryFarSilent else soundInfo.fire3PVeryFar
+        val soundVeryFar = soundInfo.fire3PVeryFar
         if (soundVeryFar != null) {
             shooter.playSound(soundVeryFar, soundRadius, pitch)
         }

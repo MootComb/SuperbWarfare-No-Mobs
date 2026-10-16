@@ -15,12 +15,10 @@
     "SoundInfo": {
       "Fire1P": "minecraft:entity.cat.hiss",
       "Fire3P": "minecraft:entity.cat.hiss",
-      "Fire3PFar": "minecraft:entity.cat.hiss",
-      "Fire3PVeryFar": "minecraft:entity.cat.hiss",
-      "Fire1PSilent": "minecraft:entity.cat.hiss",
-      "Fire3PSilent": "minecraft:entity.cat.hiss",
-      "Fire3PFarSilent": "minecraft:entity.cat.hiss",
-      "Fire3PVeryFarSilent": "minecraft:entity.cat.hiss"
+      "Fire3PFar": "superbwarfare:empty",
+      "Fire3PVeryFar": "superbwarfare:empty",
+      "Fire1PSilent": "superbwarfare:empty",
+      "Fire3PSilent": "superbwarfare:empty"
     }
   },
   "Model": "superbwarfare:models/bedrock/attachment/hissilencer.geo.json",

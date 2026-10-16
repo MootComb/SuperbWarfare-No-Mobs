@@ -15,12 +15,10 @@
     "SoundInfo": {
       "Fire1P": "superbwarfare:laowu",
       "Fire3P": "superbwarfare:laowu_single",
-      "Fire3PFar": "superbwarfare:laowu_single",
-      "Fire3PVeryFar": "superbwarfare:laowu_single",
-      "Fire1PSilent": "superbwarfare:laowu",
-      "Fire3PSilent": "superbwarfare:laowu_single",
-      "Fire3PFarSilent": "superbwarfare:laowu_single",
-      "Fire3PVeryFarSilent": "superbwarfare:laowu_single"
+      "Fire3PFar": "superbwarfare:empty",
+      "Fire3PVeryFar": "superbwarfare:empty",
+      "Fire1PSilent": "superbwarfare:empty",
+      "Fire3PSilent": "superbwarfare:empty"
     }
   },
   "Model": "superbwarfare:models/bedrock/attachment/silaowuncer.geo.json",
