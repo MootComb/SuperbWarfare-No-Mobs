@@ -16,8 +16,8 @@
       "Fire3P": "superbwarfare:steel_pipe_drop",
       "Fire3PFar": "superbwarfare:empty",
       "Fire3PVeryFar": "superbwarfare:empty",
-      "Fire1PSilent": "superbwarfare:empty",
-      "Fire3PSilent": "superbwarfare:empty"
+      "Fire1PSilent": "superbwarfare:steel_pipe_drop",
+      "Fire3PSilent": "superbwarfare:steel_pipe_drop"
     }
   },
   "Model": "superbwarfare:models/bedrock/attachment/steel_pipe_silencer.geo.json",

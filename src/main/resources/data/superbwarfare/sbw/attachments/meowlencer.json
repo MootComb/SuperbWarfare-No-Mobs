@@ -17,8 +17,8 @@
       "Fire3P": "minecraft:entity.cat.ambient",
       "Fire3PFar": "superbwarfare:empty",
       "Fire3PVeryFar": "superbwarfare:empty",
-      "Fire1PSilent": "superbwarfare:empty",
-      "Fire3PSilent": "superbwarfare:empty"
+      "Fire1PSilent": "minecraft:entity.cat.ambient",
+      "Fire3PSilent": "minecraft:entity.cat.ambient"
     }
   },
   "Model": "superbwarfare:models/bedrock/attachment/meowlencer.geo.json",

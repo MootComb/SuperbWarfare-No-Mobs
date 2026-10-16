@@ -17,8 +17,8 @@
       "Fire3P": "superbwarfare:laowu_single",
       "Fire3PFar": "superbwarfare:empty",
       "Fire3PVeryFar": "superbwarfare:empty",
-      "Fire1PSilent": "superbwarfare:empty",
-      "Fire3PSilent": "superbwarfare:empty"
+      "Fire1PSilent": "superbwarfare:laowu",
+      "Fire3PSilent": "superbwarfare:laowu_single"
     }
   },
   "Model": "superbwarfare:models/bedrock/attachment/silaowuncer.geo.json",
