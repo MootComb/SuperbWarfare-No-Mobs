@@ -12,6 +12,7 @@ object ModEntityRenderers {
     @SubscribeEvent
     fun registerEntityRenderers(event: EntityRenderersEvent.RegisterRenderers) {
         with(event) {
+            registerEntityRenderer(ModEntities.REFORGING_LIGHTNING_BALL.get(), ::ReforgingLightningBallRenderer)
             registerEntityRenderer(ModEntities.MORTAR.get(), ::MortarRenderer)
             registerEntityRenderer(ModEntities.SENPAI.get(), ::SenpaiRenderer)
             registerEntityRenderer(ModEntities.CREEPING_SENPAI.get(), ::CreepingSenpaiRenderer)

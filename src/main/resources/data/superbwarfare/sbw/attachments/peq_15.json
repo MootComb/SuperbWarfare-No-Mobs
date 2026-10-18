@@ -20,7 +20,7 @@
     {
       "Prop": "SprintTransitionSpeed",
       "Op": "Mul",
-      "Value": 1.3
+      "Value": 1.05
     }
   ],
   "Model": "superbwarfare:models/bedrock/attachment/peq_15.geo.json",

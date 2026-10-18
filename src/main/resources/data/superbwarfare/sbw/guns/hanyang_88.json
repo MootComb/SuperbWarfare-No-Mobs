@@ -49,8 +49,8 @@
     "StrikeHitTime": 1,
     "StrikeDamage": 50
   },
-  "DrawTime": 12,
-  "ZoomTime": 7,
+  "DrawTime": 13,
+  "ZoomTime": 8,
   "ZoomSpreadRate": 0.005,
   "DefaultFireMode": "Auto",
   "GunType": "Sniper",
@@ -95,6 +95,11 @@
   },
   "AmmoType": "@SniperAmmo",
   "Icon": "superbwarfare:textures/gun_icon/hanyang_88_icon.png",
+  "AvailableAttachments": {
+    "Charm": [
+      "#superbwarfare:attachment/charm"
+    ]
+  },
   "AvailablePerks": [
     "@Ammo",
     "superbwarfare:heal_clip",

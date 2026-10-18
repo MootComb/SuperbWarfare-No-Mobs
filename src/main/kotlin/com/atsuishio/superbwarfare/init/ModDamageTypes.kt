@@ -74,6 +74,11 @@ object ModDamageTypes {
     }
 
     @JvmStatic
+    fun causeShockDamage(registryAccess: RegistryAccess, directEntity: Entity?, attacker: Entity?): DamageSource {
+        return DamageMessages(registryAccess.registry(Registries.DAMAGE_TYPE).get().getHolderOrThrow(SHOCK), directEntity, attacker)
+    }
+
+    @JvmStatic
     fun causeBurnDamage(registryAccess: RegistryAccess, attacker: Entity?): DamageSource {
         return DamageMessages(registryAccess.registry(Registries.DAMAGE_TYPE).get().getHolderOrThrow(BURN), attacker)
     }

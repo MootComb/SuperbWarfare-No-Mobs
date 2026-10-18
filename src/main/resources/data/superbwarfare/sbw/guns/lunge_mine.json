@@ -1,5 +1,6 @@
 {
   "GunType": "Special",
+  "ArmPose": "LungeMine",
   "Icon": "superbwarfare:textures/gun_icon/lunge_mine_icon.png",
   "ProjectileAmount": 0,
   "AmmoType": "Infinity",

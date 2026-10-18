@@ -56,6 +56,11 @@
         },
         {
           "type": "minecraft:item",
+          "name": "superbwarfare:hanyang_88_blueprint",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
           "name": "superbwarfare:m_870_blueprint",
           "weight": 2
         },

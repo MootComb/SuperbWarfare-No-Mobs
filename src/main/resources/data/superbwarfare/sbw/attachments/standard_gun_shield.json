@@ -10,7 +10,12 @@
     {
       "Prop": "Weight",
       "Op": "Add",
-      "Value": 1.0
+      "Value": 2.5
+    },
+    {
+      "Prop": "ZoomTime",
+      "Op": "Mul",
+      "Value": 1.2
     }
   ],
   "Model": "superbwarfare:models/bedrock/attachment/standard_gun_shield.geo.json",

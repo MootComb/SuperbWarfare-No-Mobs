@@ -301,6 +301,7 @@ class ModItemModelProvider(output: PackOutput, existingFileHelper: ExistingFileH
         gunBlueprintItem(ModItems.QBZ_95_BLUEPRINT)
         gunBlueprintItem(ModItems.K_98_BLUEPRINT)
         gunBlueprintItem(ModItems.MOSIN_NAGANT_BLUEPRINT)
+        gunBlueprintItem(ModItems.HANYANG_88_BLUEPRINT)
         gunBlueprintItem(ModItems.JAVELIN_BLUEPRINT)
         cannonBlueprintItem(ModItems.MK_42_BLUEPRINT)
         cannonBlueprintItem(ModItems.MLE_1934_BLUEPRINT)

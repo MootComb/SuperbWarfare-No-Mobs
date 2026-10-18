@@ -19,6 +19,7 @@
   "DefaultFireMode": "Auto",
   "AvailableFireModes": "Auto",
   "GunType": "DirectLauncher",
+  "ArmPose": "SuperStarShooter",
   "AmmoType": "100 minecraft:nether_star",
   "Icon": "superbwarfare:textures/gun_icon/super_star_shooter_icon.png",
   "AvailablePerks": [

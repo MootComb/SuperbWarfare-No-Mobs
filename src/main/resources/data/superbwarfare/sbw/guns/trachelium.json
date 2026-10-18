@@ -1,5 +1,5 @@
 {
-  "Spread": 3,
+  "Spread": 0,
   "RecoilX": 0.0025,
   "RecoilY": 0.032,
   "Damage": 18,
@@ -22,6 +22,7 @@
       "AmmoSlot": "Default",
       "Override": {
         "Damage": 6.5,
+        "Spread": 3,
         "Headshot": 2,
         "BypassesArmor": 0.25,
         "ProjectileAmount": 4,

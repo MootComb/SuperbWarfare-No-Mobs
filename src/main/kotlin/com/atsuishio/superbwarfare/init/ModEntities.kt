@@ -121,6 +121,13 @@ object ModEntities {
 
     // Projectiles
     @JvmField
+    val REFORGING_LIGHTNING_BALL = register(
+        "reforging_lightning_ball",
+        misc(::ReforgingLightningBallEntity).setTrackingRange(64).setUpdateInterval(1)
+            .setShouldReceiveVelocityUpdates(true).noSave().fireImmune().sized(2f, 2f)
+    )
+
+    @JvmField
     val TASER_BULLET = register("taser_bullet", fastProjectile(::TaserBulletEntity, true).sized(0.25f, 0.25f))
 
     @JvmField

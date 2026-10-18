@@ -20,7 +20,7 @@
     {
       "Prop": "SprintTransitionSpeed",
       "Op": "Mul",
-      "Value": 1.25
+      "Value": 1.05
     }
   ],
   "Model": "superbwarfare:models/bedrock/attachment/pistol_laser.geo.json",

@@ -1,6 +1,5 @@
 package com.atsuishio.superbwarfare.item.gun.special
 
-import com.atsuishio.superbwarfare.client.PoseTool
 import com.atsuishio.superbwarfare.data.gun.GunData
 import com.atsuishio.superbwarfare.data.gun.GunProp
 import com.atsuishio.superbwarfare.entity.mixin.ICustomKnockback
@@ -10,35 +9,20 @@ import com.atsuishio.superbwarfare.item.gun.GeoGunItem
 import com.atsuishio.superbwarfare.network.message.receive.ClientIndicatorMessage
 import com.atsuishio.superbwarfare.tools.*
 import com.atsuishio.superbwarfare.world.phys.EntityResult
-import net.minecraft.client.model.HumanoidModel
 import net.minecraft.core.particles.BlockParticleOption
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundEvent
 import net.minecraft.sounds.SoundSource
-import net.minecraft.world.InteractionHand
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.LivingEntity
-import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.phys.BlockHitResult
 import net.minecraft.world.phys.Vec3
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.api.distmarker.OnlyIn
 
 @RegistryName("repair_tool")
 class RepairToolItem : GeoGunItem(Properties()) {
-
-    @OnlyIn(Dist.CLIENT)
-    override fun armPose(
-        entityLiving: LivingEntity,
-        hand: InteractionHand,
-        itemStack: ItemStack
-    ): HumanoidModel.ArmPose {
-        return if (!itemStack.isEmpty && entityLiving.usedItemHand == hand) PoseTool.REPAIR_TOOL_POSE
-        else HumanoidModel.ArmPose.EMPTY
-    }
 
     override fun onRayHitBlock(
         shooter: Entity?,

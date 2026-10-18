@@ -10,7 +10,12 @@
     {
       "Prop": "Weight",
       "Op": "Add",
-      "Value": 1.0
+      "Value": 3.0
+    },
+    {
+      "Prop": "ZoomTime",
+      "Op": "Mul",
+      "Value": 1.25
     }
   ],
   "Model": "superbwarfare:models/bedrock/attachment/hyperion_shield_module.geo.json",

@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:smithing_transform",
+  "addition": {
+    "tag": "minecraft:logs"
+  },
+  "base": {
+    "item": "superbwarfare:rare_material_pack"
+  },
+  "result": {
+    "item": "superbwarfare:hanyang_88"
+  },
+  "template": {
+    "item": "superbwarfare:hanyang_88_blueprint"
+  }
+}

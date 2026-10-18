@@ -55,6 +55,42 @@
       "#superbwarfare:attachment/charm"
     ]
   },
-  "AmmoType": "@RifleAmmo",
+  "AmmoType": [
+    "@RifleAmmo",
+    {
+      "Ammo": "exp",
+      "Override": {
+        "Projectile": {
+          "Type": "superbwarfare:reforging_lightning_ball",
+          "Data": {
+            "Owner": "@sbw:owner",
+            "AttackRadius": 8.0,
+            "AttackInterval": 10,
+            "MaxTargets": 4
+          }
+        },
+        "Magazine": 0,
+        "AmmoCostPerShoot": 8,
+        "Damage": 50,
+        "Velocity": 0.35,
+        "Gravity": 0,
+        "ProjectileLife": 200,
+        "RPM": 60,
+        "DefaultFireMode": "Charge",
+        "AvailableFireModes": [
+          {
+            "Mode": "Charge",
+            "Charge": {
+              "Duration": 20,
+              "Trigger": "AutoAtFull",
+              "PowerMode": "Full",
+              "MinPower": 1.0
+            }
+          }
+        ],
+        "ClearHoldProgressAfterShoot": true
+      }
+    }
+  ],
   "Icon": "superbwarfare:textures/gun_icon/reforging_icon.png"
 }

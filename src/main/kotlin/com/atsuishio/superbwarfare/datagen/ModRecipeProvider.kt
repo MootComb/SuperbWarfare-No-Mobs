@@ -2698,6 +2698,13 @@ class ModRecipeProvider(output: PackOutput, registries: CompletableFuture<Holder
             )
             gunSmithing(
                 writer,
+                ModItems.HANYANG_88_BLUEPRINT.get(),
+                GunRarity.RARE,
+                ItemTags.LOGS,
+                ModItems.HANYANG_88.get()
+            )
+            gunSmithing(
+                writer,
                 ModItems.JAVELIN_BLUEPRINT.get(),
                 GunRarity.LEGENDARY,
                 ModItems.ANCIENT_CPU.get(),
@@ -2816,6 +2823,7 @@ class ModRecipeProvider(output: PackOutput, registries: CompletableFuture<Holder
             copyBlueprint(writer, ModItems.QBZ_191_BLUEPRINT.get())
             copyBlueprint(writer, ModItems.K_98_BLUEPRINT.get())
             copyBlueprint(writer, ModItems.MOSIN_NAGANT_BLUEPRINT.get())
+            copyBlueprint(writer, ModItems.HANYANG_88_BLUEPRINT.get())
             copyBlueprint(writer, ModItems.JAVELIN_BLUEPRINT.get())
             copyBlueprint(writer, ModItems.IGLA_BLUEPRINT.get())
             copyBlueprint(writer, ModItems.M_2_HB_BLUEPRINT.get())

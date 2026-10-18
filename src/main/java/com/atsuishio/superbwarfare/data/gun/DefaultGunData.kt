@@ -182,6 +182,8 @@ data class DefaultGunData(
     val seekType: SeekType? = SeekType.NONE,
     @SerialName("GunType")
     val gunType: GunType = GunType.SPECIAL,
+    @SerialName("ArmPose")
+    val armPose: GunArmPose = GunArmPose.DEFAULT,
     // Nullable!!!
     @SerialName("AutoReload")
     val autoReload: Boolean? = null,

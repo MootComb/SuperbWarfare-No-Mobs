@@ -16,6 +16,7 @@
   "Projectile": "@ray",
   "DefaultFireMode": "Auto",
   "GunType": "Special",
+  "ArmPose": "SingleHand",
   "AvailableFireModes": [
     "Auto"
   ],

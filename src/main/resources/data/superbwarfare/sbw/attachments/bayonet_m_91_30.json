@@ -17,6 +17,11 @@
       "Prop": "Weight",
       "Op": "Add",
       "Value": 0.4
+    },
+    {
+      "Prop": "ZoomTime",
+      "Op": "Mul",
+      "Value": 1.1
     }
   ],
   "Override": {

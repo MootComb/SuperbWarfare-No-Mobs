@@ -35,6 +35,7 @@
   "RPM": 360,
   "HeatPerShoot": 2,
   "GunType": "MachineGun",
+  "ArmPose": "MiniGun",
   "Deployable": true,
   "StandBehind": 1.0,
   "AvailableFireModes": [

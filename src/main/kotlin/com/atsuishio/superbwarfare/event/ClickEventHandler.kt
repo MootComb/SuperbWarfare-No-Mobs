@@ -1,6 +1,7 @@
 package com.atsuishio.superbwarfare.event
 
 import com.atsuishio.superbwarfare.client.overlay.OverlayTraceHandler
+import com.atsuishio.superbwarfare.client.overlay.ammo.AmmoBarHud
 import com.atsuishio.superbwarfare.client.screens.LoiterConfigScreen
 import com.atsuishio.superbwarfare.client.screens.MissilePosInputScreen
 import com.atsuishio.superbwarfare.client.screens.TacticalMapScreen
@@ -347,10 +348,12 @@ object ClickEventHandler {
                 }
                 if (data.get(GunProp.AMMO_CONSUMER).size > 1) {
                     if (key == ModKeyMappings.CHANGE_AMMO_FORWARD.key.value) {
+                        AmmoBarHud.noteAmmoSwitch(data, add = false)
                         sendPacketToServer(EditMessage(5, add = false, isVehicle = false))
                         ClientEventHandler.burstFireAmount = 0
                     }
                     if (key == ModKeyMappings.CHANGE_AMMO_BACKWARD.key.value) {
+                        AmmoBarHud.noteAmmoSwitch(data, add = true)
                         sendPacketToServer(EditMessage(5, add = true, isVehicle = false))
                         ClientEventHandler.burstFireAmount = 0
                     }

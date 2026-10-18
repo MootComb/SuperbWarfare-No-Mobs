@@ -328,6 +328,7 @@ class ModItemTagProvider(
             ModItems.AK_47_BLUEPRINT.get(),
             ModItems.K_98_BLUEPRINT.get(),
             ModItems.MOSIN_NAGANT_BLUEPRINT.get(),
+            ModItems.HANYANG_88_BLUEPRINT.get(),
             ModItems.M_2_HB_BLUEPRINT.get(),
             ModItems.HK_416_BLUEPRINT.get(),
             ModItems.AK_12_BLUEPRINT.get(),

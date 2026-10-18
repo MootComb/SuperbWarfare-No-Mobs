@@ -1,140 +1,54 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="aui-viewport" content="mode=gui,zoom=1,min-zoom=1,max-zoom=1,user-scalable=false">
+    <style>
+        * { user-select: none; pointer-events: none; }
+        html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
+        body { position: relative; color: #ffffff; }
+        /* Glyphs and widths come from Minecraft.font through AmmoHudText, including resource-pack fonts. */
+        sbw-hud-text { display: block; flex-shrink: 0; }
+        /* W = 57, A = 96. The root origin comes from existing MC GUI/config offsets. */
+        #ammo-bar { position: absolute; width: 176px; height: 80px; transform-origin: 0 0; pointer-events: none; }
+        .name { position: absolute; left: -23px; width: 160px; }
+        #gun-name { top: 4px; }
+        #ammo-name { top: 14px; color: #c8a679; }
+        #gun-icon { position: absolute; left: 25px; top: 24px; width: 64px; height: 16px; transform-origin: center; }
+        #ammo-row { position: absolute; left: 96px; top: 21px; display: flex; align-items: flex-start; white-space: nowrap; }
+        #virtual-ammo { position: relative; top: -6px; margin-left: 4px; color: #55ffff; }
+        #backup-ammo { position: absolute; left: 96px; top: 34px; color: #cccccc; }
+        /* The 16px mode box also accommodates RPM textures. */
+        #fire-mode-key { position: absolute; right: 120.5px; top: 47px; }
+        #fire-mode-seat { position: absolute; left: 58.5px; top: 41px; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; }
+        #fire-mode-line { position: absolute; left: 62.5px; top: 50px; width: 8px; height: 8px; }
+        .ordinal { position: absolute; top: 59px; height: 7px; display: flex; justify-content: center; }
+        #fire-mode-index { left: 58.5px; width: 16px; }
+        .index-current { color: #ffffff; }
+        .index-total { color: #888888; }
+        #resource-seat { position: absolute; left: 96px; top: 0; width: 12px; height: 80px; }
+        /* Frames/plus signs stay fixed while item groups slide. Only surplus frames enter/leave. */
+        #resource-viewport { position: absolute; left: -10px; top: 43px; width: 32px; height: 16px; overflow: hidden; }
+        /* Native paint snapshots move icons; the AUI element itself has stable geometry. */
+        #resource-content { position: absolute; left: 10px; top: 2px; height: 12px; display: block; }
+        #ammo-type-index { left: 0; width: 12px; }
+    </style>
+</head>
 <body>
-    <div id="ammo-bar" class="ammo-bar">
-        <div class="ammo-bar-main">
-            <div class="gun-info">
-                <span id="gun-name" class="gun-name">--</span>
-                <span id="ammo-name" class="ammo-name">--</span>
-            </div>
-            <texture id="gun-icon" class="gun-icon gun-icon-anim" src="" />
-            <div class="ammo-bar-bottom">
-                <span id="fire-mode-key" class="fire-mode-key"></span>
-                <div>
-                    <texture id="fire-mode-icon" class="fire-mode-icon" src="" />
-                </div>
-                <span id="virtual-ammo" class="virtual-ammo"></span>
-            </div>
-        </div>
-        <div class="ammo-count-section">
-            <span id="ammo-count" class="ammo-count">--</span>
-            <span id="backup-ammo" class="backup-ammo">--</span>
+    <div id="ammo-bar">
+        <sbw-hud-text id="gun-name" class="name" data-scale="0.9" data-fixed-width="true" data-align="center"></sbw-hud-text>
+        <sbw-hud-text id="ammo-name" class="name" data-scale="0.7" data-fixed-width="true" data-align="center"></sbw-hud-text>
+        <texture id="gun-icon" />
+        <div id="ammo-row"><sbw-hud-text id="ammo-count" data-scale="1.5"></sbw-hud-text><sbw-hud-text id="virtual-ammo" data-scale="0.8"></sbw-hud-text></div>
+        <sbw-hud-text id="backup-ammo" data-scale="1"></sbw-hud-text>
+        <sbw-hud-text id="fire-mode-key" data-scale="1"></sbw-hud-text>
+        <div id="fire-mode-seat"><texture id="fire-mode-icon" /></div>
+        <texture id="fire-mode-line" src="superbwarfare:textures/overlay/ammo_bar/fire_mode/line.png" />
+        <div id="fire-mode-index" class="ordinal"><sbw-hud-text id="fire-mode-index-current" class="index-current" data-scale="0.7"></sbw-hud-text><sbw-hud-text id="fire-mode-index-total" class="index-total" data-scale="0.7"></sbw-hud-text></div>
+        <div id="resource-seat">
+            <div id="resource-viewport"><sbw-hud-resources id="resource-content"></sbw-hud-resources></div>
+            <div id="ammo-type-index" class="ordinal"><sbw-hud-text id="ammo-type-index-current" class="index-current" data-scale="0.7"></sbw-hud-text><sbw-hud-text id="ammo-type-index-total" class="index-total" data-scale="0.7"></sbw-hud-text></div>
         </div>
     </div>
 </body>
-
-<style>
-    .gun-icon {
-        width: 64px;
-        height: 16px;
-    }
-
-    .gun-icon-anim {
-        animation: scale 0.5s;
-    }
-
-    .gun-icon-anim.reloading {
-        animation: flicker 0.3s infinite alternate;
-    }
-
-    .ammo-bar {
-        display: flex;
-        align-items: flex-end;
-        position: fixed;
-        right: 30px;
-        bottom: 20px;
-    }
-
-    .ammo-bar-main {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .gun-info {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .gun-name {
-        font-size: 9px;
-        color: #ffffff;
-        text-stroke: 1px #333;
-    }
-
-    .ammo-name {
-        font-size: 7px;
-        color: #c8a679;
-        text-stroke: 1px #000000;
-    }
-
-    .ammo-count-section {
-        display: flex;
-        flex-direction: column;
-        margin: 8px 8px;
-        padding-left: 20px;
-        padding-bottom: 6px;
-    }
-
-    .ammo-count {
-        font-size: 14px;
-        color: #ffffff;
-        text-stroke: 1px #333;
-    }
-
-    .backup-ammo {
-        font-size: 8px;
-        color: #cccccc;
-        text-stroke: 1px #000000;
-    }
-
-    .ammo-bar-bottom {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .fire-mode-key {
-        font-size: 9px;
-        color: #fff;
-        margin-top: 2px;
-    }
-
-    .fire-mode-icon {
-        width: 8px;
-        height: 8px;
-        position: relative;
-        right: 1.5px;
-    }
-
-    .ammo-bar-bottom>div {
-        border-bottom: 0.5px solid #fff;
-        height: 14px;
-        width: 6px;
-        margin-bottom: 8px;
-    }
-
-    .virtual-ammo {
-        font-size: 14px;
-        color: #55ffff;
-        text-stroke: 1px #000000;
-    }
-
-    @keyframes scale {
-        0% {
-            transform: scale(1.08);
-            opacity: 0;
-        }
-        30% {
-            transform: scale(1.15);
-            opacity: 1;
-        }
-        100% { transform: scale(1)}
-    }
-
-    @keyframes flicker {
-        0% { opacity: 1 }
-        100% { opacity: 0 }
-    }
-</style>
-
+</html>
