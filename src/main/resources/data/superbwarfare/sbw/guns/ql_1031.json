@@ -77,7 +77,7 @@
     },
     {
       "Mode": "Hold",
-      "Name": "HOLD",
+      "Name": "HoldAuto",
       "Charge": {
         "Duration": 20,
         "Trigger": "AutoAtFull",

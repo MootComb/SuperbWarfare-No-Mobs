@@ -13,6 +13,7 @@
   "AvailableFireModes": [
     {
       "Mode": "Charge",
+      "Name": "HoldManual",
       "Charge": {
         "Duration": 10,
         "Trigger": "OnRelease",

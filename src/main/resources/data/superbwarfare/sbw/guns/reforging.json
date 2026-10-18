@@ -80,6 +80,7 @@
         "AvailableFireModes": [
           {
             "Mode": "Charge",
+            "Name": "HoldAuto",
             "Charge": {
               "Duration": 20,
               "Trigger": "AutoAtFull",
