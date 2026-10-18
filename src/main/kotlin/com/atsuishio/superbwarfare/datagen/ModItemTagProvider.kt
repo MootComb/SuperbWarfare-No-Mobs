@@ -235,6 +235,7 @@ class ModItemTagProvider(
             ModItems.MK_14.get(),
             ModItems.MARLIN.get(),
             ModItems.K_98.get(),
+            ModItems.HANYANG_88.get(),
             ModItems.M_98B.get(),
             ModItems.SENTINEL.get(),
             ModItems.HUNTING_RIFLE.get(),
@@ -290,6 +291,7 @@ class ModItemTagProvider(
             ModItems.SVD.get(),
             ModItems.M_98B.get(),
             ModItems.K_98.get(),
+            ModItems.HANYANG_88.get(),
             ModItems.MOSIN_NAGANT.get(),
             ModItems.AWM.get(),
             ModItems.QL_1031.get()

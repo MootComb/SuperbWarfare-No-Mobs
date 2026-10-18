@@ -58,7 +58,7 @@
         "Damage": 19.5,
         "SoundRadius": 12,
         "Headshot": 2.5,
-        "Velocity": 25,
+        "Velocity": 23,
         "BypassesArmor": 0.7,
         "HeatPerShoot": 5,
         "RPM": 300,

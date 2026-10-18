@@ -5,6 +5,7 @@ import com.atsuishio.superbwarfare.api.event.ProjectileHitEvent.HitBlock
 import com.atsuishio.superbwarfare.api.event.ProjectileHitEvent.HitEntity
 import com.atsuishio.superbwarfare.client.lighting.ClientLightingHandler
 import com.atsuishio.superbwarfare.client.particle.BulletDecalOption
+import com.atsuishio.superbwarfare.client.sound.ClientSonicBoomHandler
 import com.atsuishio.superbwarfare.config.server.ProjectileConfig
 import com.atsuishio.superbwarfare.entity.OBBEntity
 import com.atsuishio.superbwarfare.entity.getValue
@@ -402,6 +403,8 @@ open class ProjectileEntity(entityType: EntityType<out ProjectileEntity>, level:
         } else {
             this.setPosRaw(this.x + vec.x, this.y + vec.y, this.z + vec.z)
             ClientLightingHandler.handleProjectileTick(this)
+            // 纯客户端：子弹掠过玩家时播放破空音效，服务端不参与
+            ClientSonicBoomHandler.handleProjectileTick(this)
         }
 
         this.deltaMovement = this.deltaMovement.add(0.0, -this.gravity.toDouble(), 0.0)
@@ -949,6 +952,8 @@ open class ProjectileEntity(entityType: EntityType<out ProjectileEntity>, level:
         super.onRemovedFromLevel()
         if (level().isClientSide) {
             ClientLightingHandler.handleProjectileRemoved(this)
+            // 纯客户端：子弹在服务端打中东西就地消失时，客户端没走完最后一段位移，这里补判定
+            ClientSonicBoomHandler.handleProjectileRemoved(this)
         }
     }
 

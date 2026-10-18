@@ -62,6 +62,17 @@ object SoundTool {
         sendPacketTo(player, ClientboundStopSoundPacket(sound, source))
     }
 
+    /**
+     * 播放「远程延迟音效」：只发给 [radius] × 16 格内的玩家，其余全部交给客户端按距离延迟播放
+     * （约 17 格/tick，即音速），用于远处的枪声、爆炸声。
+     *
+     * [radius] 既是音量也是收听半径的倍率，和原版 `Level.playSound` 的口径一致；
+     * 客户端侧的处理见 [SoundClientMessage]。
+     *
+     * @param sender 发射者 UUID，客户端据此区分「自己打的」和「别人打的」
+     * @param exclude 这个玩家**完全收不到**这条音效。例如射手本人不该听到自己的第三人称枪声
+     *        （他只该听客户端本地播的第一人称音效），这里直接不给他发包
+     */
     @JvmStatic
     fun playDistantSound(
         serverLevel: ServerLevel,
@@ -69,22 +80,28 @@ object SoundTool {
         pos: Vec3,
         radius: Float,
         pitch: Float,
-        sender: Entity?
+        sender: Entity?,
+        exclude: ServerPlayer? = null
     ) {
-        val players = serverLevel.getPlayers { it.distanceToSqr(pos) < radius * radius * 256 }
+        val excludeUuid = exclude?.uuid
+        val maxDistanceSqr = radius.toDouble() * radius * 256
+        val players = serverLevel.getPlayers {
+            (excludeUuid == null || it.uuid != excludeUuid) && it.distanceToSqr(pos) < maxDistanceSqr
+        }
+        if (players.isEmpty()) return
+
+        // 同一个包发给所有收件人：sender 为 null 时用一次性 UUID，反正不会和任何玩家匹配
+        val message = SoundClientMessage(
+            soundEvent.location,
+            pos.x,
+            pos.y,
+            pos.z,
+            radius,
+            pitch,
+            sender?.uuid ?: UUID.randomUUID()
+        )
         for (serverPlayer in players) {
-            sendPacketTo(
-                serverPlayer,
-                SoundClientMessage(
-                    soundEvent.location,
-                    pos.x,
-                    pos.y,
-                    pos.z,
-                    radius,
-                    pitch,
-                    if (sender == null) UUID.randomUUID() else sender.getUUID()
-                )
-            )
+            sendPacketTo(serverPlayer, message)
         }
     }
 }

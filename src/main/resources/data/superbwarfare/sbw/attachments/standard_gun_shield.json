@@ -24,6 +24,6 @@
     "BrokenLockout": 40,
     "EnergyPerCharge": 50,
     "BreakOverflow": 0.8,
-    "RechargeSound": "superbwarfare:bullet_supply"
+    "RechargeSound": "superbwarfare:shield_recharge"
   }
 }

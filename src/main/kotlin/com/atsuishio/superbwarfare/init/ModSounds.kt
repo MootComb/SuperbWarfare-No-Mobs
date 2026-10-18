@@ -20,6 +20,10 @@ object ModSounds {
     @JvmField val HIT = register("hit")
     @JvmField val HIT_SHIELD = register("hit_shield")
     @JvmField val SHIELD_BREAK = register("shield_break")
+
+    // 枪盾受击 / 充能完毕（受击者本人这一侧听到的音效）
+    @JvmField val SHIELD_GOT_HIT = register("shield_got_hit")
+    @JvmField val SHIELD_RECHARGE = register("shield_recharge")
     @JvmField val TARGET_DOWN = register("targetdown")
     @JvmField val INDICATION = register("indication")
     @JvmField val INDICATION_VEHICLE = register("indication_vehicle")
@@ -97,6 +101,12 @@ object ModSounds {
     @JvmField val ROCKET_FLY = register("rocket_fly")
     @JvmField val SHELL_FLY = register("shell_fly")
     @JvmField val ROCKET_ENGINE = register("rocket_engine")
+
+    // 子弹破空音（12 个随机变体，普通子弹）。只在客户端播放，见 client/sound/ClientSonicBoomHandler
+    @JvmField val BULLET_SONIC_BOOM = register("bullet_sonic_boom")
+
+    // 狙击弹破空音（8 个随机变体），同样只在客户端播放
+    @JvmField val SNIPER_SONIC_BOOM = register("sniper_sonic_boom")
 
     @JvmField val BOMB_RELEASE = register("bomb_release")
     @JvmField val MISSILE_START = register("missile_start")

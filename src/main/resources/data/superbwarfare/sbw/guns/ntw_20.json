@@ -9,7 +9,7 @@
   "Headshot": 3,
   "RPM": 120,
   "ZoomReload": false,
-  "Velocity": 24,
+  "Velocity": 26,
   "Magazine": [3, 6, 9],
   "MeleeDamage": 5,
   "MeleeDuration": 16,

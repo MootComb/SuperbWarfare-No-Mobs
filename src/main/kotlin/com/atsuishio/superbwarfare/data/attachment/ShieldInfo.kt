@@ -4,7 +4,6 @@ import com.atsuishio.superbwarfare.init.ModSounds
 import com.atsuishio.superbwarfare.serialization.kserializer.SerializedSoundEvent
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import net.minecraft.sounds.SoundEvents
 import kotlin.math.cos
 
 /**
@@ -44,17 +43,17 @@ data class ShieldInfo(
     @SerialName("BreakOverflow")
     val breakOverflow: Double = 0.0,
 
-    /** 吸收伤害时的音效 id */
+    /** 吸收伤害时的音效 id（受击者侧）。默认值就是枪盾受击音，数据里不写即用这个 */
     @SerialName("BlockSound")
-    val blockSound: SerializedSoundEvent? = SoundEvents.SHIELD_BLOCK,
+    val blockSound: SerializedSoundEvent? = ModSounds.SHIELD_GOT_HIT.get(),
 
     /** 破碎时的音效 id */
     @SerialName("BreakSound")
     val breakSound: SerializedSoundEvent? = ModSounds.SHIELD_BREAK.get(),
 
-    /** 开始恢复时的音效 id，一次恢复只播一次，且只播给自己听 */
+    /** 充能完毕时的音效 id，只播给持有者自己听 */
     @SerialName("RechargeSound")
-    val rechargeSound: SerializedSoundEvent? = SoundEvents.BEACON_ACTIVATE,
+    val rechargeSound: SerializedSoundEvent? = ModSounds.SHIELD_RECHARGE.get(),
 ) {
     /** 实际生效的减伤比例（0~1） */
     fun resistRate(): Double = (resist / 100.0).coerceIn(0.0, 1.0)

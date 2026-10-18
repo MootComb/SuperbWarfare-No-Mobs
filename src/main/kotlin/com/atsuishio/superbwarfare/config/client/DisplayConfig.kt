@@ -199,4 +199,16 @@ object DisplayConfig {
         comment("是否常显近战判定体外框（不按 F3+B 也显示；按 F3+B 也能显示）")
         define("melee_hitbox_render", false).also { pop() }
     }
+
+    /**
+     * 子弹破空音效（高速子弹掠过自己时播放一次）。
+     *
+     * 纯客户端判定与播放，开关只影响本机听到的声音，服务端不参与。
+     */
+    @JvmField
+    val ENABLE_BULLET_SONIC_BOOM = buildClientConfig {
+        comment("Set true to play a sonic boom when a fast bullet whizzes past you (client side only)")
+        comment("是否在高速子弹掠过自己时播放破空音效（纯客户端）")
+        define("enable_bullet_sonic_boom", true)
+    }
 }

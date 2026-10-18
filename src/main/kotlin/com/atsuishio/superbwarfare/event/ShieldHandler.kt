@@ -1,6 +1,7 @@
 package com.atsuishio.superbwarfare.event
 
 import com.atsuishio.superbwarfare.api.event.ShieldHitEvent
+import com.atsuishio.superbwarfare.capability.player.PlayerDeployState
 import com.atsuishio.superbwarfare.data.gun.GunData
 import com.atsuishio.superbwarfare.data.gun.GunProp
 import com.atsuishio.superbwarfare.init.ModSounds
@@ -16,6 +17,7 @@ import net.minecraft.tags.DamageTypeTags
 import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.entity.player.Player
 import net.minecraft.world.entity.projectile.Projectile
 import net.minecraft.world.phys.Vec3
 import net.minecraftforge.event.entity.living.LivingHurtEvent
@@ -43,17 +45,24 @@ object ShieldHandler {
         return false
     }
 
+    private fun shieldRaised(victim: LivingEntity, gun: GunData): Boolean {
+        if (gun.zooming.get()) return true
+        if (victim !is Player || !DeployedWeaponHandler.isDeployed(victim)) return false
+        val uuid = gun.uuid ?: return false
+        return PlayerDeployState.getOrDefault(victim).gunUuid == uuid
+    }
+
     @JvmStatic
     fun hasActiveShield(victim: LivingEntity): Boolean {
         val gun = mainHandGun(victim) ?: return false
-        if (!gun.zooming.get()) return false
+        if (!shieldRaised(victim, gun)) return false
         return ShieldRuntime.of(gun).any { !it.broken && it.charge > 0.0 }
     }
 
     @JvmStatic
     fun willCover(victim: LivingEntity, travel: Vec3, from: Vec3): Boolean {
         val gun = mainHandGun(victim) ?: return false
-        if (!gun.zooming.get()) return false
+        if (!shieldRaised(victim, gun)) return false
         return ShieldRuntime.of(gun).any {
             !it.broken && it.charge > 0.0 && ShieldRuntime.inCover(victim, it, travel, from)
         }
@@ -62,7 +71,7 @@ object ShieldHandler {
     @JvmStatic
     fun covering(victim: LivingEntity, travel: Vec3, from: Vec3): List<ShieldRuntime.Instance> {
         val gun = mainHandGun(victim) ?: return emptyList()
-        if (!gun.zooming.get()) return emptyList()
+        if (!shieldRaised(victim, gun)) return emptyList()
         return ShieldRuntime.of(gun).filter {
             !it.broken && it.charge > 0.0 && ShieldRuntime.inCover(victim, it, travel, from)
         }
@@ -131,7 +140,7 @@ object ShieldHandler {
         if (!isBlockableSource(source)) return 0f
 
         val gun = mainHandGun(victim) ?: return 0f
-        if (!gun.zooming.get()) return 0f
+        if (!shieldRaised(victim, gun)) return 0f
 
         val shields = covering(victim, travel, from)
         if (shields.isEmpty()) return 0f
@@ -169,8 +178,6 @@ object ShieldHandler {
         val broken = cost >= shield.charge
         shield.charge -= cost
         shield.lastHit = now
-        // 挨了一下就是新一轮恢复，下次开始恢复时要重新播一次开始恢复的音效
-        shield.recovered = false
 
         if (broken) {
             shield.charge = 0.0

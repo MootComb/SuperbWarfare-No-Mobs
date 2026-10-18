@@ -23,7 +23,6 @@ object ShieldRuntime {
     private const val CHARGE = "Charge"
     private const val LAST_HIT = "LastHit"
     private const val BROKEN_AT = "BrokenAt"
-    private const val RECOVERED = "Recovered"
     private const val TICKS_PER_SECOND = 20.0
 
     /** 一件装着枪盾的全部状态，[tag] 是槽位 compound 的活引用 */
@@ -53,13 +52,6 @@ object ShieldRuntime {
             get() = tag.getLong(BROKEN_AT)
             set(value) {
                 tag.putLong(BROKEN_AT, value)
-            }
-
-        /** 本轮恢复是否已经播过 [ShieldInfo.rechargeSound] */
-        var recovered: Boolean
-            get() = tag.getBoolean(RECOVERED)
-            set(value) {
-                tag.putBoolean(RECOVERED, value)
             }
 
         val broken: Boolean get() = brokenAt != 0L
@@ -160,14 +152,12 @@ object ShieldRuntime {
             if (amount <= 0.0) continue
             if (!consume(stack, amount * shield.info.energyPerCharge.coerceAtLeast(0))) continue
 
-            // 开始恢复：本轮第一次真的涨耐久时播给自己听
-            if (!shield.recovered) {
-                shield.recovered = true
+            shield.charge += amount
+            if (shield.charge >= max) {
+                shield.charge = max
+                // 充能完毕：只播给持有者自己听。满耐久后本循环开头就会 continue，所以一次恢复只会响一次
                 shield.info.rechargeSound?.let { SoundTool.playLocalSound(holder as? Player, it) }
             }
-
-            shield.charge += amount
-            if (shield.charge >= max) shield.charge = max
         }
     }
 

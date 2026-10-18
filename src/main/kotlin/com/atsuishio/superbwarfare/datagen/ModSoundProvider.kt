@@ -60,7 +60,12 @@ class ModSoundProvider(output: PackOutput, existingFileHelper: ExistingFileHelpe
 
         // -------------------- gun_shield --------------------
         register("hit_shield", "gun_shield/hit_shield_1", "gun_shield/hit_shield_2", "gun_shield/hit_shield_3")
-        group("gun_shield", "shield_break")
+        // 枪盾受击（受击者侧，5 个随机变体）与充能完毕
+        register(
+            "shield_got_hit", "gun_shield/shield_got_hit_1", "gun_shield/shield_got_hit_2",
+            "gun_shield/shield_got_hit_3", "gun_shield/shield_got_hit_4", "gun_shield/shield_got_hit_5",
+        )
+        group("gun_shield", "shield_break", "shield_recharge")
 
         // -------------------- annihilator --------------------
         group(
@@ -84,6 +89,27 @@ class ModSoundProvider(output: PackOutput, existingFileHelper: ExistingFileHelpe
         register(
             "hit_water", "bullet/water_01", "bullet/water_02", "bullet/water_03", "bullet/water_04",
             "bullet/water_05", "bullet/water_06",
+        )
+
+        // -------------------- bullet_sonic_boom --------------------
+        // 子弹破空音（见 client/sound/ClientSonicBoomHandler）：
+        // bullet_sonic_boom = 普通子弹（速度 > 15 格/tick），12 个随机变体
+        register(
+            "bullet_sonic_boom", "bullet_sonic_boom/bullet_sonic_boom_1",
+            "bullet_sonic_boom/bullet_sonic_boom_2", "bullet_sonic_boom/bullet_sonic_boom_3",
+            "bullet_sonic_boom/bullet_sonic_boom_4", "bullet_sonic_boom/bullet_sonic_boom_5",
+            "bullet_sonic_boom/bullet_sonic_boom_6", "bullet_sonic_boom/bullet_sonic_boom_7",
+            "bullet_sonic_boom/bullet_sonic_boom_8", "bullet_sonic_boom/bullet_sonic_boom_9",
+            "bullet_sonic_boom/bullet_sonic_boom_10", "bullet_sonic_boom/bullet_sonic_boom_11",
+            "bullet_sonic_boom/bullet_sonic_boom_12",
+        )
+        // sniper_sonic_boom = 狙击弹（速度 > 24 格/tick），8 个随机变体
+        register(
+            "sniper_sonic_boom", "bullet_sonic_boom/sniper_sonic_boom_1",
+            "bullet_sonic_boom/sniper_sonic_boom_2", "bullet_sonic_boom/sniper_sonic_boom_3",
+            "bullet_sonic_boom/sniper_sonic_boom_4", "bullet_sonic_boom/sniper_sonic_boom_5",
+            "bullet_sonic_boom/sniper_sonic_boom_6", "bullet_sonic_boom/sniper_sonic_boom_7",
+            "bullet_sonic_boom/sniper_sonic_boom_8",
         )
 
         // -------------------- c4 --------------------
@@ -306,6 +332,11 @@ class ModSoundProvider(output: PackOutput, existingFileHelper: ExistingFileHelpe
             "gun/k_98", "k_98_fire_1p", "k_98_fire_3p", "k_98_fire_1p_s", "k_98_fire_3p_s", "k_98_far",
             "k_98_veryfar", "k_98_loop", "k_98_bolt_close", "k_98_bolt_open", "k_98_clip", "k_98_clip_out",
             "k_98_first_bullet_in",
+        )
+
+        // -------------------- gun/hanyang_88 --------------------
+        group(
+            "gun/hanyang_88", "hanyang_88_fire_1p", "hanyang_88_fire_3p", "hanyang_88_bolt_open", "hanyang_88_bolt_close"
         )
 
         // -------------------- gun/m_1897 --------------------

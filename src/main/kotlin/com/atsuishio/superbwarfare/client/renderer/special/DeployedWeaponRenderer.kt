@@ -1,6 +1,7 @@
 package com.atsuishio.superbwarfare.client.renderer.special
 
 import com.atsuishio.superbwarfare.client.renderer.gun.GunMountContext
+import com.atsuishio.superbwarfare.client.renderer.gun.GunRenderContext
 import com.atsuishio.superbwarfare.event.DeployedWeaponHandler
 import com.atsuishio.superbwarfare.item.gun.GunItem
 import com.atsuishio.superbwarfare.tools.mc
@@ -41,6 +42,7 @@ object DeployedWeaponRenderer {
             poseStack.mulPose(Axis.XP.rotationDegrees(-player.getViewXRot(partialTick)))
 
             GunMountContext.enter()
+            GunRenderContext.push(player, player.mainArm)
             try {
                 mc.itemRenderer.renderStatic(
                     player,
@@ -55,6 +57,7 @@ object DeployedWeaponRenderer {
                     player.id
                 )
             } finally {
+                GunRenderContext.pop()
                 GunMountContext.exit()
             }
 
