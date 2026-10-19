@@ -116,9 +116,9 @@ class FuMO25Screen(pMenu: FuMO25Menu, pPlayerInventory: Inventory, pTitle: Compo
             val moveX = (entity.x - pos.x) / range * 74
             val moveZ = (entity.z - pos.z) / range * 74
 
-            RenderHelper.preciseBlit(
-                guiGraphics, TEXTURE, (centerX + moveX).toFloat(), (centerY + moveZ).toFloat(),
-                233f, 167f, 4f, 4f, 358f, 328f
+            RenderHelper.blit(
+                guiGraphics.pose(), TEXTURE, (centerX + moveX).toFloat(), (centerY + moveZ).toFloat(), 233f, 167f, 4f,
+                4f, 358f, 328f,
             )
         }
 

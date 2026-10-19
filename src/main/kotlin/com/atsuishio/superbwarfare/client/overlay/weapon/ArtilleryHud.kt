@@ -46,29 +46,12 @@ object ArtilleryHud {
         val yaw = -getYRotFromVector(vehicle.getBarrelVector(partialTick))
         val pitch = -getXRotFromVector(vehicle.getBarrelVector(partialTick))
 
-        RenderHelper.preciseBlit(
-            guiGraphics,
-            COMPASS,
-            screenWidth.toFloat() / 2 - 128,
-            10f,
-            128 + (64f / 45 * yaw.toFloat()),
-            0f,
-            256f,
-            16f,
-            512f,
-            16f
+        RenderHelper.blit(
+            guiGraphics.pose(), COMPASS, screenWidth.toFloat() / 2 - 128, 10f, 256f, 16f,
+            128 + (64f / 45 * yaw.toFloat()), 0f, 512f, 16f,
         )
-        RenderHelper.preciseBlit(
-            guiGraphics,
-            ROLL_IND_WHITE,
-            screenWidth.toFloat() / 2 - 4,
-            27f,
-            0f,
-            0f,
-            8f,
-            8f,
-            8f,
-            8f
+        RenderHelper.blit(
+            guiGraphics.pose(), ROLL_IND_WHITE, screenWidth.toFloat() / 2 - 4, 27f, 8f, 8f,
         )
 
         val width = Minecraft.getInstance().font.width(FormatTool.DECIMAL_FORMAT_1ZZ.format(yaw))
@@ -81,17 +64,9 @@ object ArtilleryHud {
             false
         )
 
-        RenderHelper.preciseBlit(
-            guiGraphics,
-            CANNON_PITCH,
-            screenWidth.toFloat() / 2 + 166,
-            screenHeight.toFloat() / 2 - 64,
-            0f,
-            0f,
-            8f,
+        RenderHelper.blit(
+            guiGraphics.pose(), CANNON_PITCH, screenWidth.toFloat() / 2 + 166, screenHeight.toFloat() / 2 - 64, 8f,
             128f,
-            8f,
-            128f
         )
 
         val widthP = Minecraft.getInstance().font.width(FormatTool.DECIMAL_FORMAT_1ZZ.format(pitch))
@@ -99,17 +74,9 @@ object ArtilleryHud {
         poseStack.pushPose()
 
         guiGraphics.pose().translate(0.0, pitch * 0.7, 0.0)
-        RenderHelper.preciseBlit(
-            guiGraphics,
-            CANNON_PITCH_IND,
-            screenWidth.toFloat() / 2 + 158,
-            screenHeight.toFloat() / 2 - 4,
-            0f,
-            0f,
+        RenderHelper.blit(
+            guiGraphics.pose(), CANNON_PITCH_IND, screenWidth.toFloat() / 2 + 158, screenHeight.toFloat() / 2 - 4, 8f,
             8f,
-            8f,
-            8f,
-            8f
         )
         guiGraphics.drawString(
             Minecraft.getInstance().font,

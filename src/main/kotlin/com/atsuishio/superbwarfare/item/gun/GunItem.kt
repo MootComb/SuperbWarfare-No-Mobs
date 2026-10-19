@@ -798,6 +798,11 @@ abstract class GunItem(properties: Properties) : Item(properties.stacksTo(1)), I
      */
     open fun onProjectileCreated(data: GunData, entity: Entity) {}
 
+    /** Shot-aware customization, with the original hook retained for existing weapons. */
+    open fun onProjectileCreated(parameters: ShootParameters, entity: Entity) {
+        onProjectileCreated(parameters.data, entity)
+    }
+
     /**
      * 服务端发射单发子弹
      */
@@ -1022,7 +1027,7 @@ abstract class GunItem(properties: Properties) : Item(properties.stacksTo(1)), I
         }
 
         // 进世界前的最后一道定制点，见 [onProjectileCreated]
-        onProjectileCreated(data, entity)
+        onProjectileCreated(parameters, entity)
 
         level.addFreshEntity(entity)
         return true

@@ -21,6 +21,9 @@
   ],
   "ScopeInfo": {
     "Type": "Scope",
+    "LensEdgeWidth": 0.2,
+    "LensTint": "#70AEE8",
+    "LensTintStrength": 0.1,
     "Zoom": {
       "Min": 1,
       "Max": 6,

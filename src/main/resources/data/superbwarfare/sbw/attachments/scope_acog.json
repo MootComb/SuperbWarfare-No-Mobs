@@ -13,6 +13,9 @@
   "Texture": "superbwarfare:textures/bedrock/attachment/scope_acog.png",
   "ScopeInfo": {
     "Type": "Scope",
+    "LensEdgeWidth": 0.35,
+    "LensTint": "#70AEE8",
+    "LensTintStrength": 0.2,
     "Zoom": {
       "Min": 4,
       "Max": 4,

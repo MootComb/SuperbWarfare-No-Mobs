@@ -101,7 +101,7 @@ object IFFOverlay : CommonOverlay("iff") {
                             icon,
                             (xf - 6).coerceIn(0f, (screenWidth - 12).toFloat()),
                             (yf - 6).coerceIn(0f, (screenHeight - 12).toFloat()),
-                            0f, 0f, 12f, 12f, 12f, 12f,
+                            12f, 12f, 0f, 0f, 12f, 12f,
                             0x7FFFAD
                         )
 
@@ -174,7 +174,7 @@ object IFFOverlay : CommonOverlay("iff") {
                             icon,
                             (xf - 6).coerceIn(0f, (screenWidth - 12).toFloat()),
                             (yf - 6).coerceIn(0f, (screenHeight - 12).toFloat()),
-                            0f, 0f, 12f, 12f, 12f, 12f,
+                            12f, 12f, 0f, 0f, 12f, 12f,
                             0xFFBD7F
                         )
 
@@ -227,7 +227,7 @@ object IFFOverlay : CommonOverlay("iff") {
                         guiGraphics, icon,
                         (xf - 6).coerceIn(0f, (screenWidth - 12).toFloat()),
                         (yf - 6).coerceIn(0f, (screenHeight - 12).toFloat()),
-                        0f, 0f, 12f, 12f, 12f, 12f,
+                        12f, 12f, 0f, 0f, 12f, 12f,
                         -1 // 白色 = 中立
                     )
 
@@ -359,7 +359,7 @@ object IFFOverlay : CommonOverlay("iff") {
                 guiGraphics, FRIENDLY_INDICATOR,
                 (xf - 6).coerceIn(0f, (screenWidth - 12).toFloat()),
                 (yf - 6).coerceIn(0f, (screenHeight - 12).toFloat()),
-                0f, 0f, 12f, 12f, 12f, 12f,
+                12f, 12f, 0f, 0f, 12f, 12f,
                 color
             )
         } else {

@@ -79,7 +79,7 @@ class AmmoHudResourceGroup(document: Document) : Element(document, TAG), BodyRen
                                                 AuiItemRenderRequest(pose, icon.stack, 0, false, null, 0f, false)
                                             )
                                             is AmmoHudResources.Icon.Texture -> RenderHelper.blit(
-                                                pose, icon.location, 0f, 0f, 0f, 0f, 16f, 16f, 16f, 16f, 1f
+                                                pose, icon.location, 0f, 0f, 16f, 16f
                                             )
                                         }
                                     } finally {

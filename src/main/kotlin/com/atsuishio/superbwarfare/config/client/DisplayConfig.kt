@@ -15,6 +15,13 @@ object DisplayConfig {
     }
 
     @JvmField
+    val LENS_ZOOM_RATIO = buildClientConfig {
+        comment("Share of the scope zoom handled inside the lens instead of the world FOV. 0 = all zoom from the world FOV, 1 = the world FOV stays untouched and the lens does all the work")
+        comment("开镜倍率中由镜内放大承担的比例。0 = 完全由世界 FOV 放大，1 = 世界视野不变、全部由镜片放大")
+        defineInRange("lens_zoom_ratio", 0.5, 0.0, 1.0)
+    }
+
+    @JvmField
     val VEHICLE_LOD_DISTANCE = buildClientConfig {
         comment("The global LOD distance for rendering vehicles. Set -1 to disable this config")
         comment("渲染载具低模的最小全局距离，设置为-1则不生效")

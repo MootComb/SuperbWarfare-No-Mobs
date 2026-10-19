@@ -64,6 +64,7 @@ class ModDamageTypeTagProvider(
             ModDamageTypes.LASER,
             ModDamageTypes.LASER_HEADSHOT,
             ModDamageTypes.SHOCK,
+            ModDamageTypes.GRAVITY,
             ModDamageTypes.BURN,
             ModDamageTypes.REPAIR_TOOL,
             ModDamageTypes.PROJECTILE_HIT,

@@ -15,6 +15,9 @@
   "ScopeInfo": {
     "Type": "Scope",
     "ZoomLengthScale": 0.5,
+    "LensEdgeWidth": 0.35,
+    "LensTint": "#70AEE8",
+    "LensTintStrength": 0.2,
     "Zoom": {
       "Min": 4,
       "Max": 4,

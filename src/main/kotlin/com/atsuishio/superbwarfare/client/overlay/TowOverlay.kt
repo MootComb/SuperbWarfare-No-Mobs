@@ -55,7 +55,7 @@ object TowOverlay : CommonOverlay("tow") {
             val k = ((screenWidth - i) / 2)
             val l = ((screenHeight - j) / 2)
             val w = i * 21 / 9
-            RenderHelper.preciseBlit(guiGraphics, SPYGLASS, k - (2 * w / 7), l, 0f, 0f, w, j, w, j)
+            RenderHelper.blit(guiGraphics.pose(), SPYGLASS, k - (2 * w / 7), l, w, j)
             poseStack.popPose()
         } else {
             scopeScale = 1f

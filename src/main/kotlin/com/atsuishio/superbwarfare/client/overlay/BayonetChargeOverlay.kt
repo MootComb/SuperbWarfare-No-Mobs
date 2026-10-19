@@ -99,23 +99,17 @@ object BayonetChargeOverlay : CommonOverlay("bayonet_charge") {
 
         // 底：深灰半透明
         RenderSystem.setShaderColor(0.2f, 0.2f, 0.22f, 0.7f * alpha)
-        RenderHelper.blit(
-            poseStack, TEXTURE,
-            posX, posY, WIDTH, HEIGHT,
-            0f, 0f, TEX_WIDTH, TEX_HEIGHT,
-            TEX_WIDTH, TEX_HEIGHT,
-            0xFFFFFF
+        RenderHelper.blitRegion(
+            poseStack, TEXTURE, posX, posY, WIDTH, HEIGHT, 0f, 0f, TEX_WIDTH, TEX_HEIGHT, TEX_WIDTH, TEX_HEIGHT,
+            argb = RenderHelper.opaque(0xFFFFFF),
         )
 
         // 填充：从左端（刀尖）裁同一张贴图
         if (rate > 0f) {
             RenderSystem.setShaderColor(1f, 1f, 1f, alpha)
-            RenderHelper.blit(
-                poseStack, TEXTURE,
-                posX, posY, WIDTH * rate, HEIGHT,
-                0f, 0f, TEX_WIDTH * rate, TEX_HEIGHT,
-                TEX_WIDTH, TEX_HEIGHT,
-                if (phase == Phase.COOLDOWN) 0xFF0000 else 0xFFFFFF
+            RenderHelper.blitRegion(
+                poseStack, TEXTURE, posX, posY, WIDTH * rate, HEIGHT, 0f, 0f, TEX_WIDTH * rate, TEX_HEIGHT, TEX_WIDTH,
+                TEX_HEIGHT, argb = RenderHelper.opaque(if (phase == Phase.COOLDOWN) 0xFF0000 else 0xFFFFFF),
             )
         }
 

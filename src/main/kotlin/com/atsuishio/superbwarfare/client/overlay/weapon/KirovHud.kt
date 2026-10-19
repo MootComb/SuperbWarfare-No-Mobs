@@ -90,32 +90,15 @@ object KirovHud {
                 guiGraphics.drawString(mc.font, component, 25, -11, 1, false)
                 poseStack.popPose()
 
-                RenderHelper.preciseBlit(
-                    guiGraphics,
-                    BOMB_SCOPE,
-                    x - 1.5f * i,
-                    y - 1.5f * j,
-                    0f,
-                    0f,
-                    (3 * i).toFloat(),
-                    (3 * j).toFloat(),
-                    (3 * i).toFloat(),
-                    (3 * j).toFloat()
+                RenderHelper.blit(
+                    guiGraphics.pose(), BOMB_SCOPE, x - 1.5f * i, y - 1.5f * j, (3 * i).toFloat(), (3 * j).toFloat(),
                 )
 
                 poseStack.pushPose()
                 poseStack.rotateAround(Axis.ZP.rotationDegrees(vehicle.getRoll(partialTick)), x, y, 0f)
-                RenderHelper.preciseBlit(
-                    guiGraphics,
-                    BOMB_SCOPE_PITCH,
-                    x - 1.5f * i,
-                    y - 1.5f * j - 4 * vehicle.getPitch(partialTick),
-                    0f,
-                    0f,
-                    (3 * i).toFloat(),
-                    (3 * j).toFloat(),
-                    (3 * i).toFloat(),
-                    (3 * j).toFloat()
+                RenderHelper.blit(
+                    guiGraphics.pose(), BOMB_SCOPE_PITCH, x - 1.5f * i,
+                    y - 1.5f * j - 4 * vehicle.getPitch(partialTick), (3 * i).toFloat(), (3 * j).toFloat(),
                 )
                 renderKillIndicatorDynamic(
                     guiGraphics,
@@ -166,17 +149,8 @@ object KirovHud {
 
                 poseStack.popPose()
 
-                RenderHelper.preciseBlit(
-                    guiGraphics,
-                    cross,
-                    xCross - 0.5f * size,
-                    yCross - 0.5f * size,
-                    0f,
-                    0f,
-                    size,
-                    size,
-                    size,
-                    size
+                RenderHelper.blit(
+                    guiGraphics.pose(), cross, xCross - 0.5f * size, yCross - 0.5f * size, size, size,
                 )
 
                 renderKillIndicatorDynamic(

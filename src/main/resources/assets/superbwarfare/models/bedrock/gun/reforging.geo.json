@@ -16,6 +16,11 @@
 					"pivot": [-0.25, 2.8, -18]
 				},
 				{
+					"name": "muzzle_pos",
+					"parent": "root",
+					"pivot": [-0.25, 0, -21.05]
+				},
+				{
 					"name": "xinpian",
 					"parent": "root",
 					"pivot": [-0.25, 0, -3.5],

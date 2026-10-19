@@ -14,6 +14,9 @@
   "ScopeInfo": {
     "Type": "Scope",
     "MovingZoom": 1.25,
+    "LensEdgeWidth": 0.35,
+    "LensTint": "#70AEE8",
+    "LensTintStrength": 0.2,
     "Zoom": {
       "Min": 3,
       "Max": 3,

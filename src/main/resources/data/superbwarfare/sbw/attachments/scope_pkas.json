@@ -18,6 +18,9 @@
   "Texture": "superbwarfare:textures/bedrock/attachment/scope_pkas.png",
   "ScopeInfo": {
     "Type": "Scope",
+    "LensEdgeWidth": 0.3,
+    "LensTint": "#70AEE8",
+    "LensTintStrength": 0.25,
     "Zoom": {
       "Min": 1.25,
       "Max": 1.25,

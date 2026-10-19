@@ -23,14 +23,14 @@ class WrenchHealthElement(maxHealth: Float, health: Float) : Element() {
         return Vec2(8f + font.width(this.text), 10f)
     }
 
-    override fun render(guiGraphics: GuiGraphics?, x: Float, y: Float, maxX: Float, maxY: Float) {
+    override fun render(guiGraphics: GuiGraphics, x: Float, y: Float, maxX: Float, maxY: Float) {
         RenderSystem.setShaderColor(1f, 1f, 1f, OverlayRenderer.alpha)
         RenderSystem.setShaderTexture(0, WRENCH_ICON)
         RenderSystem.enableBlend()
         RenderSystem.defaultBlendFunc()
 
         // 扳手图标
-        RenderHelper.preciseBlit(guiGraphics, WRENCH_ICON, x + 2, y, 0f, 0f, 8f, 8f, 8f, 8f)
+        RenderHelper.blit(guiGraphics.pose(), WRENCH_ICON, x + 2, y, 8f, 8f)
         // 文字
         DisplayHelper.INSTANCE.drawText(guiGraphics, this.text, x + 6, y, IThemeHelper.get().getNormalColor())
 

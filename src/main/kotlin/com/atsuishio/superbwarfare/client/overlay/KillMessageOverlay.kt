@@ -183,17 +183,8 @@ object KillMessageOverlay : CommonOverlay("kill_message") {
             val damageTypeIcon: ResourceLocation? = getDamageTypeIcon(record)
             if (damageTypeIcon != null) {
                 currentPosX -= 18f
-                RenderHelper.preciseBlit(
-                    guiGraphics,
-                    damageTypeIcon,
-                    currentPosX,
-                    top - 2,
-                    0f,
-                    0f,
-                    12f,
-                    12f,
-                    12f,
-                    12f
+                RenderHelper.blit(
+                    guiGraphics.pose(), damageTypeIcon, currentPosX, top - 2, 12f, 12f,
                 )
             }
 
@@ -201,17 +192,8 @@ object KillMessageOverlay : CommonOverlay("kill_message") {
             val currentWeaponIcon: ResourceLocation? = getWeaponIcon(record)
             if (currentWeaponIcon != null) {
                 currentPosX -= 36f
-                RenderHelper.preciseBlit(
-                    guiGraphics,
-                    currentWeaponIcon,
-                    currentPosX,
-                    top,
-                    0f,
-                    0f,
-                    32f,
-                    8f,
-                    -32f,
-                    8f
+                RenderHelper.blit(
+                    guiGraphics.pose(), currentWeaponIcon, currentPosX, top, 32f, 8f, 0f, 0f, -32f, 8f,
                 )
             }
 
@@ -258,17 +240,8 @@ object KillMessageOverlay : CommonOverlay("kill_message") {
             // 渲染武器图标
             val currentWeaponIcon: ResourceLocation? = getWeaponIcon(record)
             if (currentWeaponIcon != null) {
-                RenderHelper.preciseBlit(
-                    guiGraphics,
-                    currentWeaponIcon,
-                    currentPosX,
-                    top,
-                    0f,
-                    0f,
-                    32f,
-                    8f,
-                    -32f,
-                    8f
+                RenderHelper.blit(
+                    guiGraphics.pose(), currentWeaponIcon, currentPosX, top, 32f, 8f, 0f, 0f, -32f, 8f,
                 )
                 currentPosX += 36f
             }
@@ -276,17 +249,8 @@ object KillMessageOverlay : CommonOverlay("kill_message") {
             // 渲染伤害类型图标
             val damageTypeIcon: ResourceLocation? = getDamageTypeIcon(record)
             if (damageTypeIcon != null) {
-                RenderHelper.preciseBlit(
-                    guiGraphics,
-                    damageTypeIcon,
-                    currentPosX,
-                    top - 2,
-                    0f,
-                    0f,
-                    12f,
-                    12f,
-                    12f,
-                    12f
+                RenderHelper.blit(
+                    guiGraphics.pose(), damageTypeIcon, currentPosX, top - 2, 12f, 12f,
                 )
                 currentPosX += 18f
             }

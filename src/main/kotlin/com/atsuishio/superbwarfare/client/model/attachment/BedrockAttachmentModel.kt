@@ -6,7 +6,10 @@ import com.atsuishio.superbwarfare.client.renderer.ammo.AmmoDisplayRenderer
 import com.atsuishio.superbwarfare.client.renderer.ammo.AmmoDisplayRenderer.AmmoBarState
 import com.atsuishio.superbwarfare.client.renderer.ammo.AmmoDisplayRenderer.AmmoText
 import com.atsuishio.superbwarfare.client.renderer.ammo.AmmoReadout
+import com.atsuishio.superbwarfare.client.renderer.scope.ScopeLensShader
 import com.atsuishio.superbwarfare.client.renderer.scope.ScopeStencilRenderHelper
+import com.atsuishio.superbwarfare.compat.oculus.OculusCompat
+import com.atsuishio.superbwarfare.config.client.DisplayConfig
 import com.atsuishio.superbwarfare.data.attachment.ScopeMode
 import com.atsuishio.superbwarfare.data.attachment.ScopeType
 import com.atsuishio.superbwarfare.event.ClientEventHandler
@@ -78,6 +81,8 @@ class BedrockAttachmentModel(internal val baseModel: TreeBedrockModel) {
     private val ocularRingIndices = mutableMapOf<Int, Int>()
     private val ocularIndicesByGroup = mutableMapOf<Int, List<Int>>()
     private val isScopeOcularByGroup = mutableMapOf<Int, List<Boolean>>()
+    private val shaderIndicesByGroup = mutableMapOf<Int, Int>()
+    private val surfaceRadiusCache = mutableMapOf<Int, Float>()
     private val modeScopeBodyGroups = mutableMapOf<Int, List<Int>>()
     private val divisionGroups = mutableMapOf<String, List<Int>>()
     private val illuminatedBoneIndices: IntArray = baseModel.bones()
@@ -123,6 +128,14 @@ class BedrockAttachmentModel(internal val baseModel: TreeBedrockModel) {
             if (!matcher.matches()) continue
             val num = matcher.group(1)?.removePrefix("_")?.toIntOrNull() ?: 0
             ocularRingIndices[num] = bone.index()
+        }
+
+        val shaderPattern = Pattern.compile("^${SHADER_NODE}(_(\\d+))?$")
+        for (bone in baseModel.bones()) {
+            val matcher = shaderPattern.matcher(bone.name())
+            if (!matcher.matches()) continue
+            val num = matcher.group(2)?.toIntOrNull() ?: 0
+            shaderIndicesByGroup[num] = bone.index()
         }
 
         // Unnumbered scope_body stays common; scope_body_N is selected per mode.
@@ -298,6 +311,11 @@ class BedrockAttachmentModel(internal val baseModel: TreeBedrockModel) {
 
     fun needsStencil(info: ScopeMode?): Boolean =
         info != null && ocularIndicesFor(info).isNotEmpty()
+
+    fun hasLensSurface(info: ScopeMode): Boolean {
+        val index = shaderBoneIndex(info)
+        return index >= 0 && surfaceRadius(index) > 1.0e-4f
+    }
 
     fun renderWithStencil(
         poseStack: PoseStack,
@@ -498,13 +516,15 @@ class BedrockAttachmentModel(internal val baseModel: TreeBedrockModel) {
         if (ClientEventHandler.zoomTime < DIVISION_MIN_ZOOM) return
 
         RenderSystem.disableDepthTest()
-        for (i in divisions.indices) {
-            RenderSystem.stencilFunc(GL11.GL_EQUAL, i + 1, 0xFF)
-            renderBoneImmediate(divisions[i], poseStack, bufferSource, quadType, triangleType, light)
-            // Same stencil value and depth state as the reticle it sits next to.
-            for (text in texts) {
-                if (text.divisionIndex == divisions[i]) {
-                    ammo.renderText(text, poseStack, bufferSource)
+        withShaderBonesHidden {
+            for (i in divisions.indices) {
+                RenderSystem.stencilFunc(GL11.GL_EQUAL, i + 1, 0xFF)
+                renderBoneImmediate(divisions[i], poseStack, bufferSource, quadType, triangleType, light)
+                // Same stencil value and depth state as the reticle it sits next to.
+                for (text in texts) {
+                    if (text.divisionIndex == divisions[i]) {
+                        ammo.renderText(text, poseStack, bufferSource)
+                    }
                 }
             }
         }
@@ -621,15 +641,44 @@ class BedrockAttachmentModel(internal val baseModel: TreeBedrockModel) {
             if (selective && !isScopeOcular[i]) {
                 if (!divisionDue) continue
                 RenderSystem.stencilFunc(GL11.GL_EQUAL, i + 1, 0xFF)
-                renderBoneImmediate(divisions[i], poseStack, bufferSource, quadType, triangleType, light)
+                withShaderBonesHidden {
+                    renderBoneImmediate(divisions[i], poseStack, bufferSource, quadType, triangleType, light)
+                }
             } else {
                 RenderSystem.stencilFunc(GL11.GL_EQUAL, i + 1, 0xFF)
                 renderBoneImmediate(ocularIndices[i], poseStack, bufferSource, quadType, triangleType, light)
 
-                if (!divisionDue) continue
                 val b = (i + 1).inv() and 0xFF
+                val shaderBone = shaderBoneIndex(info)
+                val lensSurface = if (shaderBone >= 0) getLensSurface(poseStack, shaderBone) else null
                 RenderSystem.stencilFunc(GL11.GL_EQUAL, b, 0xFF)
-                renderBoneImmediate(divisions[i], poseStack, bufferSource, quadType, triangleType, light)
+                if (!OculusCompat.isShaderPackActive() && shaderBone >= 0 && lensSurface != null) {
+                    val magnification = if (DisplayConfig.LENS_ZOOM_RATIO.get() > 0.0) {
+                        val progress = ClientEventHandler.aimingProgress(ClientEventHandler.zoomTime)
+                        1f + progress * (ClientEventHandler.customZoom.coerceAtLeast(1.0) - 1.0).toFloat()
+                    } else {
+                        1f
+                    }
+                    val tint = info.lensTint
+                    if (ScopeLensShader.beginSurface(
+                            lensSurface.x(), lensSurface.y(), lensSurface.z(),
+                            info.lensEdgeWidth, magnification,
+                            tint?.get() ?: 0xFFFFFF,
+                            if (tint == null) 0f else info.lensTintStrength
+                        )
+                    ) {
+                        renderLensSurface(poseStack, shaderBone, light)
+                        ScopeLensShader.endSurface()
+                    } else {
+                        renderLensFallback(poseStack, shaderBone, info.lensEdgeWidth)
+                    }
+                }
+
+                if (!divisionDue) continue
+                RenderSystem.stencilFunc(GL11.GL_EQUAL, b, 0xFF)
+                withShaderBonesHidden {
+                    renderBoneImmediate(divisions[i], poseStack, bufferSource, quadType, triangleType, light)
+                }
                 for (text in texts) {
                     if (text.divisionIndex == divisions[i]) {
                         ammo.renderText(text, poseStack, bufferSource)
@@ -668,6 +717,10 @@ class BedrockAttachmentModel(internal val baseModel: TreeBedrockModel) {
         // Sight optics model their lens without an ocular_ring.
         if (info.type == ScopeType.SIGHT) return -1
         return ocularRingIndices[info.index] ?: ocularRingIndices[0] ?: -1
+    }
+
+    private fun shaderBoneIndex(info: ScopeMode): Int {
+        return shaderIndicesByGroup[info.index] ?: shaderIndicesByGroup[0] ?: -1
     }
 
     private fun renderRemaining(
@@ -731,6 +784,172 @@ class BedrockAttachmentModel(internal val baseModel: TreeBedrockModel) {
         for (text in texts) {
             if (text.divisionIndex < 0) {
                 ammo.renderText(text, poseStack, bufferSource)
+            }
+        }
+    }
+
+    private fun surfaceRadius(boneIndex: Int): Float {
+        return surfaceRadiusCache.getOrPut(boneIndex) {
+            val cubeTransform = Matrix4f()
+            val point = Vector3f()
+            var maxSquared = 0f
+            for (cube in baseModel.bone(boneIndex).cubes()) {
+                cubeTransform.identity()
+                val pivot = cube.pivot()
+                val rotation = cube.rotation()
+                if (pivot != null && rotation != null) {
+                    cubeTransform.translate(pivot[0], pivot[1], pivot[2])
+                    cubeTransform.rotate(rotation)
+                    cubeTransform.translate(-pivot[0], -pivot[1], -pivot[2])
+                }
+                for (corner in 0 until 8) {
+                    point.set(
+                        cube.x() + if (corner and 1 != 0) cube.width() else 0f,
+                        cube.y() + if (corner and 2 != 0) cube.height() else 0f,
+                        cube.z() + if (corner and 4 != 0) cube.depth() else 0f
+                    ).mulPosition(cubeTransform)
+                    val squared = point.x * point.x + point.y * point.y
+                    if (squared > maxSquared) maxSquared = squared
+                }
+            }
+            Mth.sqrt(maxSquared)
+        }
+    }
+
+    private fun getLensSurface(poseStack: PoseStack, boneIndex: Int): Vector3f? {
+        val radius = surfaceRadius(boneIndex)
+        if (radius <= 1.0e-4f) return null
+
+        val matrix = Matrix4f(poseStack.last().pose()).mul(instance.getGlobalTransform(boneIndex))
+        val center = matrix.getTranslation(Vector3f())
+        val rim = Vector3f(radius, 0f, 0f).mulPosition(matrix)
+        val modelView = RenderSystem.getModelViewMatrix()
+        center.mulPosition(modelView)
+        rim.mulPosition(modelView)
+
+        val dx = rim.x - center.x
+        val dy = rim.y - center.y
+        val viewRadius = Mth.sqrt(dx * dx + dy * dy)
+        if (viewRadius <= 1.0e-4f) return null
+
+        return Vector3f(center.x, center.y, viewRadius)
+    }
+
+    // The lens is one flat disc in the shader bone's own frame. Rendering the bone's cubes instead
+    // would shade every overlapping cube separately, so the vignette alpha compounds into visible
+    // seams wherever two bars cross.
+    private fun renderLensSurface(poseStack: PoseStack, boneIndex: Int, light: Int) {
+        val radius = surfaceRadius(boneIndex)
+        if (radius <= 1.0e-4f) return
+
+        poseStack.pushPose()
+        instance.mulGlobalTransform(poseStack, boneIndex)
+        val matrix = poseStack.last().pose()
+
+        val builder = Tesselator.getInstance().builder
+        builder.begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.NEW_ENTITY)
+        lensVertex(builder, matrix, 0f, 0f, light)
+        for (i in 0..LENS_SEGMENTS) {
+            val angle = i * ((Math.PI * 2.0) / LENS_SEGMENTS)
+            lensVertex(
+                builder, matrix,
+                Mth.cos(angle.toFloat()) * radius,
+                Mth.sin(angle.toFloat()) * radius,
+                light
+            )
+        }
+        BufferUploader.drawWithShader(builder.end())
+        poseStack.popPose()
+    }
+
+    // Shader-pack path: no custom core shader, so the vignette is baked into vertex colours.
+    // Rings are spaced quadratically to put more geometry where the falloff is steepest.
+    private fun renderLensFallback(poseStack: PoseStack, boneIndex: Int, edgeWidth: Float) {
+        val radius = surfaceRadius(boneIndex)
+        if (radius <= 1.0e-4f) return
+
+        RenderSystem.setShader(GameRenderer::getPositionColorShader)
+        RenderSystem.enableBlend()
+        RenderSystem.defaultBlendFunc()
+        RenderSystem.disableDepthTest()
+        RenderSystem.depthMask(false)
+
+        poseStack.pushPose()
+        instance.mulGlobalTransform(poseStack, boneIndex)
+        val matrix = poseStack.last().pose()
+
+        val builder = Tesselator.getInstance().builder
+        builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR)
+        var innerFraction = 0f
+        var innerAlpha = ScopeLensShader.edgeAlpha(0f, edgeWidth)
+        for (ring in 1..LENS_FALLBACK_RINGS) {
+            val t = ring.toFloat() / LENS_FALLBACK_RINGS
+            val outerFraction = 1f - (1f - t) * (1f - t)
+            val outerAlpha = ScopeLensShader.edgeAlpha(outerFraction, edgeWidth)
+            val innerRadius = radius * innerFraction
+            val outerRadius = radius * outerFraction
+            for (segment in 0 until LENS_SEGMENTS) {
+                val angle0 = segment * LENS_STEP
+                val angle1 = angle0 + LENS_STEP
+                val cos0 = Mth.cos(angle0)
+                val sin0 = Mth.sin(angle0)
+                val cos1 = Mth.cos(angle1)
+                val sin1 = Mth.sin(angle1)
+                lensFallbackVertex(builder, matrix, innerRadius * cos0, innerRadius * sin0, innerAlpha)
+                lensFallbackVertex(builder, matrix, outerRadius * cos0, outerRadius * sin0, outerAlpha)
+                lensFallbackVertex(builder, matrix, outerRadius * cos1, outerRadius * sin1, outerAlpha)
+                lensFallbackVertex(builder, matrix, innerRadius * cos1, innerRadius * sin1, innerAlpha)
+            }
+            innerFraction = outerFraction
+            innerAlpha = outerAlpha
+        }
+        BufferUploader.drawWithShader(builder.end())
+        poseStack.popPose()
+
+        RenderSystem.depthMask(true)
+        RenderSystem.enableDepthTest()
+    }
+
+    private fun lensFallbackVertex(
+        builder: VertexConsumer,
+        matrix: Matrix4f,
+        x: Float,
+        y: Float,
+        alpha: Float
+    ) {
+        builder.vertex(matrix, x, y, 0f)
+            .color(0f, 0f, 0f, alpha)
+            .endVertex()
+    }
+
+    private fun lensVertex(builder: VertexConsumer, matrix: Matrix4f, x: Float, y: Float, light: Int) {
+        builder.vertex(matrix, x, y, 0f)
+            .color(255, 255, 255, 255)
+            .uv(0f, 0f)
+            .overlayCoords(OverlayTexture.NO_OVERLAY)
+            .uv2(light)
+            .normal(0f, 0f, 1f)
+            .endVertex()
+    }
+
+    private fun withShaderBonesHidden(action: () -> Unit) {
+        if (shaderIndicesByGroup.isEmpty()) {
+            action()
+            return
+        }
+
+        val bones = shaderIndicesByGroup.values.mapNotNull { instance.getBone(it) }
+        val originalVisibility = BooleanArray(bones.size)
+        for (i in bones.indices) {
+            originalVisibility[i] = bones[i].visible
+            bones[i].visible = false
+        }
+
+        try {
+            action()
+        } finally {
+            for (i in bones.indices) {
+                bones[i].visible = originalVisibility[i]
             }
         }
     }
@@ -851,6 +1070,10 @@ class BedrockAttachmentModel(internal val baseModel: TreeBedrockModel) {
 
         internal const val DIVISION_MIN_ZOOM = 0.4
 
+        private const val LENS_SEGMENTS = 90
+        private const val LENS_FALLBACK_RINGS = 20
+        private const val LENS_STEP = (Math.PI * 2.0 / LENS_SEGMENTS).toFloat()
+
         private const val SCOPE_BODY_NODE = "scope_body"
         private const val OCULAR_RING_NODE = "ocular_ring"
         private const val DIVISION_NODE = "division"
@@ -858,6 +1081,7 @@ class BedrockAttachmentModel(internal val baseModel: TreeBedrockModel) {
         private const val OCULAR_NODE = "ocular"
         private const val OCULAR_SIGHT_NODE = "ocular_sight"
         private const val OCULAR_SCOPE_NODE = "ocular_scope"
+        private const val SHADER_NODE = "shader"
         private const val ILLUMINATED_SUFFIX = "_illuminated"
 
         /** 手部骨骼名，与 `GeoGunModel.LEFT_HAND_BONE` / `RIGHT_HAND_BONE` 保持一致 */

@@ -18,6 +18,9 @@
         "Index": 1,
         "Type": "Scope",
         "ViewRadiusModifier": 1.0,
+        "LensEdgeWidth": 0.5,
+        "LensTint": "#E8C070",
+        "LensTintStrength": 0.3,
         "Zoom": {
           "Min": 3.5,
           "Max": 3.5,

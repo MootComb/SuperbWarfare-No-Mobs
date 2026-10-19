@@ -68,24 +68,14 @@ class CompassHud {
         // 绘制旋转表盘——表盘跟随载具方向转动
         poseStack.pushPose()
         poseStack.rotateAround(Axis.ZP.rotationDegrees(-vehicle.getYaw(partialTick) - 180), centerX, centerY, 0f)
-        RenderHelper.preciseBlit(
-            guiGraphics,
-            baseTexture,
-            actualX, actualY,
-            0f, 0f,
-            size, size,
-            size, size
+        RenderHelper.blit(
+            guiGraphics.pose(), baseTexture, actualX, actualY, size, size,
         )
         poseStack.popPose()
 
         // 绘制固定指针——指针始终指向上方（正北）
-        RenderHelper.preciseBlit(
-            guiGraphics,
-            needleTexture,
-            actualX, actualY,
-            0f, 0f,
-            size, size,
-            size, size
+        RenderHelper.blit(
+            guiGraphics.pose(), needleTexture, actualX, actualY, size, size,
         )
     }
 }

@@ -37,7 +37,7 @@
       "Legshot": 0.75
     }
   ],
-  "DefaultFireMode": "Auto",
+  "DefaultFireMode": "Charge",
   "NormalReloadTime": 54,
   "EmptyReloadTime": 71,
   "BypassesArmor": 0.8,
@@ -48,7 +48,16 @@
     "Type": "Rifle"
   },
   "AvailableFireModes": [
-    "Auto"
+    {
+      "Mode": "Charge",
+      "Name": "HoldAuto",
+      "Charge": {
+        "Duration": 20,
+        "Trigger": "AutoAtFull",
+        "PowerMode": "Full",
+        "MinPower": 1.0
+      }
+    }
   ],
   "AvailableAttachments": {
     "Charm": [
@@ -56,7 +65,33 @@
     ]
   },
   "AmmoType": [
-    "@RifleAmmo",
+    {
+      "Ammo": "hunger",
+      "Override": {
+        "Projectile": {
+          "Type": "superbwarfare:reforging_gravity_ball",
+          "Data": {
+            "Owner": "@sbw:owner",
+            "AttackRadius": 8.0,
+            "CoreRadius": 0.75,
+            "ActivationDelay": 10,
+            "ExpansionDuration": 20,
+            "FieldDuration": 100,
+            "DamageInterval": 10,
+            "PullStrength": 0.6
+          }
+        },
+        "Magazine": 0,
+        "AmmoCostPerShoot": 2,
+        "Damage": 12,
+        "ExplosionDamage": 80,
+        "Velocity": 1.2,
+        "Gravity": 0.04,
+        "ProjectileLife": 200,
+        "RPM": 60,
+        "ClearHoldProgressAfterShoot": true
+      }
+    },
     {
       "Ammo": "exp",
       "Override": {
@@ -76,20 +111,39 @@
         "Gravity": 0,
         "ProjectileLife": 200,
         "RPM": 60,
-        "DefaultFireMode": "Charge",
+        "ClearHoldProgressAfterShoot": true
+      }
+    },
+    {
+      "Ammo": "health",
+      "Override": {
+        "Projectile": {
+          "Type": "superbwarfare:reforging_laser",
+          "Data": {
+            "Owner": "@sbw:owner"
+          }
+        },
+        "Range": 128,
+        "Magazine": 0,
+        "AmmoCostPerShoot": 4,
+        "Damage": 120,
+        "Velocity": 1,
+        "Gravity": 0,
+        "ProjectileLife": 8,
+        "RPM": 60,
+        "ClearHoldProgressAfterShoot": true,
         "AvailableFireModes": [
           {
             "Mode": "Charge",
-            "Name": "HoldAuto",
+            "Name": "HoldManual",
             "Charge": {
-              "Duration": 20,
-              "Trigger": "AutoAtFull",
-              "PowerMode": "Full",
-              "MinPower": 1.0
+              "Duration": 40,
+              "Trigger": "OnRelease",
+              "PowerMode": "Current",
+              "MinPower": 0.25
             }
           }
-        ],
-        "ClearHoldProgressAfterShoot": true
+        ]
       }
     }
   ],

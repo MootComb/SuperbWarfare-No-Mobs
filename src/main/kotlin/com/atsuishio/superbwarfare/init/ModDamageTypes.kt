@@ -24,6 +24,7 @@ object ModDamageTypes {
     @JvmField val LASER_HEADSHOT = registerDamageType("laser_headshot")
     @JvmField val BURN = registerDamageType("burn")
     @JvmField val SHOCK = registerDamageType("shock")
+    @JvmField val GRAVITY = registerDamageType("gravity")
     @JvmField val PROJECTILE_HIT = registerDamageType("projectile_hit")
     @JvmField val PROJECTILE_HIT_HEADSHOT = registerDamageType("projectile_hit_headshot")
     @JvmField val PROJECTILE_EXPLOSION = registerDamageType("projectile_explosion")
@@ -71,6 +72,11 @@ object ModDamageTypes {
     @JvmStatic
     fun causeShockDamage(registryAccess: RegistryAccess, attacker: Entity?): DamageSource {
         return DamageMessages(registryAccess.registry(Registries.DAMAGE_TYPE).get().getHolderOrThrow(SHOCK), attacker)
+    }
+
+    @JvmStatic
+    fun causeGravityDamage(registryAccess: RegistryAccess, directEntity: Entity?, attacker: Entity?): DamageSource {
+        return DamageMessages(registryAccess.registry(Registries.DAMAGE_TYPE).get().getHolderOrThrow(GRAVITY), directEntity, attacker)
     }
 
     @JvmStatic

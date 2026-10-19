@@ -113,88 +113,30 @@ object VehicleHudOverlay : CommonOverlay("vehicle_hud") {
             val energy = entity.energy.toFloat()
             val maxEnergy = entity.maxEnergy.toFloat()
 
-            RenderHelper.preciseBlit(
-                guiGraphics,
-                ENERGY,
-                10f,
-                (screenHeight - 22 - compatHeight).toFloat(),
-                100f,
-                0f,
-                0f,
-                8f,
-                8f,
-                8f,
-                8f
+            RenderHelper.blit(
+                guiGraphics.pose(), ENERGY, 10f, (screenHeight - 22 - compatHeight).toFloat(), 8f, 8f, z = 100f,
             )
-            RenderHelper.preciseBlit(
-                guiGraphics,
-                VALUE_FRAME,
-                20f,
-                (screenHeight - 21 - compatHeight).toFloat(),
-                100f,
-                0f,
-                0f,
-                60f,
-                6f,
-                60f,
-                6f
+            RenderHelper.blit(
+                guiGraphics.pose(), VALUE_FRAME, 20f, (screenHeight - 21 - compatHeight).toFloat(), 60f, 6f, z = 100f,
             )
-            RenderHelper.preciseBlit(
-                guiGraphics,
-                VALUE_BAR,
-                20f,
-                (screenHeight - 21 - compatHeight).toFloat(),
-                100f,
-                0f,
-                0f,
-                (60 * energy / maxEnergy).toInt().toFloat(),
-                6f,
-                60f,
-                6f
+            RenderHelper.blit(
+                guiGraphics.pose(), VALUE_BAR, 20f, (screenHeight - 21 - compatHeight).toFloat(),
+                (60 * energy / maxEnergy).toInt().toFloat(), 6f, 0f, 0f, 60f, 6f, z = 100f,
             )
         }
 
         val health = entity.health
         val maxHealth = entity.getMaxHealth()
 
-        RenderHelper.preciseBlit(
-            guiGraphics,
-            ARMOR,
-            10f,
-            (screenHeight - 13 - compatHeight).toFloat(),
-            100f,
-            0f,
-            0f,
-            8f,
-            8f,
-            8f,
-            8f
+        RenderHelper.blit(
+            guiGraphics.pose(), ARMOR, 10f, (screenHeight - 13 - compatHeight).toFloat(), 8f, 8f, z = 100f,
         )
-        RenderHelper.preciseBlit(
-            guiGraphics,
-            VALUE_FRAME,
-            20f,
-            (screenHeight - 12 - compatHeight).toFloat(),
-            100f,
-            0f,
-            0f,
-            60f,
-            6f,
-            60f,
-            6f
+        RenderHelper.blit(
+            guiGraphics.pose(), VALUE_FRAME, 20f, (screenHeight - 12 - compatHeight).toFloat(), 60f, 6f, z = 100f,
         )
-        RenderHelper.preciseBlit(
-            guiGraphics,
-            VALUE_BAR,
-            20f,
-            (screenHeight - 12 - compatHeight).toFloat(),
-            100f,
-            0f,
-            0f,
-            (60 * health / maxHealth).toInt().toFloat(),
-            6f,
-            60f,
-            6f
+        RenderHelper.blit(
+            guiGraphics.pose(), VALUE_BAR, 20f, (screenHeight - 12 - compatHeight).toFloat(),
+            (60 * health / maxHealth).toInt().toFloat(), 6f, 0f, 0f, 60f, 6f, z = 100f,
         )
 
         renderWeaponInfo(guiGraphics, entity, screenWidth, screenHeight)
@@ -220,7 +162,7 @@ object VehicleHudOverlay : CommonOverlay("vehicle_hud") {
     }
 
     @JvmStatic
-    fun renderKillIndicator(guiGraphics: GuiGraphics?, w: Float, h: Float) {
+    fun renderKillIndicator(guiGraphics: GuiGraphics, w: Float, h: Float) {
         if (MiscConfig.HIDE_COMBAT_HUD.get()) return
 
         val posX = w / 2f - 7.5f + (2 * (Math.random() - 0.5f)).toFloat()
@@ -228,15 +170,15 @@ object VehicleHudOverlay : CommonOverlay("vehicle_hud") {
         val rate = (40 - CrossHairOverlay.killIndicator * 5) / 5.5f
 
         if (CrossHairOverlay.hitIndicator > 0) {
-            RenderHelper.preciseBlit(guiGraphics, HIT_MARKER, posX, posY, 0f, 0f, 16f, 16f, 16f, 16f)
+            RenderHelper.blit(guiGraphics.pose(), HIT_MARKER, posX, posY, 16f, 16f)
         }
 
         if (CrossHairOverlay.vehicleIndicator > 0) {
-            RenderHelper.preciseBlit(guiGraphics, HIT_MARKER_VEHICLE, posX, posY, 0f, 0f, 16f, 16f, 16f, 16f)
+            RenderHelper.blit(guiGraphics.pose(), HIT_MARKER_VEHICLE, posX, posY, 16f, 16f)
         }
 
         if (CrossHairOverlay.headIndicator > 0) {
-            RenderHelper.preciseBlit(guiGraphics, HEADSHOT_MARKER, posX, posY, 0f, 0f, 16f, 16f, 16f, 16f)
+            RenderHelper.blit(guiGraphics.pose(), HEADSHOT_MARKER, posX, posY, 16f, 16f)
         }
 
         if (CrossHairOverlay.killIndicator > 0) {
@@ -245,29 +187,29 @@ object VehicleHudOverlay : CommonOverlay("vehicle_hud") {
             val posX2 = w / 2f - 7.5f + 2 - rate
             val posY2 = h / 2f - 7.5f + 2 - rate
 
-            RenderHelper.preciseBlit(guiGraphics, KILL_MARKER_1, posX1, posY1, 0f, 0f, 16f, 16f, 16f, 16f)
-            RenderHelper.preciseBlit(guiGraphics, KILL_MARKER_2, posX2, posY1, 0f, 0f, 16f, 16f, 16f, 16f)
-            RenderHelper.preciseBlit(guiGraphics, KILL_MARKER_3, posX1, posY2, 0f, 0f, 16f, 16f, 16f, 16f)
-            RenderHelper.preciseBlit(guiGraphics, KILL_MARKER_4, posX2, posY2, 0f, 0f, 16f, 16f, 16f, 16f)
+            RenderHelper.blit(guiGraphics.pose(), KILL_MARKER_1, posX1, posY1, 16f, 16f)
+            RenderHelper.blit(guiGraphics.pose(), KILL_MARKER_2, posX2, posY1, 16f, 16f)
+            RenderHelper.blit(guiGraphics.pose(), KILL_MARKER_3, posX1, posY2, 16f, 16f)
+            RenderHelper.blit(guiGraphics.pose(), KILL_MARKER_4, posX2, posY2, 16f, 16f)
         }
     }
 
     @JvmStatic
-    fun renderKillIndicatorDynamic(guiGraphics: GuiGraphics?, posX: Float, posY: Float) {
+    fun renderKillIndicatorDynamic(guiGraphics: GuiGraphics, posX: Float, posY: Float) {
         if (MiscConfig.HIDE_COMBAT_HUD.get()) return
 
         val rate = (40 - CrossHairOverlay.killIndicator * 5) / 5.5f
 
         if (CrossHairOverlay.hitIndicator > 0) {
-            RenderHelper.preciseBlit(guiGraphics, HIT_MARKER, posX, posY, 0f, 0f, 16f, 16f, 16f, 16f)
+            RenderHelper.blit(guiGraphics.pose(), HIT_MARKER, posX, posY, 16f, 16f)
         }
 
         if (CrossHairOverlay.vehicleIndicator > 0) {
-            RenderHelper.preciseBlit(guiGraphics, HIT_MARKER_VEHICLE, posX, posY, 0f, 0f, 16f, 16f, 16f, 16f)
+            RenderHelper.blit(guiGraphics.pose(), HIT_MARKER_VEHICLE, posX, posY, 16f, 16f)
         }
 
         if (CrossHairOverlay.headIndicator > 0) {
-            RenderHelper.preciseBlit(guiGraphics, HEADSHOT_MARKER, posX, posY, 0f, 0f, 16f, 16f, 16f, 16f)
+            RenderHelper.blit(guiGraphics.pose(), HEADSHOT_MARKER, posX, posY, 16f, 16f)
         }
 
         if (CrossHairOverlay.killIndicator > 0) {
@@ -276,10 +218,10 @@ object VehicleHudOverlay : CommonOverlay("vehicle_hud") {
             val posX2 = posX + 2 - rate
             val posY2 = posY + 2 - rate
 
-            RenderHelper.preciseBlit(guiGraphics, KILL_MARKER_1, posX1, posY1, 0f, 0f, 16f, 16f, 16f, 16f)
-            RenderHelper.preciseBlit(guiGraphics, KILL_MARKER_2, posX2, posY1, 0f, 0f, 16f, 16f, 16f, 16f)
-            RenderHelper.preciseBlit(guiGraphics, KILL_MARKER_3, posX1, posY2, 0f, 0f, 16f, 16f, 16f, 16f)
-            RenderHelper.preciseBlit(guiGraphics, KILL_MARKER_4, posX2, posY2, 0f, 0f, 16f, 16f, 16f, 16f)
+            RenderHelper.blit(guiGraphics.pose(), KILL_MARKER_1, posX1, posY1, 16f, 16f)
+            RenderHelper.blit(guiGraphics.pose(), KILL_MARKER_2, posX2, posY1, 16f, 16f)
+            RenderHelper.blit(guiGraphics.pose(), KILL_MARKER_3, posX1, posY2, 16f, 16f)
+            RenderHelper.blit(guiGraphics.pose(), KILL_MARKER_4, posX2, posY2, 16f, 16f)
         }
     }
 
@@ -319,18 +261,9 @@ object VehicleHudOverlay : CommonOverlay("vehicle_hud") {
                 true
             )
 
-            RenderHelper.preciseBlit(
-                guiGraphics,
-                if (index == passengers.size - 1) DRIVER else PASSENGER,
-                30f,
-                y.toFloat(),
-                100f,
-                0f,
-                0f,
-                8f,
-                8f,
-                8f,
-                8f
+            RenderHelper.blit(
+                guiGraphics.pose(), if (index == passengers.size - 1) DRIVER else PASSENGER, 30f, y.toFloat(), 8f, 8f,
+                z = 100f,
             )
         }
     }
@@ -516,18 +449,8 @@ object VehicleHudOverlay : CommonOverlay("vehicle_hud") {
             RenderSystem.setShaderColor(1f, 1f, 1f, Mth.lerp(progress, 0.2f, 1f))
             xOffset = Mth.lerp(progress, maxXOffset.toFloat(), 0f)
 
-            RenderHelper.preciseBlit(
-                guiGraphics,
-                frame,
-                w - 85 + xOffset,
-                (h - frameIndex * 18 - 20).toFloat(),
-                100f,
-                0f,
-                0f,
-                75f,
-                16f,
-                75f,
-                16f
+            RenderHelper.blit(
+                guiGraphics.pose(), frame, w - 85 + xOffset, (h - frameIndex * 18 - 20).toFloat(), 75f, 16f, z = 100f,
             )
 
             val data = vehicle.getGunData(vehicle.getSeatIndex(player), i)
@@ -546,18 +469,8 @@ object VehicleHudOverlay : CommonOverlay("vehicle_hud") {
                     (h - (weapons.size - 1 - weaponIndex) * 18 - 16).toFloat()
                 )
 
-                RenderHelper.preciseBlit(
-                    guiGraphics,
-                    SELECTED,
-                    (w - 95).toFloat(),
-                    startY,
-                    100f,
-                    0f,
-                    0f,
-                    8f,
-                    8f,
-                    8f,
-                    8f
+                RenderHelper.blit(
+                    guiGraphics.pose(), SELECTED, (w - 95).toFloat(), startY, 8f, 8f, z = 100f,
                 )
 
                 var ammoCount = vehicle.getAmmoCount(player)
@@ -569,18 +482,9 @@ object VehicleHudOverlay : CommonOverlay("vehicle_hud") {
                     data.countBackupAmmo(vehicle)
 
                 if (ammoCount == Int.MAX_VALUE) {
-                    RenderHelper.preciseBlit(
-                        guiGraphics,
-                        NUMBER,
-                        w - 28 + xOffset,
-                        (h - frameIndex * 18 - 15).toFloat(),
-                        100f,
-                        58f,
-                        0f,
-                        10f,
-                        7.5f,
-                        75f,
-                        7.5f
+                    RenderHelper.blit(
+                        guiGraphics.pose(), NUMBER, w - 28 + xOffset, (h - frameIndex * 18 - 15).toFloat(), 10f, 7.5f,
+                        58f, 0f, 75f, 7.5f, z = 100f,
                     )
                 } else {
                     val percent = data.selectedAmmoConsumer().type == AmmoConsumer.AmmoConsumeType.ENERGY
@@ -598,18 +502,9 @@ object VehicleHudOverlay : CommonOverlay("vehicle_hud") {
                         }
 
                         if (backUpAmmoCount == Int.MAX_VALUE) {
-                            RenderHelper.preciseBlit(
-                                guiGraphics,
-                                NUMBER,
-                                w - 22 + xOffset,
-                                (h - frameIndex * 18 - 15).toFloat(),
-                                100f,
-                                58f,
-                                0f,
-                                10f,
-                                7.5f,
-                                75f,
-                                7.5f
+                            RenderHelper.blit(
+                                guiGraphics.pose(), NUMBER, w - 22 + xOffset, (h - frameIndex * 18 - 15).toFloat(), 10f,
+                                7.5f, 58f, 0f, 75f, 7.5f, z = 100f,
                             )
                             lengthB = 14
                         } else {
@@ -622,17 +517,8 @@ object VehicleHudOverlay : CommonOverlay("vehicle_hud") {
                                     h - frameIndex * 18 - 12f,
                                     0.125f
                                 )
-                                RenderHelper.preciseBlit(
-                                    guiGraphics,
-                                    PLUS,
-                                    w - 17.5f + xOffset,
-                                    h - frameIndex * 18 - 12f,
-                                    0f,
-                                    0f,
-                                    4f,
-                                    4f,
-                                    4f,
-                                    4f
+                                RenderHelper.blit(
+                                    guiGraphics.pose(), PLUS, w - 17.5f + xOffset, h - frameIndex * 18 - 12f, 4f, 4f,
                                 )
                             } else {
                                 renderNumber(
@@ -646,17 +532,9 @@ object VehicleHudOverlay : CommonOverlay("vehicle_hud") {
                             }
                         }
 
-                        RenderHelper.preciseBlit(
-                            guiGraphics,
-                            FRACTION,
-                            w - 14 + xOffset - lengthB,
-                            h - frameIndex * 18 - 15.5f,
-                            0f,
-                            0f,
+                        RenderHelper.blit(
+                            guiGraphics.pose(), FRACTION, w - 14 + xOffset - lengthB, h - frameIndex * 18 - 15.5f, 8f,
                             8f,
-                            8f,
-                            8f,
-                            8f
                         )
 
                         renderNumber(
@@ -681,18 +559,9 @@ object VehicleHudOverlay : CommonOverlay("vehicle_hud") {
                 }
             }
 
-            RenderHelper.preciseBlit(
-                guiGraphics,
-                weapon!!.get(GunProp.ICON),
-                w - 86 + xOffset,
-                (h - frameIndex * 18 - 20).toFloat(),
-                100f,
-                0f,
-                0f,
-                75f,
-                16f,
-                75f,
-                16f
+            RenderHelper.blit(
+                guiGraphics.pose(), weapon!!.get(GunProp.ICON), w - 86 + xOffset, (h - frameIndex * 18 - 20).toFloat(),
+                75f, 16f, z = 100f,
             )
 
             // 这里不知道为什么不能合并，会导致上面那个渲染出错
@@ -784,25 +653,24 @@ object VehicleHudOverlay : CommonOverlay("vehicle_hud") {
         var pX = x
         if (percent) {
             pX -= 32 * scale
-            RenderHelper.preciseBlit(
-                guiGraphics, NUMBER, pX + 20 * scale, y, 100f,
-                200 * scale, 0f, 32 * scale, 30 * scale, 300 * scale, 30 * scale
+            RenderHelper.blit(
+                guiGraphics.pose(), NUMBER, pX + 20 * scale, y, 32 * scale, 30 * scale, 200 * scale, 0f, 300 * scale,
+                30 * scale, z = 100f,
             )
         }
 
         var index = 0
         if (number == 0) {
-            RenderHelper.preciseBlit(
-                guiGraphics, NUMBER, pX, y, 100f,
-                0f, 0f, 20 * scale, 30 * scale, 300 * scale, 30 * scale
+            RenderHelper.blit(
+                guiGraphics.pose(), NUMBER, pX, y, 20 * scale, 30 * scale, 0f, 0f, 300 * scale, 30 * scale, z = 100f,
             )
         }
 
         while (number > 0) {
             val digit = number % 10
-            RenderHelper.preciseBlit(
-                guiGraphics, NUMBER, pX - index * 20 * scale, y, 100f,
-                digit * 20 * scale, 0f, 20 * scale, 30 * scale, 300 * scale, 30 * scale
+            RenderHelper.blit(
+                guiGraphics.pose(), NUMBER, pX - index * 20 * scale, y, 20 * scale, 30 * scale, digit * 20 * scale, 0f,
+                300 * scale, 30 * scale, z = 100f,
             )
             number /= 10
             index++

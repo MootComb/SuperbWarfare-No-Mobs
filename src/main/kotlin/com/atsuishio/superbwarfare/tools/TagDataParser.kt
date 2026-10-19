@@ -84,9 +84,8 @@ object TagDataParser {
                     }
                     StringTag.valueOf(`object`.content)
                 } else {
-                    // Gson 版用 asLong 截断取整，这里保持同样行为
                     `object`.booleanOrNull?.let { return ByteTag.valueOf(it) }
-                    `object`.doubleOrNull?.let { return DoubleTag.valueOf(it.toLong().toDouble()) }
+                    `object`.doubleOrNull?.let { return DoubleTag.valueOf(it) }
                     null
                 }
             }

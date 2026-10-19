@@ -9,7 +9,6 @@ import com.atsuishio.superbwarfare.init.RegistryName
 import com.atsuishio.superbwarfare.item.DispenserLaunchable
 import com.atsuishio.superbwarfare.tools.CustomExplosion
 import com.atsuishio.superbwarfare.tools.mc
-import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer
 import net.minecraft.core.BlockSource
 import net.minecraft.core.Position
 import net.minecraft.core.dispenser.AbstractProjectileDispenseBehavior
@@ -36,14 +35,11 @@ open class Type88ClusterGrenadesItem : Item(Properties().rarity(Rarity.RARE)), D
     override fun initializeClient(consumer: Consumer<IClientItemExtensions?>) {
         super.initializeClient(consumer)
         consumer.accept(object : IClientItemExtensions {
-            private var renderer: BlockEntityWithoutLevelRenderer? = null
-
-            override fun getCustomRenderer(): BlockEntityWithoutLevelRenderer {
-                if (renderer == null) {
-                    renderer = Type88ClusterGrenadesRenderer(mc.blockEntityRenderDispatcher, mc.entityModels)
-                }
-                return renderer!!
+            private val renderer by lazy {
+                Type88ClusterGrenadesRenderer(mc.blockEntityRenderDispatcher, mc.entityModels)
             }
+
+            override fun getCustomRenderer() = renderer
         })
     }
 

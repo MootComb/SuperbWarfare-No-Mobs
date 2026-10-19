@@ -3814,7 +3814,7 @@
 				{
 					"name": "scope_pos",
 					"parent": "root",
-					"pivot": [0, 0, 0]
+					"pivot": [0, 3.5, 0]
 				},
 				{
 					"name": "muzzle_pos",

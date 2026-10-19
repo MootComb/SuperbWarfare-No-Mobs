@@ -66,7 +66,7 @@ object SpyglassRangeOverlay : CommonOverlay("spyglass_range") {
                 val k = ((screenWidth - i) / 2)
                 val l = ((screenHeight - j) / 2)
                 val w = i * 21 / 9
-                RenderHelper.preciseBlit(guiGraphics, SPYGLASS, k - (2 * w / 7), l, 0f, 0f, w, j, w, j)
+                RenderHelper.blit(guiGraphics.pose(), SPYGLASS, k - (2 * w / 7), l, w, j)
 
                 // 标记位置
                 val parameters = stack.firingParameters
@@ -75,17 +75,9 @@ object SpyglassRangeOverlay : CommonOverlay("spyglass_range") {
                 if (pos.canBeSeen()) {
                     val x = point.x.toFloat()
                     val y = point.y.toFloat()
-                    RenderHelper.preciseBlit(
-                        guiGraphics,
-                        INDICATOR,
-                        Mth.clamp(x - 6, 0f, (screenWidth - 12).toFloat()),
-                        Mth.clamp(y - 6, 0f, (screenHeight - 12).toFloat()),
-                        0f,
-                        0f,
-                        12f,
-                        12f,
-                        12f,
-                        12f
+                    RenderHelper.blit(
+                        guiGraphics.pose(), INDICATOR, Mth.clamp(x - 6, 0f, (screenWidth - 12).toFloat()),
+                        Mth.clamp(y - 6, 0f, (screenHeight - 12).toFloat()), 12f, 12f,
                     )
                 }
 
@@ -100,17 +92,10 @@ object SpyglassRangeOverlay : CommonOverlay("spyglass_range") {
                         if (posF.canBeSeen()) {
                             val xf = pointF.x.toFloat()
                             val yf = pointF.y.toFloat()
-                            RenderHelper.preciseBlit(
-                                guiGraphics,
-                                IFFOverlay.FRIENDLY_ARTILLERY,
+                            RenderHelper.blit(
+                                guiGraphics.pose(), IFFOverlay.FRIENDLY_ARTILLERY,
                                 Mth.clamp(xf - 6, 0f, (screenWidth - 12).toFloat()),
-                                Mth.clamp(yf - 6, 0f, (screenHeight - 12).toFloat()),
-                                0f,
-                                0f,
-                                12f,
-                                12f,
-                                12f,
-                                12f
+                                Mth.clamp(yf - 6, 0f, (screenHeight - 12).toFloat()), 12f, 12f,
                             )
                         }
                     }

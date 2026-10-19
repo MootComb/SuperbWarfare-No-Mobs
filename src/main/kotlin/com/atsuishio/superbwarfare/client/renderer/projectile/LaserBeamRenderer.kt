@@ -1,0 +1,172 @@
+package com.atsuishio.superbwarfare.client.renderer.projectile
+
+import com.atsuishio.superbwarfare.Mod.Companion.loc
+import com.atsuishio.superbwarfare.client.model.gun.GeoGunModel
+import com.atsuishio.superbwarfare.client.renderer.gun.GunRenderContext
+import com.atsuishio.superbwarfare.compat.oculus.OculusCompat
+import com.atsuishio.superbwarfare.entity.projectile.LaserBeamEntity
+import com.atsuishio.superbwarfare.event.ClientEventHandler
+import com.atsuishio.superbwarfare.tools.BedrockBoneCoordinateTool
+import com.atsuishio.superbwarfare.tools.mc
+import com.mojang.blaze3d.vertex.PoseStack
+import com.mojang.blaze3d.vertex.VertexConsumer
+import net.minecraft.client.renderer.MultiBufferSource
+import net.minecraft.client.renderer.RenderType
+import net.minecraft.client.renderer.culling.Frustum
+import net.minecraft.client.renderer.entity.EntityRenderer
+import net.minecraft.client.renderer.entity.EntityRendererProvider
+import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.item.ItemDisplayContext
+import net.minecraft.world.level.ClipContext
+import net.minecraft.world.phys.Vec3
+import org.joml.Matrix4f
+import org.joml.Vector3f
+import java.util.*
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
+
+open class LaserBeamRenderer<T : LaserBeamEntity>(context: EntityRendererProvider.Context) : EntityRenderer<T>(context) {
+    private class VisualRay(val start: Vec3, val end: Vec3)
+    private val rays = WeakHashMap<T, VisualRay>()
+    protected open val beamColor = Vec3(0.2, 0.65, 1.0)
+
+    override fun getTextureLocation(entity: T) = loc("textures/entity/white.png")
+
+    // The origin may be outside the camera frustum while the far end of the beam is visible.
+    override fun shouldRender(entity: T, camera: Frustum, x: Double, y: Double, z: Double) = true
+
+    override fun render(
+        entity: T, entityYaw: Float, partialTicks: Float,
+        pose: PoseStack, buffers: MultiBufferSource, packedLight: Int,
+    ) {
+        if (OculusCompat.isRenderingShadowPass()) return
+        val age = (entity.level().gameTime - entity.startTime + partialTicks.toDouble()).coerceAtLeast(0.0)
+        val progress = (age / entity.getLife()).coerceIn(0.0, 1.0)
+        if (progress >= 1.0) return
+        val shooter = (entity.owner ?: entity.level().getEntity(entity.ownerId)) as? LivingEntity
+        val sampled = shooter?.let { muzzles[it] }?.takeIf {
+            it.firstPerson == (shooter === mc.player && mc.options.cameraType.isFirstPerson)
+                    && System.nanoTime() - it.time < 250_000_000L
+        }
+        val cached = rays[entity]
+        val origin = cached?.start ?: sampled?.position ?: run {
+            // Allow the gun render pass to provide its animated locator before choosing a fallback.
+            if (entity.tickCount < 2) return
+            entity.position()
+        }
+        val end = cached?.end ?: entity.level().clip(
+            ClipContext(origin, entity.beamEnd, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, entity)
+        ).location
+        if (cached == null && sampled != null) rays[entity] = VisualRay(origin, end)
+        val vector = end.subtract(origin)
+        val length = vector.length()
+        if (length < 0.001) return
+        val direction = vector.scale(1.0 / length)
+        val reference = if (kotlin.math.abs(direction.y) > 0.95) Vec3(1.0, 0.0, 0.0) else Vec3(0.0, 1.0, 0.0)
+        val right = direction.cross(reference).normalize()
+        val up = right.cross(direction).normalize()
+        val fade = ((1.0 - progress) * 1.8).coerceAtMost(1.0).toFloat()
+        val radius = entity.beamRadius * (1.0 - progress * 0.3)
+        pose.pushPose()
+        val offset = origin.subtract(entity.getPosition(partialTicks))
+        pose.translate(offset.x, offset.y, offset.z)
+        val matrix = pose.last().pose()
+        val buffer = buffers.getBuffer(RenderType.lightning())
+
+        // Constant vertex count, regardless of range; no per-block particles or persistent emitters.
+        val r = beamColor.x.toFloat()
+        val g = beamColor.y.toFloat()
+        val b = beamColor.z.toFloat()
+        tube(buffer, matrix, direction, right, up, length, radius * 2.5, r, g, b, fade * 0.1f)
+        tube(buffer, matrix, direction, right, up, length, radius, r, g, b, fade * 0.65f)
+        tube(buffer, matrix, direction, right, up, length, radius * 0.3,
+            0.8f + r * 0.2f, 0.8f + g * 0.2f, 0.8f + b * 0.2f, fade)
+        renderEffects(entity, buffer, BeamFrame(matrix, direction, right, up, length, radius, age, progress, fade))
+        pose.popPose()
+        super.render(entity, entityYaw, partialTicks, pose, buffers, packedLight)
+    }
+
+    protected class BeamFrame(
+        val matrix: Matrix4f, val direction: Vec3, val right: Vec3, val up: Vec3,
+        val length: Double, val radius: Double, val age: Double, val progress: Double, val fade: Float,
+    )
+
+    protected open fun renderEffects(entity: T, buffer: VertexConsumer, beam: BeamFrame) {}
+
+    protected fun square(
+        buffer: VertexConsumer, matrix: Matrix4f, center: Vec3, right: Vec3, up: Vec3,
+        size: Double, angle: Double, width: Double, alpha: Float,
+    ) {
+        var previous: Vec3? = null
+        for (corner in 0..4) {
+            val theta = angle + corner * PI / 2
+            val point = center.add(right.scale(cos(theta) * size)).add(up.scale(sin(theta) * size))
+            previous?.let {
+                ribbon(buffer, matrix, it, point, width,
+                    beamColor.x.toFloat(), beamColor.y.toFloat(), beamColor.z.toFloat(), alpha)
+            }
+            previous = point
+        }
+    }
+
+    private fun tube(
+        buffer: VertexConsumer, matrix: Matrix4f, direction: Vec3, right: Vec3, up: Vec3,
+        length: Double, radius: Double, r: Float, g: Float, b: Float, alpha: Float,
+    ) {
+        val end = direction.scale(length)
+        for (side in 0 until 8) {
+            val angle = side * PI / 4
+            val next = (side + 1) * PI / 4
+            val a = right.scale(cos(angle) * radius).add(up.scale(sin(angle) * radius))
+            val c = right.scale(cos(next) * radius).add(up.scale(sin(next) * radius))
+            vertex(buffer, matrix, a, r, g, b, alpha)
+            vertex(buffer, matrix, a.add(end), r, g, b, alpha)
+            vertex(buffer, matrix, c.add(end), r, g, b, alpha)
+            vertex(buffer, matrix, c, r, g, b, alpha)
+        }
+    }
+
+    protected fun ribbon(
+        buffer: VertexConsumer, matrix: Matrix4f, start: Vec3, end: Vec3,
+        width: Double, r: Float, g: Float, b: Float, alpha: Float,
+    ) {
+        val direction = end.subtract(start).normalize()
+        val reference = if (kotlin.math.abs(direction.y) > 0.95) Vec3(1.0, 0.0, 0.0) else Vec3(0.0, 1.0, 0.0)
+        val side = direction.cross(reference).normalize().scale(width)
+        val up = direction.cross(side).normalize().scale(width)
+        for (offset in arrayOf(side, up)) {
+            vertex(buffer, matrix, start.add(offset), r, g, b, alpha)
+            vertex(buffer, matrix, end.add(offset), r, g, b, alpha)
+            vertex(buffer, matrix, end.subtract(offset), r, g, b, alpha)
+            vertex(buffer, matrix, start.subtract(offset), r, g, b, alpha)
+        }
+    }
+
+    private fun vertex(buffer: VertexConsumer, matrix: Matrix4f, point: Vec3, r: Float, g: Float, b: Float, alpha: Float) {
+        buffer.vertex(matrix, point.x.toFloat(), point.y.toFloat(), point.z.toFloat()).color(r, g, b, alpha).endVertex()
+    }
+
+    companion object {
+        private class Muzzle(val position: Vec3, val firstPerson: Boolean, val time: Long = System.nanoTime())
+        private val muzzles = WeakHashMap<LivingEntity, Muzzle>()
+
+        /** Sample the actual animated muzzle_pos, including the holder's first/third-person item transforms. */
+        fun captureMuzzle(pose: PoseStack, model: GeoGunModel, context: ItemDisplayContext) {
+            if (OculusCompat.isRenderingShadowPass()) return
+            val firstPerson = context.firstPerson()
+            val holder = if (firstPerson) mc.player else GunRenderContext.entity()
+            if (holder == null || (!firstPerson && !GunRenderContext.isMainArm())) return
+            if (!firstPerson && context != ItemDisplayContext.THIRD_PERSON_RIGHT_HAND
+                && context != ItemDisplayContext.THIRD_PERSON_LEFT_HAND) return
+            val bone = model.getGlobalTransform("muzzle_pos") ?: return
+            val point = Matrix4f(pose.last().pose()).mul(bone).getTranslation(Vector3f())
+            val view = Vec3(point.x.toDouble(), point.y.toDouble(), point.z.toDouble())
+            val camera = mc.gameRenderer.mainCamera
+            val position = if (firstPerson) BedrockBoneCoordinateTool.viewPointToWorld(
+                view, camera, ClientEventHandler.handFov.toFloat(), ClientEventHandler.fov.toFloat()
+            ) else BedrockBoneCoordinateTool.viewPointToWorld(view, camera)
+            muzzles[holder] = Muzzle(position, firstPerson)
+        }
+    }
+}
