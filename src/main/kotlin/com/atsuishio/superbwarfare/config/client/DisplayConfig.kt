@@ -186,7 +186,7 @@ object DisplayConfig {
     val TACTICAL_MAP_ZOOM = buildClientConfig {
         comment("Zoom level for the tactical map (1=closest, 10=farthest)")
         comment("战术地图缩放等级")
-        defineInRange("tactical_map_zoom", 5.0, 0.05, 20.0).also { pop() }
+        defineInRange("tactical_map_zoom", 5.0, 0.05, 20.0)
     }
 
     /**
@@ -211,7 +211,7 @@ object DisplayConfig {
     val MELEE_HITBOX_RENDER = buildClientConfig {
         comment("Set true to always draw the melee hitbox wireframe without pressing F3+B")
         comment("是否常显近战判定体外框（不按 F3+B 也显示；按 F3+B 也能显示）")
-        define("melee_hitbox_render", false).also { pop() }
+        define("melee_hitbox_render", false)
     }
 
     /**
@@ -223,6 +223,6 @@ object DisplayConfig {
     val ENABLE_BULLET_SONIC_BOOM = buildClientConfig {
         comment("Set true to play a sonic boom when a fast bullet whizzes past you (client side only)")
         comment("是否在高速子弹掠过自己时播放破空音效（纯客户端）")
-        define("enable_bullet_sonic_boom", true)
+        define("enable_bullet_sonic_boom", true).also { pop() }
     }
 }

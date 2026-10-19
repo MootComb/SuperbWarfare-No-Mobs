@@ -462,6 +462,12 @@ class ModSoundProvider(output: PackOutput, existingFileHelper: ExistingFileHelpe
         register("ql_1031_far_semi", "gun/ql_1031/semi/ql_1031_far")
         register("ql_1031_veryfar_semi", "gun/ql_1031/semi/ql_1031_veryfar")
 
+        // -------------------- gun/reforging --------------------
+        group(
+            "gun/reforging", "reforging_fire", "reforging_fire_3p", "reforging_fire_laser",
+            "reforging_fire_3p_laser", "reforging_fire_lightning", "reforging_fire_3p_lightning",
+        )
+
         // -------------------- gun/raubtier --------------------
         group(
             "gun/raubtier", "raubtier_fire_1p", "raubtier_fire_3p", "raubtier_far", "raubtier_veryfar",

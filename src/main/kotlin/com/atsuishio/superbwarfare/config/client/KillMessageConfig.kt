@@ -38,7 +38,7 @@ object KillMessageConfig {
     val KILL_MESSAGE_MARGIN_Y = buildClientConfig {
         comment("The y margin of kill message")
         comment("击杀提示的竖直方向偏移量")
-        defineInRange("kill_message_margin_y", 5, -1000, 1000)
+        defineInRange("kill_message_margin_y", 5, -1000, 1000).also { pop() }
     }
 
     enum class KillMessagePosition {

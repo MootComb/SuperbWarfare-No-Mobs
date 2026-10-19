@@ -64,6 +64,9 @@ abstract class AmmoConsumeStrategy {
     @OnlyIn(Dist.CLIENT)
     open fun getDisplayName(source: AmmoSource): String = "Invalid"
 
+    @OnlyIn(Dist.CLIENT)
+    open fun getDisplayCount(data: GunData, source: AmmoSource, count: Int): Int = count
+
     companion object {
         /**
          * 所有弹药策略的注册列表，按优先级排序。

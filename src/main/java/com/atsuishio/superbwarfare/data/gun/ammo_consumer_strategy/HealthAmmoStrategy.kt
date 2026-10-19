@@ -44,7 +44,7 @@ class HealthAmmoStrategy : AmmoConsumeStrategy() {
         shooter.invulnerableTime = 0
 
         shooter.forceHurt(
-            ModDamageTypes.causeAmmoConsumptionDamage(shooter.level().registryAccess(), shooter),
+            ModDamageTypes.causeAmmoConsumptionDamage(shooter.level().registryAccess(), null),
             count / ammoPerHealth
         )
         return 1
@@ -64,4 +64,8 @@ class HealthAmmoStrategy : AmmoConsumeStrategy() {
 
     @OnlyIn(Dist.CLIENT)
     override fun getDisplayName(source: AmmoSource) = "Health"
+
+    @OnlyIn(Dist.CLIENT)
+    override fun getDisplayCount(data: GunData, source: AmmoSource, count: Int) =
+        count / data.primaryAmmoCostPerShoot().coerceAtLeast(1)
 }

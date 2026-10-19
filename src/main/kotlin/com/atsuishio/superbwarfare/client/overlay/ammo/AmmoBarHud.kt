@@ -285,17 +285,26 @@ object AmmoBarHud {
 
     private fun getGunAmmoString(data: GunData, player: Player): String {
         if (data.isEnergyMagazine()) return data.ammo.get().toString()
-        if (data.selectedAmmoConsumer().type == AmmoConsumeType.ENERGY) return getEnergyPercentString(data)
+        val consumer = data.selectedAmmoConsumer()
+        if (consumer.type == AmmoConsumeType.ENERGY) return getEnergyPercentString(data)
         if (data.meleeOnly() || data.useBackpackAmmo() && data.hasInfiniteBackupAmmo(player)) return "∞"
-        return if (data.useBackpackAmmo()) (data.countBackupAmmo(player) - data.virtualAmmo.get()).toString()
-        else data.ammo.get().toString()
+        if (data.useBackpackAmmo()) {
+            return displayAmmoCount(data, data.countBackupAmmo(player) - data.virtualAmmo.get()).toString()
+        }
+        return data.ammo.get().toString()
     }
 
     private fun getBackupAmmoString(data: GunData, player: Player): String {
         if (data.isEnergyMagazine()) return getEnergyPercentString(data)
-        if (data.meleeOnly() || data.useBackpackAmmo() || data.selectedAmmoConsumer().type == AmmoConsumeType.ENERGY) return ""
-        return if (data.hasInfiniteBackupAmmo(player)) "∞"
-        else (data.countBackupAmmo(player) - data.virtualAmmo.get()).toString()
+        val consumer = data.selectedAmmoConsumer()
+        if (data.meleeOnly() || data.useBackpackAmmo() || consumer.type == AmmoConsumeType.ENERGY) return ""
+        if (data.hasInfiniteBackupAmmo(player)) return "∞"
+        return displayAmmoCount(data, data.countBackupAmmo(player) - data.virtualAmmo.get()).toString()
+    }
+
+    private fun displayAmmoCount(data: GunData, count: Int): Int {
+        val source = data.selectedAmmoConsumer().primary
+        return source.strategy.getDisplayCount(data, source, count)
     }
 
     private fun reset() {

@@ -3,7 +3,7 @@
   "RecoilX": 0.0025,
   "RecoilY": 0.014,
   "Damage": 10,
-  "Headshot": 2.5,
+  "Headshot": 4.0,
   "Velocity": 22.5,
   "Magazine": 200,
   "Weight": 5,
@@ -40,7 +40,7 @@
   "DefaultFireMode": "Charge",
   "NormalReloadTime": 54,
   "EmptyReloadTime": 71,
-  "BypassesArmor": 0.8,
+  "BypassesArmor": 1.0,
   "SoundRadius": 16,
   "RPM": 600,
   "GunType": "Rifle",
@@ -48,16 +48,7 @@
     "Type": "Rifle"
   },
   "AvailableFireModes": [
-    {
-      "Mode": "Charge",
-      "Name": "HoldAuto",
-      "Charge": {
-        "Duration": 20,
-        "Trigger": "AutoAtFull",
-        "PowerMode": "Full",
-        "MinPower": 1.0
-      }
-    }
+    "Semi"
   ],
   "AvailableAttachments": {
     "Charm": [
@@ -72,23 +63,22 @@
           "Type": "superbwarfare:reforging_gravity_ball",
           "Data": {
             "Owner": "@sbw:owner",
-            "AttackRadius": 8.0,
-            "CoreRadius": 0.75,
             "ActivationDelay": 10,
-            "ExpansionDuration": 20,
-            "FieldDuration": 100,
+            "ExpansionDuration": 10,
             "DamageInterval": 10,
             "PullStrength": 0.6
           }
         },
+        "Headshot": 1,
         "Magazine": 0,
-        "AmmoCostPerShoot": 2,
+        "AmmoCostPerShoot": 4,
         "Damage": 12,
         "ExplosionDamage": 80,
-        "Velocity": 1.2,
+        "ExplosionRadius": 12,
+        "Velocity": 1.5,
         "Gravity": 0.04,
-        "ProjectileLife": 200,
-        "RPM": 60,
+        "ProjectileLife": 300,
+        "RPM": 90,
         "ClearHoldProgressAfterShoot": true
       }
     },
@@ -99,15 +89,34 @@
           "Type": "superbwarfare:reforging_lightning_ball",
           "Data": {
             "Owner": "@sbw:owner",
-            "AttackRadius": 8.0,
-            "AttackInterval": 10,
-            "MaxTargets": 4
+            "AttackInterval": 5,
+            "MaxTargets": 5
           }
         },
+        "AvailableFireModes": [
+          {
+            "Mode": "Charge",
+            "Name": "HoldAuto",
+            "Charge": {
+              "Duration": 20,
+              "Trigger": "AutoAtFull",
+              "PowerMode": "Full",
+              "MinPower": 1.0
+            }
+          }
+        ],
+        "ShootAnimation": "animation.reforging.fire_lighting",
+        "SoundInfo": {
+          "Fire1P": "superbwarfare:reforging_fire_lightning",
+          "Fire3P": "superbwarfare:reforging_fire_3p_lightning"
+        },
+        "Headshot": 1,
         "Magazine": 0,
-        "AmmoCostPerShoot": 8,
-        "Damage": 50,
-        "Velocity": 0.35,
+        "AmmoCostPerShoot": 80,
+        "Damage": 10,
+        "ExplosionDamage": 120,
+        "ExplosionRadius": 8,
+        "Velocity": 0.2,
         "Gravity": 0,
         "ProjectileLife": 200,
         "RPM": 60,
@@ -123,14 +132,19 @@
             "Owner": "@sbw:owner"
           }
         },
+        "ShootAnimation": "animation.reforging.fire_laser",
+        "SoundInfo": {
+          "Fire1P": "superbwarfare:reforging_fire_laser",
+          "Fire3P": "superbwarfare:reforging_fire_3p_laser"
+        },
         "Range": 128,
         "Magazine": 0,
-        "AmmoCostPerShoot": 4,
-        "Damage": 120,
+        "AmmoCostPerShoot": 5,
+        "Damage": 300,
         "Velocity": 1,
         "Gravity": 0,
-        "ProjectileLife": 8,
-        "RPM": 60,
+        "ProjectileLife": 10,
+        "RPM": 120,
         "ClearHoldProgressAfterShoot": true,
         "AvailableFireModes": [
           {
@@ -147,5 +161,9 @@
       }
     }
   ],
+  "SoundInfo": {
+    "Fire1P": "superbwarfare:reforging_fire",
+    "Fire3P": "superbwarfare:reforging_fire_3p"
+  },
   "Icon": "superbwarfare:textures/gun_icon/reforging_icon.png"
 }

@@ -2618,6 +2618,36 @@
       "superbwarfare:gun/common/reflections_4"
     ]
   },
+  "reforging_fire": {
+    "sounds": [
+      "superbwarfare:gun/reforging/reforging_fire"
+    ]
+  },
+  "reforging_fire_3p": {
+    "sounds": [
+      "superbwarfare:gun/reforging/reforging_fire_3p"
+    ]
+  },
+  "reforging_fire_3p_laser": {
+    "sounds": [
+      "superbwarfare:gun/reforging/reforging_fire_3p_laser"
+    ]
+  },
+  "reforging_fire_3p_lightning": {
+    "sounds": [
+      "superbwarfare:gun/reforging/reforging_fire_3p_lightning"
+    ]
+  },
+  "reforging_fire_laser": {
+    "sounds": [
+      "superbwarfare:gun/reforging/reforging_fire_laser"
+    ]
+  },
+  "reforging_fire_lightning": {
+    "sounds": [
+      "superbwarfare:gun/reforging/reforging_fire_lightning"
+    ]
+  },
   "repair_tool_fire_1p": {
     "sounds": [
       "superbwarfare:gun/repair_tool/repair_tool_fire_1p"

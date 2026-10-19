@@ -1,7 +1,17 @@
 {
+  "Icon": "superbwarfare:textures/gun_icon/reforging_icon.png",
   "SlotIcon": "superbwarfare:textures/item/reforging_icon.png",
   "Animation": {
-    "Idle": "animation.reforging.idle"
+    "Idle": "animation.reforging.idle",
+    "Loop": "animation.reforging.loop",
+    "Fire": "animation.reforging.fire",
+    "Charge": "animation.reforging.charge"
+  },
+  "ShootRecoil": {
+    "Offset": [0.7, 1.0, 0.5],
+    "Rotation": [0.2, 0.2, 0.5],
+    "ZoomRate": 0.5,
+    "Speed": 1.0
   },
   "Model": {
     "Animation": "superbwarfare:animations/bedrock/gun/reforging.animation.json",

@@ -102,7 +102,7 @@ object IFFOverlay : CommonOverlay("iff") {
                             (xf - 6).coerceIn(0f, (screenWidth - 12).toFloat()),
                             (yf - 6).coerceIn(0f, (screenHeight - 12).toFloat()),
                             12f, 12f, 0f, 0f, 12f, 12f,
-                            0x7FFFAD
+                            RenderHelper.opaque(0x7FFFAD)
                         )
 
                         if (Vec2(xf, yf).distanceToSqr(
@@ -124,11 +124,13 @@ object IFFOverlay : CommonOverlay("iff") {
                 val syncedPlayers = ClientSyncedEntityHandler.getSyncedPlayerInfo(level)
                 for (otherPlayer in syncedPlayers) {
                     if (otherPlayer.uuid == player.uuid) continue
-                    val color = when (otherPlayer.relation) {
-                        "hostile" -> 0xFFBD7F
-                        "neutral" -> -0x1
-                        else -> 0x7FFFAD
-                    }
+                    val color = RenderHelper.opaque(
+                        when (otherPlayer.relation) {
+                            "hostile" -> 0xFFBD7F
+                            "neutral" -> -0x1
+                            else -> 0x7FFFAD
+                        }
+                    )
                     renderSyncedPlayer(
                         otherPlayer, color, player, level, cameraPos,
                         poseStack, guiGraphics, partialTick
@@ -175,7 +177,7 @@ object IFFOverlay : CommonOverlay("iff") {
                             (xf - 6).coerceIn(0f, (screenWidth - 12).toFloat()),
                             (yf - 6).coerceIn(0f, (screenHeight - 12).toFloat()),
                             12f, 12f, 0f, 0f, 12f, 12f,
-                            0xFFBD7F
+                            RenderHelper.opaque(0xFFBD7F)
                         )
 
                         if (Vec2(xf, yf).distanceToSqr(

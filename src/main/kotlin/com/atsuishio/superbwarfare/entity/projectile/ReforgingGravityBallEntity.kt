@@ -45,7 +45,7 @@ open class ReforgingGravityBallEntity(type: EntityType<out ReforgingGravityBallE
     private val animation = if (level.isClientSide) BasicProjectileAnimationInstance(this, true) else null
     private var damageValue = 12f
     private var explosionDamageValue = 80f
-    private var flightLife = 200
+    private var projectileLife by PROJECTILE_LIFE
     private var age = 0
     private var gravityValue = 0.04f
     private var activationDelay = 10
@@ -58,16 +58,15 @@ open class ReforgingGravityBallEntity(type: EntityType<out ReforgingGravityBallE
         private set
     var expansionDuration by EXPANSION_DURATION
         private set
-    var fieldDuration by FIELD_DURATION
-        private set
+    val fieldDuration: Int
+        get() = (getLife().toLong() - expansionDuration * 2L).coerceAtLeast(0L).toInt()
     private var damageInterval by DAMAGE_INTERVAL
     private var syncedAttackRadius by ATTACK_RADIUS
-    private var syncedCoreRadius by CORE_RADIUS
     private var syncedPullStrength by PULL_STRENGTH
     private var syncedOwnerUUID by OWNER_UUID
 
-    val attackRadius: Double get() = syncedAttackRadius.toDouble()
-    val coreRadius: Double get() = syncedCoreRadius.toDouble()
+    val attackRadius: Double get() = getExplosionRadius().toDouble()
+    val coreRadius: Double get() = attackRadius * 0.2
     val pullStrength: Double get() = syncedPullStrength.toDouble()
 
     fun getOwnerUUID(): UUID? = syncedOwnerUUID.orElse(null)
@@ -81,9 +80,10 @@ open class ReforgingGravityBallEntity(type: EntityType<out ReforgingGravityBallE
         if (pOwner != null) setOwnerUUID(pOwner.uuid)
     }
 
-    private val collapseDuration: Int get() = minOf(COLLAPSE_DURATION, fieldDuration)
+    private val fieldEndTime: Long get() = anchorTime + getLife()
+    private val collapseDuration: Int get() = (fieldEndTime - collapseStartTime).toInt()
     private val collapseStartTime: Long
-        get() = (activationTime + fieldDuration - collapseDuration).coerceAtLeast(activationTime)
+        get() = (anchorTime + expansionDuration + fieldDuration).coerceAtMost(fieldEndTime)
 
     val collapsing: Boolean get() = anchored && level().gameTime >= collapseStartTime
 
@@ -91,7 +91,7 @@ open class ReforgingGravityBallEntity(type: EntityType<out ReforgingGravityBallE
         get() = anchored && level().gameTime >= activationTime && level().gameTime < collapseStartTime
 
     private val fieldHolding: Boolean
-        get() = anchored && level().gameTime >= activationTime && level().gameTime < activationTime + fieldDuration
+        get() = anchored && level().gameTime >= activationTime && level().gameTime < fieldEndTime
 
     private val damageTick: Boolean
         get() {
@@ -123,10 +123,9 @@ open class ReforgingGravityBallEntity(type: EntityType<out ReforgingGravityBallE
             define(ANCHOR_TIME, 0L)
             define(ACTIVATION_TIME, 0L)
             define(EXPANSION_DURATION, 20)
-            define(FIELD_DURATION, 100)
+            define(PROJECTILE_LIFE, 200)
             define(DAMAGE_INTERVAL, 10)
             define(ATTACK_RADIUS, 8f)
-            define(CORE_RADIUS, 0.75f)
             define(PULL_STRENGTH, 0.6f)
             define(OWNER_UUID, Optional.empty())
         }
@@ -144,9 +143,14 @@ open class ReforgingGravityBallEntity(type: EntityType<out ReforgingGravityBallE
         explosionDamageValue = value.coerceAtLeast(0f)
     }
 
-    override fun getLife() = flightLife
+    override fun getExplosionRadius() = syncedAttackRadius
+    override fun setExplosionRadius(value: Float) {
+        syncedAttackRadius = value.coerceIn(0f, 32f)
+    }
+
+    override fun getLife() = projectileLife
     override fun setLife(value: Int) {
-        flightLife = value.coerceAtLeast(1)
+        projectileLife = value.coerceAtLeast(1)
     }
 
     override fun getCustomGravity() = gravityValue
@@ -161,12 +165,12 @@ open class ReforgingGravityBallEntity(type: EntityType<out ReforgingGravityBallE
         super.tick()
         age++
         if (!level().isClientSide) {
-            if (anchored && level().gameTime >= activationTime + fieldDuration) {
+            if (anchored && level().gameTime >= fieldEndTime) {
                 collapseCore()
                 discard()
                 return
             }
-            if (!anchored && age >= flightLife) {
+            if (!anchored && age >= getLife()) {
                 discard()
                 return
             }
@@ -388,10 +392,8 @@ open class ReforgingGravityBallEntity(type: EntityType<out ReforgingGravityBallE
         if (tag.contains("ActivationDelay")) activationDelay = tag.getInt("ActivationDelay").coerceAtLeast(0)
         if (tag.contains("ExpansionDuration")) expansionDuration = tag.getInt("ExpansionDuration").coerceAtLeast(1)
         if (tag.contains("DamageInterval")) damageInterval = tag.getInt("DamageInterval").coerceAtLeast(2)
-        if (tag.contains("FieldDuration")) fieldDuration = tag.getInt("FieldDuration").coerceAtLeast(1)
-        if (tag.contains("AttackRadius")) syncedAttackRadius = tag.getFloat("AttackRadius").coerceIn(0.5f, 32f)
-        if (tag.contains("CoreRadius")) syncedCoreRadius =
-            tag.getFloat("CoreRadius").coerceIn(0.1f, attackRadius.toFloat())
+        if (tag.contains("ExplosionRadius")) setExplosionRadius(tag.getFloat("ExplosionRadius"))
+        else if (tag.contains("AttackRadius")) setExplosionRadius(tag.getFloat("AttackRadius"))
         if (tag.contains("PullStrength")) syncedPullStrength = tag.getFloat("PullStrength").coerceIn(0f, 1f)
         if (tag.contains("Anchored")) anchored = tag.getBoolean("Anchored")
         if (tag.contains("ActivationTime")) activationTime = tag.getLong("ActivationTime")
@@ -405,15 +407,13 @@ open class ReforgingGravityBallEntity(type: EntityType<out ReforgingGravityBallE
         super.addAdditionalSaveData(tag)
         tag.putFloat("Damage", damageValue)
         tag.putFloat("ExplosionDamage", getExplosionDamage())
-        tag.putInt("Life", flightLife)
+        tag.putInt("Life", getLife())
         tag.putInt("Age", age)
         tag.putFloat("Gravity", gravityValue)
         tag.putInt("ActivationDelay", activationDelay)
         tag.putInt("ExpansionDuration", expansionDuration)
         tag.putInt("DamageInterval", damageInterval)
-        tag.putInt("FieldDuration", fieldDuration)
-        tag.putFloat("AttackRadius", attackRadius.toFloat())
-        tag.putFloat("CoreRadius", coreRadius.toFloat())
+        tag.putFloat("ExplosionRadius", getExplosionRadius())
         tag.putFloat("PullStrength", pullStrength.toFloat())
         tag.putBoolean("Anchored", anchored)
         tag.putLong("AnchorTime", anchorTime)
@@ -446,7 +446,6 @@ open class ReforgingGravityBallEntity(type: EntityType<out ReforgingGravityBallE
         private const val CORE_DAMPING = 0.35
         private const val CAPTURE_SPEED = 0.08
         private const val EDGE_DAMAGE_LOSS = 0.8
-        private const val COLLAPSE_DURATION = 10
 
         @JvmField
         val ANCHORED: EntityDataAccessor<Boolean> =
@@ -469,15 +468,11 @@ open class ReforgingGravityBallEntity(type: EntityType<out ReforgingGravityBallE
             SynchedEntityData.defineId(ReforgingGravityBallEntity::class.java, EntityDataSerializers.LONG)
 
         @JvmField
-        val FIELD_DURATION: EntityDataAccessor<Int> =
+        val PROJECTILE_LIFE: EntityDataAccessor<Int> =
             SynchedEntityData.defineId(ReforgingGravityBallEntity::class.java, EntityDataSerializers.INT)
 
         @JvmField
         val ATTACK_RADIUS: EntityDataAccessor<Float> =
-            SynchedEntityData.defineId(ReforgingGravityBallEntity::class.java, EntityDataSerializers.FLOAT)
-
-        @JvmField
-        val CORE_RADIUS: EntityDataAccessor<Float> =
             SynchedEntityData.defineId(ReforgingGravityBallEntity::class.java, EntityDataSerializers.FLOAT)
 
         @JvmField

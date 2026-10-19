@@ -62,4 +62,8 @@ class HungerAmmoStrategy : AmmoConsumeStrategy() {
 
     @OnlyIn(Dist.CLIENT)
     override fun getDisplayName(source: AmmoSource) = "Hunger"
+
+    @OnlyIn(Dist.CLIENT)
+    override fun getDisplayCount(data: GunData, source: AmmoSource, count: Int) =
+        count / data.primaryAmmoCostPerShoot().coerceAtLeast(1)
 }
