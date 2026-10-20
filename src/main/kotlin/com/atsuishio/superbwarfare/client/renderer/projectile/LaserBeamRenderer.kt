@@ -4,7 +4,7 @@ import com.atsuishio.superbwarfare.Mod.Companion.loc
 import com.atsuishio.superbwarfare.client.ClientRenderHandler
 import com.atsuishio.superbwarfare.client.model.gun.GeoGunModel
 import com.atsuishio.superbwarfare.client.renderer.gun.GunRenderContext
-import com.atsuishio.superbwarfare.compat.oculus.OculusCompat
+import com.atsuishio.superbwarfare.compat.shader.ShaderCompat
 import com.atsuishio.superbwarfare.entity.projectile.LaserBeamEntity
 import com.atsuishio.superbwarfare.event.ClientEventHandler
 import com.atsuishio.superbwarfare.tools.BedrockBoneCoordinateTool
@@ -41,7 +41,7 @@ open class LaserBeamRenderer<T : LaserBeamEntity>(context: EntityRendererProvide
         entity: T, entityYaw: Float, partialTicks: Float,
         pose: PoseStack, buffers: MultiBufferSource, packedLight: Int,
     ) {
-        if (OculusCompat.isRenderingShadowPass()) return
+        if (ShaderCompat.isRenderingShadowPass()) return
         val age = (entity.level().gameTime - entity.startTime + partialTicks.toDouble()).coerceAtLeast(0.0)
         val progress = (age / entity.getLife()).coerceIn(0.0, 1.0)
         if (progress >= 1.0) return
@@ -161,7 +161,7 @@ open class LaserBeamRenderer<T : LaserBeamEntity>(context: EntityRendererProvide
 
         /** Sample the actual animated muzzle_pos, including the holder's first/third-person item transforms. */
         fun captureMuzzle(pose: PoseStack, model: GeoGunModel, context: ItemDisplayContext) {
-            if (OculusCompat.isRenderingShadowPass()) return
+            if (ShaderCompat.isRenderingShadowPass()) return
             val firstPerson = context.firstPerson()
             val holder = if (firstPerson) mc.player else GunRenderContext.entity()
             if (holder == null || (!firstPerson && !GunRenderContext.isMainArm())) return

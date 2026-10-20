@@ -1,34 +1,18 @@
-package com.atsuishio.superbwarfare.compat.oculus
+package com.atsuishio.superbwarfare.compat.shader
 
-import com.atsuishio.superbwarfare.compat.oculus.OculusCompat.getParticleShader
-import com.atsuishio.superbwarfare.compat.oculus.OculusCompat.getParticleTranslucentShader
+import com.atsuishio.superbwarfare.compat.shader.ShaderCompat.getParticleTranslucentShader
 import net.minecraft.client.renderer.MultiBufferSource
 import net.minecraft.client.renderer.ShaderInstance
 import net.minecraftforge.api.distmarker.Dist
 import net.minecraftforge.api.distmarker.OnlyIn
 import net.minecraftforge.fml.ModList
+import org.joml.Matrix4f
 
 /**
- * Reflection-based bridge to Oculus/Iris internal and public APIs.
- *
- * All calls are guarded with try/catch so the mod loads safely when Oculus is
- * absent — no compile-time dependency on Iris classes is required.
- *
- * ## Why reflection?
- *
- * Oculus is a client-only mod.  Making it a hard `implementation` dependency
- * would prevent the mod from loading on servers and on clients that don't
- * install Oculus.  Reflection keeps the dependency optional while still
- * giving us access to Iris internals that are *not* exposed through the
- * public [net.irisshaders.iris.api.v0.IrisApi].
- *
- * Key internal class used:
- * - [net.irisshaders.iris.pipeline.programs.ShaderAccess] — exposes the
- *   shader-pack-compiled particle programs ([getParticleTranslucentShader],
- *   [getParticleShader]) that replace vanilla core shaders when a pack is active.
+ * Reflection-based bridge to Oculus/Iris internal and public APIs
  */
 @OnlyIn(Dist.CLIENT)
-object OculusCompat {
+object ShaderCompat {
 
     /** True when Oculus or Iris mod id is present in the mod list. */
     val isInstalled: Boolean by lazy {
@@ -68,6 +52,38 @@ object OculusCompat {
             apiClass.getMethod("isRenderingShadowPass").invoke(instance) as? Boolean ?: false
         } catch (_: Exception) {
             false
+        }
+    }
+
+    /** Projection and depthtex2 after Iris/Oculus has finished its world composite passes. */
+    fun getPostProcessWorldState(requireCompositeComplete: Boolean = true): Pair<Matrix4f, Int>? {
+        if (!isInstalled || isRenderingShadowPass()) return null
+        return try {
+            val iris = Class.forName("net.irisshaders.iris.Iris")
+            val manager = iris.getMethod("getPipelineManager").invoke(null)
+            val pipeline = manager.javaClass.getMethod("getPipelineNullable").invoke(manager) ?: return null
+            val shaderPipeline = Class.forName("net.irisshaders.iris.pipeline.ShaderRenderingPipeline")
+            if (!shaderPipeline.isInstance(pipeline) ||
+                (requireCompositeComplete && shaderPipeline.getMethod("shouldOverrideShaders").invoke(pipeline) != false)
+            ) return null // Custom core shaders are suppressed until world rendering has ended.
+
+            val targetsField = pipeline.javaClass.getDeclaredField("renderTargets")
+            if (!targetsField.trySetAccessible()) return null
+            val targets = targetsField.get(pipeline) ?: return null
+            val noHand = targets.javaClass.getMethod("getDepthTextureNoHand").invoke(targets) ?: return null
+            val depthTexture = noHand.javaClass.getMethod("getTextureId").invoke(noHand) as? Int ?: return null
+            if (depthTexture <= 0) return null
+
+            val stateClass = Class.forName("net.irisshaders.iris.uniforms.CapturedRenderingState")
+            val state = stateClass.getField("INSTANCE").get(null)
+            val projection = stateClass.getMethod("getGbufferProjection").invoke(state) as? Matrix4f ?: return null
+            Matrix4f(projection) to depthTexture
+        } catch (_: ReflectiveOperationException) {
+            null
+        } catch (_: RuntimeException) {
+            null
+        } catch (_: LinkageError) {
+            null
         }
     }
 

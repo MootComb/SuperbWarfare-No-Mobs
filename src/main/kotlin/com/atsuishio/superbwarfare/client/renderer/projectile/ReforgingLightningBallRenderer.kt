@@ -2,6 +2,7 @@ package com.atsuishio.superbwarfare.client.renderer.projectile
 
 import com.atsuishio.superbwarfare.Mod.Companion.loc
 import com.atsuishio.superbwarfare.client.ClientRenderHandler
+import com.atsuishio.superbwarfare.client.renderer.ModRenderTypes
 import com.atsuishio.superbwarfare.entity.projectile.ReforgingLightningBallEntity
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.vertex.VertexConsumer
@@ -14,6 +15,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture
 import net.minecraft.world.phys.Vec3
 import org.joml.Matrix4f
 import java.util.*
+import kotlin.math.*
 
 class ReforgingLightningBallRenderer(context: EntityRendererProvider.Context) :
     EntityRenderer<ReforgingLightningBallEntity>(context) {
@@ -35,7 +37,6 @@ class ReforgingLightningBallRenderer(context: EntityRendererProvider.Context) :
         // 跟着同一份 pose 走才不会和球体分家。
         ClientRenderHandler.transformVirtualRenderPosition(pose, entity, partialTicks)
 
-        val buffer = buffers.getBuffer(RenderType.lightning())
         val phase = entity.level().gameTime / 2
         val seed = entity.id.toLong() * 31 + phase * 17
         val model = entity.getModelInstance()
@@ -44,18 +45,22 @@ class ReforgingLightningBallRenderer(context: EntityRendererProvider.Context) :
             animation.context.partialTick = partialTicks
             animation.tick()
             model.applyPose(BasicProjectileRenderer.BLENDER.blend(model.bindPose, animation.getPose()))
+            model.getBone("middle_frame")?.visible = false
             model.renderToBuffer(
                 pose, buffers.getBuffer(RenderType.eyes(TEXTURE)),
                 LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY
             )
-            // Both outer cages carry electricity along all edges and across their rotating faces.
+            // The thin inner cage and toothed outer cage rotate independently.
             for ((boneName, halfSize) in ELECTRIC_CAGES) {
                 val bone = model.getIndex(boneName)
                 if (bone < 0) continue
                 val transform = Matrix4f(pose.last().pose()).mul(model.getGlobalTransform(bone))
-                electrifyCage(buffer, transform, halfSize, seed + bone * 101L, phase)
+                electrifyCage(buffers.getBuffer(ModRenderTypes.REFORGING_GLOW), transform, halfSize, seed + bone * 101L, phase)
             }
         }
+
+        val buffer = buffers.getBuffer(ModRenderTypes.REFORGING_GLOW)
+        ambientElectricity(buffer, pose.last().pose(), entity, partialTicks)
 
         for (arc in entity.lightningArcs) {
             val end = arc.end.subtract(entity.getPosition(partialTicks))
@@ -65,35 +70,80 @@ class ReforgingLightningBallRenderer(context: EntityRendererProvider.Context) :
         super.render(entity, entityYaw, partialTicks, pose, buffers, packedLight)
     }
 
+    private fun ambientElectricity(
+        buffer: VertexConsumer, pose: Matrix4f, entity: ReforgingLightningBallEntity, partialTicks: Float,
+    ) {
+        val time = entity.level().gameTime + partialTicks.toDouble()
+        // Hold each random shape for a few ticks; never choose new geometry on every rendered frame.
+        repeat(7) { index ->
+            val clock = (time + index * 1.73) / 4.0
+            val generation = kotlin.math.floor(clock).toLong()
+            val random = arcRandom
+            random.setSeed(entity.id * 7919L + generation * 104729L + index * 31L)
+            if (random.nextFloat() < 0.22f) return@repeat
+            val direction = randomDirection(random)
+            val start = direction.scale(0.5 + random.nextDouble() * 0.35)
+            val end = direction.scale(1.0 + random.nextDouble() * 0.65)
+                .add(randomDirection(random).scale(0.3))
+            val arcSeed = random.nextLong()
+            val fade = sin(PI * (clock - generation)).toFloat()
+            lightning(buffer, pose, start, end, arcSeed, fade * 0.85f, 9, 0.55, 8)
+            if (index % 2 == 0) {
+                val branch = start.lerp(end, 0.55)
+                lightning(buffer, pose, branch, branch.add(direction.scale(0.25)).add(0.15, 0.2, -0.15),
+                    arcSeed + 1, fade * 0.5f, 5, 0.3, 4)
+            }
+        }
+        repeat(24) { index ->
+            val clock = (time + index * 3.17) / (12.0 + index % 7)
+            val generation = kotlin.math.floor(clock).toLong()
+            arcRandom.setSeed(entity.id * 3571L + index * 101L + generation * 65537L)
+            val direction = randomDirection(arcRandom)
+            val point = direction.scale(0.55 + arcRandom.nextDouble() * 0.95)
+                .add(direction.scale((clock - generation) * 0.12))
+            val radius = 0.008 + arcRandom.nextDouble() * 0.015
+            val fade = sin(PI * (clock - generation)).toFloat()
+            sphere(buffer, pose, point, radius * 2.1, 0.25f, 0.65f, 1f, fade * 0.12f)
+            sphere(buffer, pose, point, radius, 0.75f, 0.95f, 1f, fade * 0.85f)
+        }
+    }
+
+    private fun randomDirection(random: Random): Vec3 {
+        val y = random.nextDouble() * 2.0 - 1.0
+        val angle = random.nextDouble() * PI * 2.0
+        val radius = sqrt(1.0 - y * y)
+        return Vec3(cos(angle) * radius, y, sin(angle) * radius)
+    }
+
     private fun electrifyCage(
         buffer: VertexConsumer, pose: Matrix4f, halfSize: Double, seed: Long, phase: Long,
     ) {
         val corners = CAGE_CORNERS.map { it.scale(halfSize) }
         for (index in CAGE_EDGES.indices) {
             val edge = CAGE_EDGES[index]
-            lightning(buffer, pose, corners[edge.first], corners[edge.second], seed + index * 37L, 0.65f, 3)
+            lightning(buffer, pose, corners[edge.first], corners[edge.second], seed + index * 37L, 0.45f, 3, 0.25)
         }
         repeat(3) { faceIndex ->
             val face = Math.floorMod(phase + faceIndex * 2, 6)
             val axis = face / 2
             val start = if (face % 2 == 0) 0 else 1 shl axis
             val end = start xor (7 xor (1 shl axis))
-            lightning(buffer, pose, corners[start], corners[end], seed + 1000 + faceIndex, 0.85f, 5)
+            lightning(buffer, pose, corners[start], corners[end], seed + 1000 + faceIndex, 0.5f, 5, 0.25)
         }
         // A fourth arc bridges the charged shell and its core.
-        lightning(buffer, pose, Vec3.ZERO, corners[(phase.toInt() and 7)], seed + 2000, 0.5f, 4)
+        lightning(buffer, pose, Vec3.ZERO, corners[(phase.toInt() and 7)], seed + 2000, 0.5f, 4, 0.35)
     }
 
     private fun lightning(
         buffer: VertexConsumer, pose: Matrix4f, start: Vec3, end: Vec3, seed: Long, alpha: Float,
-        maxSegments: Int = 32,
+        maxSegments: Int = 32, widthScale: Double = 1.0, minSegments: Int = 3,
     ) {
         val offset = end.subtract(start)
         val length = offset.length()
         if (length < 0.01 || alpha <= 0f) return
         val random = arcRandom
         random.setSeed(seed)
-        val segments = (length * 3).toInt().coerceIn(3, maxSegments)
+        val segments = (length * 8).toInt().coerceIn(minSegments, maxSegments)
         val jitter = (length * 0.06).coerceIn(0.08, 0.35)
         var previous = start
         for (i in 1..segments) {
@@ -102,41 +152,67 @@ class ReforgingLightningBallRenderer(context: EntityRendererProvider.Context) :
                 (random.nextDouble() - 0.5) * jitter * 2,
                 (random.nextDouble() - 0.5) * jitter * 2,
             )
-            beam(buffer, pose, previous, point, 0.065, 0.2f, 0.4f, 1f, alpha * 0.25f)
-            beam(buffer, pose, previous, point, 0.018, 0.8f, 0.9f, 1f, alpha)
+            beam(buffer, pose, previous, point, 0.035 * widthScale, 0.2f, 0.4f, 1f, alpha * 0.2f)
+            beam(buffer, pose, previous, point, 0.009 * widthScale, 0.65f, 0.85f, 1f, alpha)
             previous = point
         }
     }
 
-    /** Four faces around a segment give the frame edges actual thickness from every view. */
     private fun beam(
         buffer: VertexConsumer, pose: Matrix4f, start: Vec3, end: Vec3,
         width: Double, red: Float, green: Float, blue: Float, alpha: Float,
     ) {
+        if (alpha <= 0f || width <= 0.0 || start.distanceToSqr(end) < 1.0E-10) return
         val direction = end.subtract(start).normalize()
-        val reference = if (kotlin.math.abs(direction.y) > 0.9) Vec3(1.0, 0.0, 0.0) else Vec3(0.0, 1.0, 0.0)
+        val reference = if (abs(direction.y) > 0.9) Vec3(1.0, 0.0, 0.0) else Vec3(0.0, 1.0, 0.0)
         val side = direction.cross(reference).normalize().scale(width)
         val up = direction.cross(side).normalize().scale(width)
         val offsets = arrayOf(side.add(up), side.subtract(up), side.scale(-1.0).subtract(up), up.subtract(side))
         for (i in offsets.indices) {
             val next = (i + 1) % offsets.size
-            for (point in arrayOf(
-                start.add(offsets[i]),
-                end.add(offsets[i]),
-                end.add(offsets[next]),
-                start.add(offsets[next])
-            )) {
-                buffer.vertex(pose, point.x.toFloat(), point.y.toFloat(), point.z.toFloat())
-                    .color(red, green, blue, alpha).endVertex()
-            }
+            vertex(buffer, pose, start.add(offsets[i]), red, green, blue, alpha)
+            vertex(buffer, pose, end.add(offsets[i]), red, green, blue, alpha)
+            vertex(buffer, pose, end.add(offsets[next]), red, green, blue, alpha)
+            vertex(buffer, pose, start.add(offsets[next]), red, green, blue, alpha)
         }
+    }
+
+    // Cache unit sphere vertices instead of rebuilding the trigonometry every frame.
+    private val sphere = buildList {
+        fun point(latitude: Int, longitude: Int): Vec3 {
+            val pitch = PI * latitude / 6
+            val yaw = PI * longitude / 6
+            return Vec3(sin(pitch) * cos(yaw), cos(pitch), sin(pitch) * sin(yaw))
+        }
+        for (latitude in 0 until 6) for (longitude in 0 until 12) {
+            add(point(latitude, longitude))
+            add(point(latitude, longitude + 1))
+            add(point(latitude + 1, longitude + 1))
+            add(point(latitude + 1, longitude))
+        }
+    }
+
+    private fun sphere(
+        buffer: VertexConsumer, pose: Matrix4f, center: Vec3, radius: Double,
+        red: Float, green: Float, blue: Float, alpha: Float,
+    ) {
+        if (radius <= 0.0001 || alpha <= 0f) return
+        for (point in sphere) vertex(buffer, pose, center.add(point.scale(radius)), red, green, blue, alpha)
+    }
+
+    private fun vertex(
+        buffer: VertexConsumer, pose: Matrix4f, point: Vec3,
+        red: Float, green: Float, blue: Float, alpha: Float,
+    ) {
+        buffer.vertex(pose, point.x.toFloat(), point.y.toFloat(), point.z.toFloat())
+            .color(red, green, blue, alpha).endVertex()
     }
 
     override fun getTextureLocation(entity: ReforgingLightningBallEntity) = TEXTURE
 
     companion object {
         private val TEXTURE = loc("textures/bedrock/projectile/reforging_lightning_ball.png")
-        private val ELECTRIC_CAGES = arrayOf("middle_frame" to 13.4 / 16.0, "outer_frame" to 16.8 / 16.0)
+        private val ELECTRIC_CAGES = arrayOf("inner_frame" to 0.35, "outer_frame" to 0.5)
         private val CAGE_CORNERS = Array(8) { corner ->
             Vec3(
                 if (corner and 1 == 0) -1.0 else 1.0,

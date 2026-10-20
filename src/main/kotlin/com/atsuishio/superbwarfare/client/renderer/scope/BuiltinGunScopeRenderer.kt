@@ -1,6 +1,7 @@
 package com.atsuishio.superbwarfare.client.renderer.scope
 
-import com.atsuishio.superbwarfare.compat.oculus.OculusCompat
+import com.atsuishio.superbwarfare.client.renderer.scope.BuiltinGunScopeRenderer.Companion.DIVISION_MIN_ZOOM
+import com.atsuishio.superbwarfare.compat.shader.ShaderCompat
 import com.atsuishio.superbwarfare.event.ClientEventHandler
 import com.atsuishio.superbwarfare.resource.gun.pojo.BuiltinScopeInfo
 import com.github.mcmodderanchor.simplebedrockmodel.v2.common.model.runtime.TreeModelInstance
@@ -326,7 +327,7 @@ class BuiltinGunScopeRenderer(
         quadType: RenderType,
         triangleType: RenderType
     ) {
-        if (!OculusCompat.endBatch(bufferSource)) {
+        if (!ShaderCompat.endBatch(bufferSource)) {
             bufferSource.endBatch(quadType)
             bufferSource.endBatch(triangleType)
         }

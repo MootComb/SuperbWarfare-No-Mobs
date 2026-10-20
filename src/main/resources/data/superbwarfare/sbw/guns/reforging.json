@@ -63,7 +63,7 @@
           "Type": "superbwarfare:reforging_gravity_ball",
           "Data": {
             "Owner": "@sbw:owner",
-            "ActivationDelay": 10,
+            "ActivationDelay": 20,
             "ExpansionDuration": 10,
             "DamageInterval": 10,
             "PullStrength": 0.6
@@ -72,7 +72,7 @@
         "Headshot": 1,
         "Magazine": 0,
         "AmmoCostPerShoot": 4,
-        "Damage": 12,
+        "Damage": 10,
         "ExplosionDamage": 80,
         "ExplosionRadius": 12,
         "Velocity": 1.5,
