@@ -1394,6 +1394,23 @@
       }
     ]
   },
+  "lightning_ball_attack": {
+    "sounds": [
+      "superbwarfare:gun/reforging/lightning_ball_attack_1",
+      "superbwarfare:gun/reforging/lightning_ball_attack_2",
+      "superbwarfare:gun/reforging/lightning_ball_attack_3",
+      "superbwarfare:gun/reforging/lightning_ball_attack_4",
+      "superbwarfare:gun/reforging/lightning_ball_attack_5"
+    ]
+  },
+  "lightning_ball_fly": {
+    "sounds": [
+      {
+        "attenuation_distance": 32,
+        "name": "superbwarfare:lightning_ball_fly"
+      }
+    ]
+  },
   "locked_warning": {
     "sounds": [
       "superbwarfare:warning/locked"

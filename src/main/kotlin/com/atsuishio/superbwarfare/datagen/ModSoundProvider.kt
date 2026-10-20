@@ -49,6 +49,7 @@ class ModSoundProvider(output: PackOutput, existingFileHelper: ExistingFileHelpe
         root("attachment_set", "attachment_remove")
         register("rocket_fly") { attenuationDistance(128) }
         register("shell_fly") { attenuationDistance(96) }
+        register("lightning_ball_fly") { attenuationDistance(32) }
         register("rocket_engine") { attenuationDistance(128) }
         root("bomb_release", "missile_start", "bomb_reload")
         register("dps_generator_evolve") { attenuationDistance(16).volume(0.7f) }
@@ -465,7 +466,11 @@ class ModSoundProvider(output: PackOutput, existingFileHelper: ExistingFileHelpe
         // -------------------- gun/reforging --------------------
         group(
             "gun/reforging", "reforging_fire", "reforging_fire_3p", "reforging_fire_laser",
-            "reforging_fire_3p_laser", "reforging_fire_lightning", "reforging_fire_3p_lightning",
+            "reforging_fire_3p_laser", "reforging_fire_lightning", "reforging_fire_3p_lightning"
+        )
+        register(
+            "lightning_ball_attack", "gun/reforging/lightning_ball_attack_1", "gun/reforging/lightning_ball_attack_2",
+            "gun/reforging/lightning_ball_attack_3", "gun/reforging/lightning_ball_attack_4", "gun/reforging/lightning_ball_attack_5"
         )
 
         // -------------------- gun/raubtier --------------------

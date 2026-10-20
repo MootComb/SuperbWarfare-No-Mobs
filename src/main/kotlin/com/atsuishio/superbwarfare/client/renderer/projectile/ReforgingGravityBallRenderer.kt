@@ -1,6 +1,7 @@
 package com.atsuishio.superbwarfare.client.renderer.projectile
 
 import com.atsuishio.superbwarfare.Mod.Companion.loc
+import com.atsuishio.superbwarfare.client.ClientRenderHandler
 import com.atsuishio.superbwarfare.entity.projectile.ReforgingGravityBallEntity
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.vertex.VertexConsumer
@@ -23,6 +24,13 @@ class ReforgingGravityBallRenderer(context: EntityRendererProvider.Context) :
         entity: ReforgingGravityBallEntity, entityYaw: Float, partialTicks: Float,
         pose: PoseStack, buffers: MultiBufferSource, packedLight: Int,
     ) {
+        pose.pushPose()
+
+        // 弹体是从玩家眼位生成的（`GunItem.shoot` 的 `shootPosition`），开火头几 tick 要跟普通子弹一样
+        // 挪到枪口上再淡出，见 [ClientRenderHandler.bulletRenderOffset]。
+        // 整段（模型 + 电圈 + 力场）一起挪：锚定相位（`anchored` 最快也在 10 tick 后）早就淡成 0 了，不会打架。
+        ClientRenderHandler.transformVirtualRenderPosition(pose, entity, partialTicks)
+
         val expansion = entity.expansionProgress(partialTicks)
         val model = entity.getModelInstance()
         val animation = entity.getAnimationInstance()
@@ -98,6 +106,7 @@ class ReforgingGravityBallRenderer(context: EntityRendererProvider.Context) :
                 }
             }
         }
+        pose.popPose()
         super.render(entity, entityYaw, partialTicks, pose, buffers, packedLight)
     }
 

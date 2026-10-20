@@ -100,6 +100,8 @@ object ModSounds {
     @JvmField val SMOKE_FIRE = register("smoke_fire")
     @JvmField val ROCKET_FLY = register("rocket_fly")
     @JvmField val SHELL_FLY = register("shell_fly")
+    @JvmField val LIGHTNING_BALL_FLY = register("lightning_ball_fly")
+    @JvmField val LIGHTNING_BALL_ATTACK = register("lightning_ball_attack")
     @JvmField val ROCKET_ENGINE = register("rocket_engine")
 
     // 子弹破空音（12 个随机变体，普通子弹）。只在客户端播放，见 client/sound/ClientSonicBoomHandler

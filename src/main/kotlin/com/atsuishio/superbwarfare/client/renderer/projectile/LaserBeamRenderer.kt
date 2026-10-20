@@ -1,6 +1,7 @@
 package com.atsuishio.superbwarfare.client.renderer.projectile
 
 import com.atsuishio.superbwarfare.Mod.Companion.loc
+import com.atsuishio.superbwarfare.client.ClientRenderHandler
 import com.atsuishio.superbwarfare.client.model.gun.GeoGunModel
 import com.atsuishio.superbwarfare.client.renderer.gun.GunRenderContext
 import com.atsuishio.superbwarfare.compat.oculus.OculusCompat
@@ -50,7 +51,12 @@ open class LaserBeamRenderer<T : LaserBeamEntity>(context: EntityRendererProvide
                     && System.nanoTime() - it.time < 250_000_000L
         }
         val cached = rays[entity]
-        val origin = cached?.start ?: sampled?.position ?: run {
+        // 采不到枪口样本时（开枪者这一帧没跑持枪渲染），起点退回**眼位 + 枪口偏移**：
+        // `bulletRenderOffset` 在这条路径上是当**固定的初始位置**用的，不做淡出
+        // （见 [ClientRenderHandler.muzzleOffsetFor]）—— 整根光束只有十来 tick 寿命，
+        // 中途把起点挪回眼位就是让线横移、落点跟着爬，比起点略偏还难看。
+        val muzzleOffset = ClientRenderHandler.muzzleOffsetFor(entity)
+        val origin = cached?.start ?: sampled?.position ?: muzzleOffset?.let { entity.position().add(it) } ?: run {
             // Allow the gun render pass to provide its animated locator before choosing a fallback.
             if (entity.tickCount < 2) return
             entity.position()
@@ -58,7 +64,9 @@ open class LaserBeamRenderer<T : LaserBeamEntity>(context: EntityRendererProvide
         val end = cached?.end ?: entity.level().clip(
             ClipContext(origin, entity.beamEnd, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, entity)
         ).location
-        if (cached == null && sampled != null) rays[entity] = VisualRay(origin, end)
+        // 起点一确定就钉死：样本是枪口，偏移也按枪口算，两者都够格当"这一发的初始位置"。
+        // 只有"什么都没有、退回眼位"那条不缓存，好让后面采到样本时还能纠回来。
+        if (cached == null && (sampled != null || muzzleOffset != null)) rays[entity] = VisualRay(origin, end)
         val vector = end.subtract(origin)
         val length = vector.length()
         if (length < 0.001) return

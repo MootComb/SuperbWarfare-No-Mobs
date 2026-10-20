@@ -3,6 +3,7 @@ package com.atsuishio.superbwarfare.init
 import com.atsuishio.superbwarfare.client.sound.*
 import com.atsuishio.superbwarfare.entity.living.SteelCoilEntity
 import com.atsuishio.superbwarfare.entity.projectile.FastThrowableProjectile
+import com.atsuishio.superbwarfare.entity.projectile.ReforgingLightningBallEntity
 import com.atsuishio.superbwarfare.entity.vehicle.base.VehicleEntity
 import com.atsuishio.superbwarfare.tools.mc
 import net.neoforged.api.distmarker.Dist
@@ -42,5 +43,7 @@ object ModSoundInstances {
             Consumer { mc.soundManager.play(FastProjectileSoundInstance.FlySound(it)) }
         SteelCoilEntity.playMoveSound =
             Consumer { mc.soundManager.play(SteelCoilMoveSoundInstance.SteelCoilMoveSound(it)) }
+        ReforgingLightningBallEntity.playFlySound =
+            Consumer { mc.soundManager.play(LightningBallFlySoundInstance(it)) }
     }
 }

@@ -1,6 +1,7 @@
 package com.atsuishio.superbwarfare.client.renderer.projectile
 
 import com.atsuishio.superbwarfare.Mod.Companion.loc
+import com.atsuishio.superbwarfare.client.ClientRenderHandler
 import com.atsuishio.superbwarfare.entity.projectile.ReforgingLightningBallEntity
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.vertex.VertexConsumer
@@ -27,6 +28,13 @@ class ReforgingLightningBallRenderer(context: EntityRendererProvider.Context) :
         buffers: MultiBufferSource,
         packedLight: Int,
     ) {
+        pose.pushPose()
+
+        // 与普通子弹一致：弹体从眼位生成，开火头几 tick 挪到枪口再淡出
+        // （见 [ClientRenderHandler.bulletRenderOffset]）。电弧的端点都是相对实体位置算的，
+        // 跟着同一份 pose 走才不会和球体分家。
+        ClientRenderHandler.transformVirtualRenderPosition(pose, entity, partialTicks)
+
         val buffer = buffers.getBuffer(RenderType.lightning())
         val phase = entity.level().gameTime / 2
         val seed = entity.id.toLong() * 31 + phase * 17
@@ -53,6 +61,7 @@ class ReforgingLightningBallRenderer(context: EntityRendererProvider.Context) :
             val end = arc.end.subtract(entity.getPosition(partialTicks))
             lightning(buffer, pose.last().pose(), Vec3.ZERO, end, arc.seed, (arc.ticks - partialTicks) / 4f)
         }
+        pose.popPose()
         super.render(entity, entityYaw, partialTicks, pose, buffers, packedLight)
     }
 
