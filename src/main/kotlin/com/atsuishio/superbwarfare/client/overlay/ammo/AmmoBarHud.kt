@@ -31,6 +31,8 @@ object AmmoBarHud {
     private const val PATH = "superbwarfare/ammo_bar.html"
     private val FORMAT_CODE = Pattern.compile("§.")
     private val LARGE_FIRE_MODE_ICONS = setOf("rpm600", "rpm1200", "rpm1800")
+    // 与 ammo_bar.html 中 .sbw-muted 一致：备用弹药与不可切换的开火模式键共用此灰色。
+    private const val MUTED_CLASS = "sbw-muted"
     private var document: Document? = null
     private var generation = -1L
     private val values = mutableMapOf<String, String>()
@@ -107,6 +109,9 @@ object AmmoBarHud {
         // Flex uses actual rendered text width; no fixed digit count or guessed font metrics.
         text("virtual-ammo", if (data.virtualAmmo.get() > 0 && !data.meleeOnly()) "+${data.virtualAmmo.get()}" else "")
         text("fire-mode-key", "[${ModKeyMappings.FIRE_MODE.key.displayName.string}]")
+        // 只有一种开火模式时这个键切不了模式，按备用弹药的灰色弱化。
+        val modes = data.get(GunProp.AVAILABLE_FIRE_MODES)
+        toggleClass("fire-mode-key", MUTED_CLASS, modes.size <= 1)
 
         val icon = (data.stack.item as GunItem).getGunIcon(data).toString()
         val identity = data.uuid ?: data.stack.item
@@ -140,7 +145,6 @@ object AmmoBarHud {
         attr("fire-mode-icon", "src", "superbwarfare:textures/overlay/ammo_bar/fire_mode/$fireMode.png")
         val fade = if (reduced) 1.0 else progress(now, modeAt, 120)
         attr("fire-mode-icon", "style", "width:${fireModeSize}px;height:${fireModeSize}px;opacity:$fade;")
-        val modes = data.get(GunProp.AVAILABLE_FIRE_MODES)
         val showModeIndex = DisplayConfig.ADVANCED_AMMO_HUD.get() && modes.size > 3
         ordinal("fire-mode-index", data.selectedFireMode.get(), if (showModeIndex) modes.size else 0)
         updateSources(data, player, now, reduced)
@@ -233,6 +237,9 @@ object AmmoBarHud {
     private fun attr(id: String, name: String, value: String) = changed("$name:$id", value) { document?.getElementById(id)?.setAttribute(name, value) }
     private fun style(id: String, property: String, value: String) = changed("css:$property:$id", value) {
         document?.getElementById(id)?.setInlineStyleProperty(property, value)
+    }
+    private fun toggleClass(id: String, name: String, enabled: Boolean) = changed("class:$id:$name", enabled.toString()) {
+        document?.getElementById(id)?.classList?.toggle(name, enabled)
     }
 
     private inline fun changed(key: String, value: String, write: () -> Unit) {

@@ -13,7 +13,7 @@
 			"bones": [
 				{
 					"name": "root",
-					"pivot": [0, 0, 6.5]
+					"pivot": [0, 0, 0]
 				},
 				{
 					"name": "muzzle_pos",
@@ -4921,7 +4921,7 @@
 				},
 				{
 					"name": "positioning",
-					"pivot": [0, 0, 6.5]
+					"pivot": [0, 0, 0]
 				},
 				{
 					"name": "camera",
@@ -4947,7 +4947,7 @@
 				{
 					"name": "iron_view",
 					"parent": "positioning",
-					"pivot": [0, 4.29922, 4.85]
+					"pivot": [0, 4.29922, 9.35]
 				},
 				{
 					"name": "idle_view",

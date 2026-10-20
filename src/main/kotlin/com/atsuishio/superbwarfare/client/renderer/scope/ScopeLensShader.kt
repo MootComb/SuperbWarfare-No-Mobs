@@ -40,11 +40,11 @@ object ScopeLensShader {
         ) { shader = it }
     }
 
-    private fun captureScreen() {
-        val window = Minecraft.getInstance().window
-        val width = window.width
-        val height = window.height
-        if (width <= 0 || height <= 0) return
+    private fun captureScreen(): Boolean {
+        val target = Minecraft.getInstance().mainRenderTarget
+        val width = target.width
+        val height = target.height
+        if (width <= 0 || height <= 0) return false
 
         if (screenTexture < 0) {
             screenTexture = GlStateManager._genTexture()
@@ -65,6 +65,7 @@ object ScopeLensShader {
         }
         GL11.glCopyTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, 0, 0, width, height)
         RenderSystem.setShaderTexture(0, screenTexture)
+        return true
     }
 
     fun isAvailable(): Boolean = shader != null
@@ -82,7 +83,7 @@ object ScopeLensShader {
         )
     }
 
-    private fun screenScale(): Float {
+    fun screenScale(): Float {
         if (DisplayConfig.LENS_ZOOM_RATIO.get() <= 0.0) return 1f
         val world = ClientEventHandler.projectionMatrix ?: return 1f
         val handM11 = RenderSystem.getProjectionMatrix().m11()
@@ -97,19 +98,19 @@ object ScopeLensShader {
         edgeWidth: Float,
         magnification: Float,
         tintColor: Int,
-        tintStrength: Float
+        tintStrength: Float,
+        screenScale: Float = screenScale()
     ): Boolean {
         if (radius <= 1.0e-4f) return false
         val custom = shader ?: return false
-        captureScreen()
+        if (!captureScreen()) return false
         RenderSystem.setShader { custom }
         custom.safeGetUniform("LensCenter").set(centerX, centerY)
         custom.safeGetUniform("LensRadius").set(radius)
         custom.safeGetUniform("LensEdgeWidth").set(edgeWidth)
         custom.safeGetUniform("LensMagnification").set(magnification.coerceAtLeast(0.001f))
-        custom.safeGetUniform("LensScreenScale").set(screenScale())
-        val window = Minecraft.getInstance().window
-        custom.safeGetUniform("LensTexelSize").set(1f / window.width, 1f / window.height)
+        custom.safeGetUniform("LensScreenScale").set(screenScale)
+        custom.safeGetUniform("LensTexelSize").set(1f / screenWidth, 1f / screenHeight)
         val tint = lensTint(tintColor, tintStrength)
         custom.safeGetUniform("LensTint").set(tint[0], tint[1], tint[2])
         RenderSystem.enableBlend()

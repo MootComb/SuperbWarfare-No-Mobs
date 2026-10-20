@@ -17,7 +17,9 @@
         #gun-icon { position: absolute; left: 25px; top: 24px; width: 64px; height: 16px; transform-origin: center; }
         #ammo-row { position: absolute; left: 96px; top: 21px; display: flex; align-items: flex-start; white-space: nowrap; }
         #virtual-ammo { position: relative; top: -6px; margin-left: 4px; color: #55ffff; }
-        #backup-ammo { position: absolute; left: 96px; top: 34px; color: #cccccc; }
+        #backup-ammo { position: absolute; left: 96px; top: 34px; }
+        /* 弱化色：备用弹药与只有一种开火模式的切换键共用同一个色号。 */
+        .sbw-muted { color: #cccccc; }
         /* The 16px mode box also accommodates RPM textures. */
         #fire-mode-key { position: absolute; right: 120.5px; top: 47px; }
         #fire-mode-seat { position: absolute; left: 58.5px; top: 41px; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; }
@@ -40,7 +42,7 @@
         <sbw-hud-text id="ammo-name" class="name" data-scale="0.7" data-fixed-width="true" data-align="center"></sbw-hud-text>
         <texture id="gun-icon" />
         <div id="ammo-row"><sbw-hud-text id="ammo-count" data-scale="1.5"></sbw-hud-text><sbw-hud-text id="virtual-ammo" data-scale="0.8"></sbw-hud-text></div>
-        <sbw-hud-text id="backup-ammo" data-scale="1"></sbw-hud-text>
+        <sbw-hud-text id="backup-ammo" class="sbw-muted" data-scale="1"></sbw-hud-text>
         <sbw-hud-text id="fire-mode-key" data-scale="1"></sbw-hud-text>
         <div id="fire-mode-seat"><texture id="fire-mode-icon" /></div>
         <texture id="fire-mode-line" src="superbwarfare:textures/overlay/ammo_bar/fire_mode/line.png" />

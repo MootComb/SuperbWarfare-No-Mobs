@@ -46,16 +46,34 @@ class ReforgingLightningBallRenderer(context: EntityRendererProvider.Context) :
             animation.tick()
             model.applyPose(BasicProjectileRenderer.BLENDER.blend(model.bindPose, animation.getPose()))
             model.getBone("middle_frame")?.visible = false
-            model.renderToBuffer(
-                pose, buffers.getBuffer(RenderType.eyes(TEXTURE)),
-                LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY
-            )
+            val outerFrame = model.getBone("outer_frame")
+            val outerVisible = outerFrame?.visible ?: false
+            val renderType = RenderType.eyes(TEXTURE)
+            try {
+                outerFrame?.visible = false
+                model.renderToBuffer(
+                    pose, buffers.getBuffer(renderType),
+                    LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY
+                )
+                if (outerVisible) {
+                    outerFrame.visible = true
+                    // Tint only the outer cage; keep the inner frame and bright core unchanged.
+                    model.renderSingleBone(
+                        pose, model.getIndex("outer_frame"), buffers, renderType, renderType,
+                        LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY,
+                        OUTER_FRAME_TINT.x.toFloat(), OUTER_FRAME_TINT.y.toFloat(), OUTER_FRAME_TINT.z.toFloat(), 1f, true
+                    )
+                }
+            } finally {
+                outerFrame?.visible = outerVisible
+            }
             // The thin inner cage and toothed outer cage rotate independently.
             for ((boneName, halfSize) in ELECTRIC_CAGES) {
                 val bone = model.getIndex(boneName)
                 if (bone < 0) continue
                 val transform = Matrix4f(pose.last().pose()).mul(model.getGlobalTransform(bone))
-                electrifyCage(buffers.getBuffer(ModRenderTypes.REFORGING_GLOW), transform, halfSize, seed + bone * 101L, phase)
+                electrifyCage(buffers.getBuffer(ModRenderTypes.REFORGING_GLOW), transform, halfSize, seed + bone * 101L,
+                    phase, if (boneName == "outer_frame") OUTER_FRAME_TINT else WHITE_TINT)
             }
         }
 
@@ -116,27 +134,27 @@ class ReforgingLightningBallRenderer(context: EntityRendererProvider.Context) :
     }
 
     private fun electrifyCage(
-        buffer: VertexConsumer, pose: Matrix4f, halfSize: Double, seed: Long, phase: Long,
+        buffer: VertexConsumer, pose: Matrix4f, halfSize: Double, seed: Long, phase: Long, tint: Vec3,
     ) {
         val corners = CAGE_CORNERS.map { it.scale(halfSize) }
         for (index in CAGE_EDGES.indices) {
             val edge = CAGE_EDGES[index]
-            lightning(buffer, pose, corners[edge.first], corners[edge.second], seed + index * 37L, 0.45f, 3, 0.25)
+            lightning(buffer, pose, corners[edge.first], corners[edge.second], seed + index * 37L, 0.45f, 3, 0.25, tint = tint)
         }
         repeat(3) { faceIndex ->
             val face = Math.floorMod(phase + faceIndex * 2, 6)
             val axis = face / 2
             val start = if (face % 2 == 0) 0 else 1 shl axis
             val end = start xor (7 xor (1 shl axis))
-            lightning(buffer, pose, corners[start], corners[end], seed + 1000 + faceIndex, 0.5f, 5, 0.25)
+            lightning(buffer, pose, corners[start], corners[end], seed + 1000 + faceIndex, 0.5f, 5, 0.25, tint = tint)
         }
         // A fourth arc bridges the charged shell and its core.
-        lightning(buffer, pose, Vec3.ZERO, corners[(phase.toInt() and 7)], seed + 2000, 0.5f, 4, 0.35)
+        lightning(buffer, pose, Vec3.ZERO, corners[(phase.toInt() and 7)], seed + 2000, 0.5f, 4, 0.35, tint = tint)
     }
 
     private fun lightning(
         buffer: VertexConsumer, pose: Matrix4f, start: Vec3, end: Vec3, seed: Long, alpha: Float,
-        maxSegments: Int = 32, widthScale: Double = 1.0, minSegments: Int = 3,
+        maxSegments: Int = 32, widthScale: Double = 1.0, minSegments: Int = 3, tint: Vec3 = WHITE_TINT,
     ) {
         val offset = end.subtract(start)
         val length = offset.length()
@@ -152,8 +170,10 @@ class ReforgingLightningBallRenderer(context: EntityRendererProvider.Context) :
                 (random.nextDouble() - 0.5) * jitter * 2,
                 (random.nextDouble() - 0.5) * jitter * 2,
             )
-            beam(buffer, pose, previous, point, 0.035 * widthScale, 0.2f, 0.4f, 1f, alpha * 0.2f)
-            beam(buffer, pose, previous, point, 0.009 * widthScale, 0.65f, 0.85f, 1f, alpha)
+            beam(buffer, pose, previous, point, 0.035 * widthScale,
+                (0.2 * tint.x).toFloat(), (0.4 * tint.y).toFloat(), tint.z.toFloat(), alpha * 0.2f)
+            beam(buffer, pose, previous, point, 0.009 * widthScale,
+                (0.65 * tint.x).toFloat(), (0.85 * tint.y).toFloat(), tint.z.toFloat(), alpha)
             previous = point
         }
     }
@@ -212,6 +232,8 @@ class ReforgingLightningBallRenderer(context: EntityRendererProvider.Context) :
 
     companion object {
         private val TEXTURE = loc("textures/bedrock/projectile/reforging_lightning_ball.png")
+        private val WHITE_TINT = Vec3(1.0, 1.0, 1.0)
+        private val OUTER_FRAME_TINT = Vec3(0.4, 0.68, 0.95)
         private val ELECTRIC_CAGES = arrayOf("inner_frame" to 0.35, "outer_frame" to 0.5)
         private val CAGE_CORNERS = Array(8) { corner ->
             Vec3(

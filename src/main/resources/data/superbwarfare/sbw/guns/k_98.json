@@ -56,9 +56,9 @@
     "Iterative"
   ],
   "EmptyReloadTime": 59,
-  "PrepareTime": 30,
-  "IterativeTime": 13,
-  "FinishTime": 20,
+  "PrepareTime": 31,
+  "IterativeTime": 14,
+  "FinishTime": 19,
   "ActionSteps": [
     {
       "Timeline": "RELOAD_EMPTY",

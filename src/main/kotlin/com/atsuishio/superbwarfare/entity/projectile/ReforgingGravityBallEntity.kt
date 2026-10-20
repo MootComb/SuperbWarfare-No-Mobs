@@ -27,10 +27,7 @@ import net.minecraft.world.entity.projectile.Projectile
 import net.minecraft.world.entity.projectile.ProjectileUtil
 import net.minecraft.world.level.ClipContext
 import net.minecraft.world.level.Level
-import net.minecraft.world.phys.BlockHitResult
-import net.minecraft.world.phys.EntityHitResult
-import net.minecraft.world.phys.HitResult
-import net.minecraft.world.phys.Vec3
+import net.minecraft.world.phys.*
 import net.minecraftforge.api.distmarker.Dist
 import net.minecraftforge.api.distmarker.OnlyIn
 import net.minecraftforge.event.ForgeEventFactory
@@ -69,7 +66,7 @@ open class ReforgingGravityBallEntity(type: EntityType<out ReforgingGravityBallE
     private var syncedOwnerUUID by OWNER_UUID
 
     val attackRadius: Double get() = getExplosionRadius().toDouble()
-    val coreRadius: Double get() = attackRadius * 0.2
+    val coreRadius: Double get() = attackRadius * 0.1
     val pullStrength: Double get() = syncedPullStrength.toDouble()
 
     fun getOwnerUUID(): UUID? = syncedOwnerUUID.orElse(null)
@@ -300,36 +297,22 @@ open class ReforgingGravityBallEntity(type: EntityType<out ReforgingGravityBallE
                 && target.boundingBox.center.distanceToSqr(position()) <= attackRadius * attackRadius
     }
 
-    private fun attractedVelocity(target: Entity): Vec3 {
-        val toCenter = position().subtract(target.boundingBox.center)
-        val distance = toCenter.length()
-        val current = target.deltaMovement
-        if (distance < 1.0E-4) {
-            return current.scale(CORE_DAMPING)
-        }
-        if (attackRadius <= 0.0 || pullStrength <= 0.0 || distance > attackRadius) return current
-
-        val core = coreRadius.coerceIn(0.0, attackRadius)
-        val direction = toCenter.scale(1.0 / distance)
-
-        val motion = if (distance <= core) {
-            current.scale(CORE_DAMPING).add(direction.scale(CAPTURE_SPEED))
-        } else {
-            val gap = (attackRadius - core).coerceAtLeast(1.0E-4)
-            val proximity = ((attackRadius - distance) / gap).coerceIn(0.0, 1.0)
-            val acceleration = pullStrength * (0.5 + 0.5 * proximity)
-            current.scale(PULL_MOMENTUM).add(direction.scale(acceleration))
-        }
-        return capSpeed(motion, MAX_PULL_SPEED)
-    }
+    private fun attractedVelocity(target: Entity): Vec3 = pullVelocity(
+        target.deltaMovement, position().subtract(target.boundingBox.center), attackRadius, coreRadius, pullStrength
+    )
 
     private fun affectTargets() {
         if (attackRadius <= 0.0) return
         val targets = level().getEntities(this, boundingBox.inflate(attackRadius), ::canAffect)
         if (targets.isEmpty()) return
-        if (fieldActive && damageTick) {
-            damageTargets(targets.filterIsInstance<LivingEntity>())
+        for (target in targets) {
+            if (target is Projectile && canConsume(target.boundingBox, position(), coreRadius)) target.discard()
         }
+        val regularDamage = fieldActive && damageTick
+        val damagedTargets = targets.filterIsInstance<LivingEntity>().filter {
+            regularDamage || canConsume(it.boundingBox, position(), coreRadius)
+        }
+        if (damagedTargets.isNotEmpty()) damageTargets(damagedTargets)
         attractTargets(targets)
     }
 
@@ -344,7 +327,11 @@ open class ReforgingGravityBallEntity(type: EntityType<out ReforgingGravityBallE
     private fun damageTargets(targets: List<LivingEntity>, finalPulse: Boolean = false) {
         val source = ModDamageTypes.causeGravityDamage(level().registryAccess(), this, shooter())
         for (target in targets) {
-            val damage = if (finalPulse) {
+            if (!target.isAlive) continue
+            val damage = if (canConsume(target.boundingBox, position(), coreRadius)) {
+                // Attempt a lethal hit through normal damage handling, preserving armor, hooks and death events.
+                target.maxHealth
+            } else if (finalPulse) {
                 getExplosionDamage() * damageMultiplier(
                     target.boundingBox.distanceToSqr(position()).let { sqrt(it) },
                     attackRadius,
@@ -395,7 +382,7 @@ open class ReforgingGravityBallEntity(type: EntityType<out ReforgingGravityBallE
     private fun attractTargets(targets: List<Entity>) {
         if (pullStrength <= 0.0) return
         for (target in targets) {
-            if (target is Player) continue
+            if (!target.isAlive || target is Player) continue
 
             val motion = attractedVelocity(target)
             // Each entity's own tick decides whether/how velocity moves it, including stationary dummies.
@@ -463,6 +450,30 @@ open class ReforgingGravityBallEntity(type: EntityType<out ReforgingGravityBallE
             return (1.0 - EDGE_DAMAGE_LOSS * falloff).toFloat()
         }
 
+        private fun canConsume(box: AABB, center: Vec3, coreRadius: Double): Boolean =
+            coreRadius > 0.0 && maxOf(box.xsize, box.ysize, box.zsize) < coreRadius &&
+                box.center.distanceToSqr(center) <= coreRadius * coreRadius
+
+        private fun pullVelocity(current: Vec3, toCenter: Vec3, radius: Double, coreRadius: Double, strength: Double): Vec3 {
+            val distance = toCenter.length()
+            if (radius <= 0.0 || strength <= 0.0 || distance > radius) return current
+            if (distance < 1.0E-4) return capSpeed(current.scale(CORE_DAMPING), MAX_PULL_SPEED)
+
+            val core = coreRadius.coerceIn(0.0, radius)
+            val direction = toCenter.scale(1.0 / distance)
+            if (distance <= core) {
+                return capSpeed(current.scale(CORE_DAMPING).add(direction.scale(CAPTURE_SPEED)), MAX_PULL_SPEED)
+            }
+            val proximity = ((radius - distance) / (radius - core).coerceAtLeast(1.0E-4)).coerceIn(0.0, 1.0)
+            val inward = direction.scale(strength * (0.5 + 0.5 * proximity))
+            return if (distance <= radius * FORCED_PULL_RADIUS_SCALE) {
+                capSpeed(current.scale(PULL_MOMENTUM).add(inward), MAX_PULL_SPEED)
+            } else {
+                // Preserve existing tangential/outward momentum; only add gravity outside the inner 60%.
+                current.add(inward)
+            }
+        }
+
         private fun capSpeed(motion: Vec3, max: Double): Vec3 {
             val speed = motion.length()
             return if (speed > max && speed > 0.0) motion.scale(max / speed) else motion
@@ -470,6 +481,7 @@ open class ReforgingGravityBallEntity(type: EntityType<out ReforgingGravityBallE
 
         const val MAX_PULL_SPEED = 0.8
 
+        private const val FORCED_PULL_RADIUS_SCALE = 0.6
         private const val PULL_MOMENTUM = 0.85
         private const val CORE_DAMPING = 0.35
         private const val CAPTURE_SPEED = 0.08

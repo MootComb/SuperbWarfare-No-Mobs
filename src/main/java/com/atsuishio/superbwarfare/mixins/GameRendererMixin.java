@@ -1,5 +1,6 @@
 package com.atsuishio.superbwarfare.mixins;
 
+import com.atsuishio.superbwarfare.client.renderer.scope.ScopeLensPostProcessor;
 import com.atsuishio.superbwarfare.config.client.DisplayConfig;
 import com.atsuishio.superbwarfare.data.vehicle.VehicleData;
 import com.atsuishio.superbwarfare.entity.vehicle.base.VehicleEntity;
@@ -30,6 +31,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(GameRenderer.class)
 public abstract class GameRendererMixin {
+
+    @Inject(method = "renderLevel", at = @At("HEAD"))
+    private void superbWarfare$beginScopeFrame(float partialTicks, long finishTime, PoseStack poseStack, CallbackInfo ci) {
+        ScopeLensPostProcessor.beginFrame();
+    }
+
+    // Iris has completed its composite at this point; its final colour-space conversion is later.
+    @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", ordinal = 2))
+    private void superbWarfare$renderScopeLenses(float partialTicks, long finishTime, PoseStack poseStack, CallbackInfo ci) {
+        ScopeLensPostProcessor.render();
+    }
 
     @Inject(method = "bobView(Lcom/mojang/blaze3d/vertex/PoseStack;F)V", at = @At("HEAD"), cancellable = true)
     public void bobView(PoseStack p_109139_, float p_109140_, CallbackInfo ci) {
