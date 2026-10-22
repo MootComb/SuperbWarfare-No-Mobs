@@ -13,8 +13,9 @@ import com.atsuishio.superbwarfare.data.attachment.AttachmentSlots.mountOf
 import com.atsuishio.superbwarfare.data.attachment.AttachmentSlots.registeredIds
 import com.atsuishio.superbwarfare.data.gun.GunData
 import com.atsuishio.superbwarfare.data.gun.value.AttachmentType
-import com.atsuishio.superbwarfare.init.ModItems
+import com.atsuishio.superbwarfare.item.attachment.AttachmentProvider
 import net.minecraft.resources.ResourceLocation
+import net.minecraftforge.registries.ForgeRegistries
 import java.util.concurrent.ConcurrentHashMap
 
 /** 槽位的挂载骨骼从哪来，见 [AttachmentSlot.mountBone] */
@@ -399,8 +400,8 @@ object AttachmentSlots {
      * [type] 槽位上已注册的全部配件 id（配件物品与配件数据都在的那些），按 id 排序
      *
      * 只被「完全自由改装模式」用到：那一档要无视枪械数据里的 `AvailableAttachments`，
-     * 把一个槽位能装的东西全部放出来，来源是配件物品注册表 [ModItems.ATTACHMENTS]，
-     * 槽位以配件数据的 `Slot` 为准，所以数据包改了 `Slot` 之后结果会跟着变
+     * 把一个槽位能装的东西全部放出来，来源是全部已注册的 [AttachmentProvider] 物品，
+     * 包括第三方配件；槽位以配件数据的 `Slot` / `ExtraSlots` 为准
      *
      * 结果按 [GunData.DATA_VERSION] 缓存：它会经 `GunItem.hasCustomAttachment` 被渲染路径每帧查询，
      * 而枚举几十个配件物品再逐条查数据表并不便宜
@@ -413,10 +414,14 @@ object AttachmentSlots {
         }
 
         return registeredIdsCache.getOrPut(type) {
-            ModItems.ATTACHMENTS.entries
-                .map { it.id }
+            ForgeRegistries.ITEMS.values
+                .asSequence()
+                .filterIsInstance<AttachmentProvider>()
+                .mapNotNull { ResourceLocation.tryParse(it.attachmentId) }
+                .distinct()
                 .filter { AttachmentDefinition.from(it)?.acceptedSlots?.contains(type) == true }
                 .sorted()
+                .toList()
         }
     }
 
