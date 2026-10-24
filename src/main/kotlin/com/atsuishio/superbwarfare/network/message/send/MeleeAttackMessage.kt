@@ -33,6 +33,7 @@ data class MeleeAttackMessage(val uuidList: List<SerializedUUID>) : ServerPacket
     override fun PayloadContext.handler() {
         val player = sender()
         if (player.isSpectator) return
+        if (!player.isAlive) return
 
         val entities = uuidList.mapNotNull { EntityFindUtil.findEntity(player.level(), it.toString()) }
 
