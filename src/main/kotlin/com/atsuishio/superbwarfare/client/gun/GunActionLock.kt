@@ -49,17 +49,17 @@ object GunActionLock {
         /** 当前近战段剩余 tick（0 = 没有正在进行的近战） */
         var meleeTicks: Int = 0
 
-        /** 本段近战是否已经结算过（每个动作只结算一次） */
-        var meleeHitResolved: Boolean = false
-
         /** 锁存的连招下标 */
         var meleeActionIndex: Int = 0
 
         /** 本段动作的持续 tick（动画按它拉伸） */
         var meleeDuration: Int = 0
 
-        /** 本段的结算点：`meleeTicks` 递减到它就打（= `Duration - HitTime`） */
-        var meleeHitTick: Int = 0
+        /** 本段的结算点：`meleeTicks` 递减到它就打一次（= `Duration - HitTime`），**从大到小**排列 */
+        var meleeHitTicks: IntArray = IntArray(0)
+
+        /** 已经结算到第几个结算点；等于 [meleeHitTicks] 长度时本段不再出伤 */
+        var meleeHitIndex: Int = 0
 
         /** 本段挥击是不是刺刀冲锋打出来的（决定用 `Animation.BayonetChargeHit` 换掉本段 clip） */
         var meleeFromBayonetCharge: Boolean = false
@@ -81,7 +81,7 @@ object GunActionLock {
                     player.isAlive && !player.isRemoved && !player.isSpectator
 
         /** 距离上一次近战结束过了多少 tick（用于 `MeleeComboReset` 窗口判定） */
-        var sinceLastMelee: Int = 0
+        var sinceLastMelee: Int = Int.MAX_VALUE
 
         /** 当前是否被 [action] 占用 */
         fun isBusy(action: GunAction = activeAction): Boolean =
@@ -117,16 +117,22 @@ object GunActionLock {
         fun clear() {
             activeAction = GunAction.NONE
             actionTicks = 0
+            cancelMelee()
+        }
+
+        /** 切走武器时取消挥击和连招，不影响换弹/拉栓等其它动作锁。 */
+        fun cancelMelee() {
+            release(GunAction.MELEE)
             meleeTicks = 0
-            meleeHitResolved = false
             meleeActionIndex = 0
             meleeDuration = 0
-            meleeHitTick = 0
+            meleeHitTicks = IntArray(0)
+            meleeHitIndex = 0
             meleeFromBayonetCharge = false
             meleeChargeTarget = null
             meleeOwner = null
             meleeLevel = null
-            sinceLastMelee = 0
+            sinceLastMelee = Int.MAX_VALUE
         }
 
         fun tick() {
@@ -156,6 +162,16 @@ object GunActionLock {
 
     private val states = WeakHashMap<GunData, State>()
     private val uuidStates = WeakHashMap<UUID, State>()
+    private var heldState: State? = null
+
+    /** 必须在推进当前主手的计时/结算前调用，空手和非枪械也要传入 null。 */
+    fun updateHeld(data: GunData?) {
+        val state = data?.let { of(it) }
+        if (heldState !== state) {
+            heldState?.cancelMelee()
+            heldState = state
+        }
+    }
 
     /** 取（或新建）这把枪的本地状态 */
     @JvmStatic
@@ -172,6 +188,8 @@ object GunActionLock {
 
     @JvmStatic
     fun clearAll() {
+        heldState?.clear()
+        heldState = null
         states.values.forEach(State::clear)
         uuidStates.values.forEach(State::clear)
         states.clear()
