@@ -1,0 +1,151 @@
+/* Reference: docs/resonance-reforging.md. Bundled font: SIL OFL, see fonts/OFL.txt. */
+@font-face {
+    font-family: ResonanceUI;
+    src: url("../fonts/SourceHanSansCN-Medium.otf");
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
+body, button { font-family: ResonanceUI, sans-serif; font-weight: normal; color: #f1f1f2; font-size: 18px; }
+body { position: relative; background: transparent; }
+body, body * { user-select: none; }
+button { display: block; margin: 0; padding: 0; border: 0; background: transparent; cursor: default; }
+button:disabled { opacity: 0.4; pointer-events: none; }
+translation { display: inline; }
+texture { display: block; pointer-events: none; }
+sbw-reforging-weapon { display: block; pointer-events: none; }
+.glass-backdrop { position: fixed; inset: 0; background: rgba(5, 6, 8, 0.76); backdrop-filter: blur(18px); }
+/* AUI's browser viewport scales the whole page; no second CSS/JS scale. */
+.frame { position: absolute; inset: 0; width: 100%; height: 100%; }
+.corner { position: absolute; width: 21px; height: 21px; color: rgba(225, 225, 228, 0.46); }
+.top-left { left: 40px; top: 40px; border-left: 1px solid #79797d; border-top: 1px solid #79797d; }
+.top-right { right: 40px; top: 40px; border-right: 1px solid #79797d; border-top: 1px solid #79797d; }
+.bottom-left { left: 40px; bottom: 50px; border-left: 1px solid #79797d; border-bottom: 1px solid #79797d; }
+.bottom-right { right: 40px; bottom: 50px; border-right: 1px solid #79797d; border-bottom: 1px solid #79797d; }
+.heading { position: absolute; left: 70px; top: 54px; display: flex; align-items: center; gap: 8px; }
+.weapon-emblem { position: relative; width: 156px; height: 156px; flex-shrink: 0; z-index: 0; }
+.reforge-emblem { position: absolute; inset: 0; width: 156px; height: 156px; opacity: 0.65; z-index: 0; }
+.weapon-icon { position: absolute; left: 50%; top: 50%; width: 104px; height: 104px; transform: translate(-50%, -50%); overflow: hidden; border: 2px solid rgba(233, 233, 235, 0.64); background: rgba(26, 26, 29, 0.3); z-index: 1; }
+.weapon-icon > sbw-reforging-weapon { position: absolute; inset: 8px; }
+.weapon-title { width: 760px; }
+.eyebrow { color: #c9c9cd; font-size: 24px; line-height: 32px; }
+.weapon-name { height: 70px; line-height: 70px; font-size: 56px; letter-spacing: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.weapon-type { color: #c6c6cb; font-size: 23px; line-height: 32px; }
+.weapon-description { position: absolute; left: 75px; right: 70px; top: calc(29.333333% - 14px); height: 26px; font-size: 17px; line-height: 26px; color: #c9c9ce; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.reforging-controls { position: absolute; left: 0; right: 0; top: calc(29.333333% + 36px); bottom: 0; }
+.perk-band {
+    position: absolute; left: 60px; right: 60px; top: 0; height: 190px;
+    display: flex; align-items: center; border: 1px solid rgba(213, 213, 221, 0.32);
+    background: rgba(28, 28, 31, 0.42);
+}
+.perk-band::before, .perk-band::after {
+    content: ""; position: absolute; top: 0; bottom: 0; width: 12px;
+    background: rgba(219, 219, 230, 0.14); pointer-events: none;
+}
+.perk-band::before { left: 0; }
+.perk-band::after { right: 0; }
+.perk-group { position: relative; flex: 1; min-width: 0; height: 100%; padding: 0 20px; }
+.perk-group::after { content: ""; position: absolute; right: 0; top: 46px; width: 1px; height: 98px; background: rgba(188, 192, 201, 0.5); pointer-events: none; }
+.group-title { position: absolute; left: 34px; top: 18px; height: 24px; display: flex; align-items: center; color: #babac0; font-size: 14px; line-height: 24px; letter-spacing: 1px; }
+.perk-row { position: absolute; left: 20px; right: 20px; top: 50%; transform: translateY(-50%); display: flex; justify-content: center; align-items: center; gap: 11px; height: 88px; }
+.perk-slots { display: flex; align-items: center; gap: 11px; }
+.perk-card {
+    position: relative; flex-shrink: 0; width: 82px; height: 86px; padding: 6px;
+    border: 1px solid rgba(210, 210, 218, 0.52); background: rgba(12, 12, 15, 0.44);
+    box-shadow: inset 0 0 0 3px rgba(0, 0, 0, 0.34);
+}
+.perk-card texture { width: 68px; height: 72px; }
+.perk-card { cursor: pointer; }
+.perk-card > sbw-reforging-weapon { position: absolute; left: 6px; right: 6px; top: 6px; bottom: 20px; }
+.perk-level { position: absolute; left: 0; right: 0; bottom: 3px; font-size: 12px; text-align: center; pointer-events: none; }
+.add-perk { display: block; font-size: 36px; color: #a9c0c9; text-align: center; line-height: 70px; pointer-events: none; }
+.perk-card[aria-disabled="true"] { opacity: 0.25; cursor: default; }
+.perk-card:hover { border-color: #a6e8ff; }
+.perk-card.selected { border: 2px solid #b5d8e9; padding: 5px; background: rgba(74, 104, 121, 0.25); box-shadow: inset 0 0 0 1px rgba(134, 192, 216, 0.4); }
+.locked { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 8px; color: #f0f0f2; font-size: 16px; }
+.locked::before { content: ""; position: absolute; inset: 6px; border: 1px solid rgba(0, 0, 0, 0.7); pointer-events: none; }
+.lock { position: relative; width: 19px; height: 17px; margin-bottom: 9px; border-radius: 2px; background: #eeeeef; }
+.lock::before { content: ""; position: absolute; left: 4px; top: -9px; width: 11px; height: 12px; border: 3px solid #eeeeef; border-radius: 7px 7px 0 0; }
+.keyhole { position: absolute; left: 8px; top: 5px; width: 3px; height: 7px; background: #222228; }
+.slot-page-indicators { position: absolute; left: 20px; right: 20px; bottom: 24px; }
+.output-preview { position: relative; flex: 0 0 184px; width: 184px; height: 100%; display: flex; justify-content: center; cursor: pointer; font-size: 17px; }
+.output-preview > span { position: absolute; left: 50%; width: 106px; bottom: 12px; height: 24px; line-height: 24px; transform: translateX(-50%); display: flex; justify-content: center; align-items: center; white-space: nowrap; }
+.output-preview.ready > sbw-reforging-weapon { border-color: #9ae7f1; box-shadow: 0 0 14px rgba(54, 162, 255, 0.5); }
+.output-preview.ready:hover > sbw-reforging-weapon { background: rgba(55, 149, 175, 0.28); }
+.output-preview > sbw-reforging-weapon { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 106px; height: 106px; border: 1px solid rgba(240, 240, 243, 0.64); background: rgba(24, 24, 27, 0.2); }
+.choices-panel {
+    display: none;
+    position: absolute; left: 48%; top: 198px; width: 500px; height: 198px; transform: translateX(-50%);
+}
+.choices-card { position: absolute; left: 36px; right: 36px; top: 0; bottom: 0; border: 1px solid rgba(223, 223, 232, 0.43); background: rgba(22, 22, 25, 0.58); }
+.reset-perks { position: absolute; left: 75px; top: 198px; display: flex; align-items: center; gap: 12px; height: 58px; padding: 0; background: transparent; color: #d0d2d8; cursor: pointer; }
+.reset-ring { display: block; width: 54px; height: 54px; pointer-events: none; }
+.reset-copy { display: flex; flex-direction: column; gap: 4px; font-size: 16px; text-align: left; pointer-events: none; }
+.reset-hint { font-size: 12px; color: #979ba3; }
+.reset-perks:hover { color: #ffffff; }
+.perk-choice-list { position: absolute; left: 50%; top: 28px; width: 398px; transform: translateX(-50%); display: flex; flex-direction: column; gap: 12px; }
+.choice-grid-row { display: flex; gap: 10px; height: 62px; }
+.perk-choice-list .perk-card { width: 58px; height: 62px; padding: 4px; border: 1px solid transparent; background: rgba(28, 35, 42, 0.18); box-shadow: none; }
+.perk-choice-list .perk-card.selected { padding: 4px; border: 1px solid #e4e8ec; background: rgba(125, 143, 157, 0.16); box-shadow: none; }
+.perk-choice-list .perk-card:hover { border-color: rgba(223, 229, 235, 0.7); }
+.choice-frame { position: absolute; inset: -4px; pointer-events: none; }
+.choice-corner { position: absolute; width: 7px; height: 7px; border-color: rgba(193, 201, 211, 0.5); pointer-events: none; }
+.corner-nw { left: 0; top: 0; border-left: 1px solid rgba(193, 201, 211, 0.5); border-top: 1px solid rgba(193, 201, 211, 0.5); }
+.corner-ne { right: 0; top: 0; border-right: 1px solid rgba(193, 201, 211, 0.5); border-top: 1px solid rgba(193, 201, 211, 0.5); }
+.corner-sw { left: 0; bottom: 0; border-left: 1px solid rgba(193, 201, 211, 0.5); border-bottom: 1px solid rgba(193, 201, 211, 0.5); }
+.corner-se { right: 0; bottom: 0; border-right: 1px solid rgba(193, 201, 211, 0.5); border-bottom: 1px solid rgba(193, 201, 211, 0.5); }
+.perk-choice-list .selected .choice-corner { border-color: rgba(224, 230, 236, 0.75); }
+.perk-choice-list .perk-card > sbw-reforging-weapon { left: 4px; right: 4px; top: 4px; bottom: 4px; }
+.empty-perk { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; color: #c7ccd2; font-size: 16px; pointer-events: none; }
+.choice.unavailable { opacity: 0.35; }
+.page-arrow { flex-shrink: 0; width: 26px; height: 64px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(212, 218, 227, 0.48); background: rgba(38, 40, 46, 0.35); cursor: pointer; }
+.choice-page-arrow { position: absolute; top: 50%; transform: translateY(-50%); }
+.choice-page-arrow.previous { left: 0; }
+.choice-page-arrow.next { right: 0; }
+.page-triangle { display: block; width: 10px; height: 14px; pointer-events: none; }
+.page-arrow .triangle-disabled { display: none; }
+.page-arrow:hover { border-color: #d4dae3; background: rgba(202, 209, 220, 0.06); }
+.page-arrow:disabled { opacity: 1; border-color: rgba(130, 135, 145, 0.4); cursor: default; }
+.page-arrow:disabled .triangle-enabled { display: none; }
+.page-arrow:disabled .triangle-disabled { display: block; }
+.page-indicators { height: 3px; display: flex; align-items: center; justify-content: center; gap: 5px; }
+.choice-page-indicators { position: absolute; left: 36px; right: 36px; bottom: 14px; }
+.page-mark { display: block; flex: 0 1 18px; width: 18px; height: 3px; background: rgba(195, 201, 211, 0.3); }
+.page-mark.active { background: #eeeeef; }
+.upgrade-points { position: absolute; left: 90px; bottom: 164px; width: 348px; height: 72px; display: flex; align-items: baseline; gap: 10px; padding-bottom: 8px; border-bottom: 1px solid rgba(226, 226, 232, 0.55); }
+.upgrade-number { font-size: 56px; line-height: 64px; color: #f5f5f7; }
+.upgrade-label { font-size: 20px; color: #e4e4e9; }
+.stats { position: absolute; right: 70px; top: 57%; width: 360px; color: #e9e9ed; }
+.stat { position: relative; height: 32px; font-size: 18px; }
+.stat-label { position: absolute; left: 0; top: 1px; width: 110px; text-align: right; white-space: nowrap; }
+.stat-track { position: absolute; left: 122px; top: 5px; width: 156px; height: 16px; background: rgba(165, 165, 174, 0.18); }
+.stat-common, .stat-change { position: absolute; left: 0; top: 0; height: 16px; }
+.stat-common { background: #e9e9ec; }
+.stat-change { background: #b8e9df; }
+.stat-value { position: absolute; left: 286px; right: 0; top: 1px; text-align: right; white-space: nowrap; color: #f1f1f3; }
+.stat-delta { position: absolute; left: 278px; right: 0; top: 20px; text-align: right; white-space: nowrap; font-size: 10px; }
+.stats-details { margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(228, 228, 234, 0.55); }
+.stat-detail { position: relative; height: 32px; font-size: 18px; }
+.stat-detail .stat-label { width: 220px; }
+.stat-detail .stat-value { left: 232px; text-align: left; }
+.stat-detail .stat-delta { left: 232px; text-align: left; }
+.level { position: absolute; left: 90px; bottom: 61px; width: 348px; }
+.level-track { height: 10px; margin-bottom: 8px; background: rgba(165, 165, 174, 0.18); }
+.level-track div { width: 0; height: 10px; background: #ed535b; }
+.level-meta { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; white-space: nowrap; }
+.level-meta > span { flex-shrink: 0; font-size: 18px; }
+.manufactured { display: flex; justify-content: flex-end; gap: 6px; font-size: 15px; color: #d7d7dd; text-align: right; }
+.weapon-experience { font-size: 14px; color: #d7d7dd; }
+@media (max-height: 800px) {
+    .weapon-description { top: 224px; }
+    .reforging-controls { top: 262px; }
+    .stats { top: 460px; }
+}
+@media (max-height: 720px) {
+    .choices-panel { height: 194px; }
+    .perk-choice-list { gap: 8px; }
+    .stat, .stat-detail { height: 24px; font-size: 14px; }
+    .stat-track { top: 4px; height: 12px; }
+    .stat-common, .stat-change { height: 12px; }
+    .stat-delta { top: 16px; font-size: 8px; }
+    .stats-details { margin-top: 8px; padding-top: 8px; }
+}

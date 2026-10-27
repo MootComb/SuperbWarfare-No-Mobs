@@ -32,6 +32,13 @@ ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.superbwarfare]]
+modId = "apricityui"
+mandatory = true
+versionRange = "[1.2.7,)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.superbwarfare]]
 modId = "geckolib"
 mandatory = false
 versionRange = "[4.4.6,)"
