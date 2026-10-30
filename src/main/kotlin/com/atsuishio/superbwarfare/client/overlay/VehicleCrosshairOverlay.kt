@@ -188,8 +188,8 @@ object VehicleCrosshairOverlay : CommonOverlay("vehicle_crosshair") {
                     )
                     renderKillIndicatorDynamic(
                         guiGraphics,
-                        x - 7.5f + (2 * (Math.random() - 0.5f)).toFloat(),
-                        y - 7.5f + (2 * (Math.random() - 0.5f)).toFloat()
+                        x - 8f,
+                        y - 8f
                     )
                     val fixedTexture: ResourceLocation? = CROSSHAIR_MAP["@VehicleFixedPoint"]
                     RenderHelper.preciseBlitWithColor(
@@ -227,8 +227,8 @@ object VehicleCrosshairOverlay : CommonOverlay("vehicle_crosshair") {
                     )
                     renderKillIndicatorDynamic(
                         guiGraphics,
-                        x - 7.5f + (2 * (Math.random() - 0.5f)).toFloat(),
-                        y - 7.5f + (2 * (Math.random() - 0.5f)).toFloat()
+                        x - 8f,
+                        y - 8f
                     )
 
                 } else if (crosshairPath == "@AirCraftNacelle") {
@@ -285,8 +285,8 @@ object VehicleCrosshairOverlay : CommonOverlay("vehicle_crosshair") {
                     )
                     renderKillIndicatorDynamic(
                         guiGraphics,
-                        x - 7.5f + (2 * (Math.random() - 0.5f)).toFloat(),
-                        y - 7.5f + (2 * (Math.random() - 0.5f)).toFloat()
+                        x - 8f,
+                        y - 8f
                     )
 
                 } else if (crosshairPath == "@VehicleCommonCannonZooming") {
@@ -389,8 +389,8 @@ object VehicleCrosshairOverlay : CommonOverlay("vehicle_crosshair") {
                 )
                 renderKillIndicatorDynamic(
                     guiGraphics,
-                    x - 7.5f + (2 * (Math.random() - 0.5f)).toFloat(),
-                    y - 7.5f + (2 * (Math.random() - 0.5f)).toFloat()
+                    x - 8f,
+                    y - 8f
                 )
 
                 poseStack.pushPose()

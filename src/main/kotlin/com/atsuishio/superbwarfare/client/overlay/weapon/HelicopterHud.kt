@@ -501,8 +501,8 @@ object HelicopterHud {
                 )
                 renderKillIndicatorDynamic(
                     guiGraphics,
-                    x - 7.5f + (2 * (Math.random() - 0.5f)).toFloat(),
-                    y - 7.5f + (2 * (Math.random() - 0.5f)).toFloat()
+                    x - 8f,
+                    y - 8f
                 )
             } else if (pos.canBeSeen()) {
                 mouseX = Mth.lerp(0.1f * partialTick, mouseX, ClientMouseHandler.lerpSpeedX.toFloat())
@@ -567,8 +567,8 @@ object HelicopterHud {
                 RenderHelper.preciseBlit(guiGraphics, CROSSHAIR_3P, x - 34, y - 8.5f, 0f, 0f, 68f, 17f, 68f, 17f)
                 renderKillIndicatorDynamic(
                     guiGraphics,
-                    x - 7.5f + (2 * (Math.random() - 0.5f)).toFloat(),
-                    y - 7.5f + (2 * (Math.random() - 0.5f)).toFloat()
+                    x - 8f,
+                    y - 8f
                 )
 
                 //
