@@ -1,12 +1,12 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_subsistence": {
+    "has_paper": {
       "conditions": {
         "items": [
           {
             "items": [
-              "superbwarfare:subsistence"
+              "minecraft:paper"
             ]
           }
         ]
@@ -15,20 +15,20 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "superbwarfare:perk/backpack_linked_magazine"
+        "recipe": "superbwarfare:vehicle_reset_kit"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
   },
   "requirements": [
     [
-      "has_subsistence",
+      "has_paper",
       "has_the_recipe"
     ]
   ],
   "rewards": {
     "recipes": [
-      "superbwarfare:perk/backpack_linked_magazine"
+      "superbwarfare:vehicle_reset_kit"
     ]
   },
   "sends_telemetry_event": false

@@ -451,6 +451,7 @@ class ModItemModelProvider(output: PackOutput, existingFileHelper: ExistingFileH
         evenSimplerBlockItem(ModBlocks.JUMP_PAD)
         evenSimplerBlockItem(ModBlocks.REFORGING_TABLE)
         evenSimplerBlockItem(ModBlocks.CHARGING_STATION)
+        evenSimplerBlockItem(ModBlocks.WEAPON_REPAIR_STATION)
         evenSimplerBlockItem(ModBlocks.CREATIVE_CHARGING_STATION)
         evenSimplerBlockItem(ModBlocks.VEHICLE_DEPLOYER)
         evenSimplerBlockItem(ModBlocks.AIRCRAFT_CATAPULT)

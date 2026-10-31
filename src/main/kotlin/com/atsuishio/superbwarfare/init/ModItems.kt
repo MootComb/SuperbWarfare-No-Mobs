@@ -525,6 +525,7 @@ object ModItems {
     @JvmField val DRAGON_TEETH = registerBlock(ModBlocks.DRAGON_TEETH)
     @JvmField val REFORGING_TABLE = registerBlock(ModBlocks.REFORGING_TABLE)
     @JvmField val CHARGING_STATION = registerBlock<ChargingStationBlockItem>()
+    @JvmField val WEAPON_REPAIR_STATION = registerBlock(ModBlocks.WEAPON_REPAIR_STATION)
     @JvmField val CREATIVE_CHARGING_STATION = registerBlock<CreativeChargingStationBlockItem>()
     @JvmField val LEAD_BLOCK = registerBlock(ModBlocks.LEAD_BLOCK)
     @JvmField val STEEL_BLOCK = registerBlock(ModBlocks.STEEL_BLOCK)

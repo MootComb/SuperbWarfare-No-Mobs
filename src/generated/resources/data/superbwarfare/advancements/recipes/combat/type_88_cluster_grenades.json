@@ -1,24 +1,12 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_claymore_mine": {
+    "has_high_energy_explosives": {
       "conditions": {
         "items": [
           {
             "items": [
-              "superbwarfare:claymore_mine"
-            ]
-          }
-        ]
-      },
-      "trigger": "minecraft:inventory_changed"
-    },
-    "has_empty_perk": {
-      "conditions": {
-        "items": [
-          {
-            "items": [
-              "superbwarfare:empty_perk"
+              "superbwarfare:high_energy_explosives"
             ]
           }
         ]
@@ -27,21 +15,20 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "superbwarfare:perk/blade_bullet"
+        "recipe": "superbwarfare:type_88_cluster_grenades"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
   },
   "requirements": [
     [
-      "has_empty_perk",
-      "has_claymore_mine",
+      "has_high_energy_explosives",
       "has_the_recipe"
     ]
   ],
   "rewards": {
     "recipes": [
-      "superbwarfare:perk/blade_bullet"
+      "superbwarfare:type_88_cluster_grenades"
     ]
   },
   "sends_telemetry_event": false
