@@ -477,6 +477,7 @@ class ModCustomLootProvider() : LootTableSubProvider {
                     ModItems.CHARM_CRYSTAL_POPCORN,
                     ModItems.CHARM_NETHER_STAR,
                     ModItems.CHARM_CONDUIT,
+                    ModItems.CHARM_GOLDEN_RINGO_GUN_KING_MEDAL,
                 )
             }
         }
@@ -502,6 +503,10 @@ class ModCustomLootProvider() : LootTableSubProvider {
                     ModItems.CHARM_HIRU_HEAD,
                     ModItems.CHARM_SUI_CONTAINER,
                     ModItems.CHARM_SWISS_COIL,
+                    ModItems.CHARM_INSIGNIA_OF_THE_HEART_SEEKER,
+                    ModItems.CHARM_COOING_BELL,
+                    ModItems.CHARM_TEMPERED_FEATHER,
+                    ModItems.CHARM_RADIANT_VOW,
                 )
             }
         }
