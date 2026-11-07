@@ -68,9 +68,11 @@ object ModPerks {
     lateinit var POISONOUS_BULLET: PERK
     lateinit var BEAST_BULLET: PERK
     lateinit var LONGER_WIRE: PERK
+    lateinit var CHAIN_LIGHTNING: PERK
     lateinit var INCENDIARY_BULLET: PERK
     lateinit var MICRO_MISSILE: PERK
     lateinit var CUPID_ARROW: PERK
+    lateinit var ARRSOW_DISCORD: PERK
     lateinit var RIOT_BULLET: PERK
     lateinit var PHASE_PENETRATING_BULLET: PERK
     lateinit var BLADE_BULLET: PERK
@@ -111,6 +113,7 @@ object ModPerks {
     lateinit var SNAPSHOT_SIGHTS: PERK
     lateinit var TRIPLE_TAP: PERK
     lateinit var STRIVING_FOR_PERFECTION: PERK
+    lateinit var PRACTICE_MAKES_PERFECT: PERK
     // @formatter:on
 
     /**
@@ -218,10 +221,12 @@ object ModPerks {
         }
         BEAST_BULLET = autoRegistryObjects["beast_bullet"] ?: registerAmmoPerk("beast_bullet") { BeastBullet }
         LONGER_WIRE = autoRegistryObjects["longer_wire"] ?: registerAmmoPerk("longer_wire") { LongerWire }
+        CHAIN_LIGHTNING = autoRegistryObjects.getValue("chain_lightning")
         INCENDIARY_BULLET =
             autoRegistryObjects["incendiary_bullet"] ?: registerAmmoPerk("incendiary_bullet") { IncendiaryBullet }
         MICRO_MISSILE = autoRegistryObjects["micro_missile"] ?: registerAmmoPerk("micro_missile") { MicroMissile }
         CUPID_ARROW = autoRegistryObjects["cupid_arrow"] ?: registerAmmoPerk("cupid_arrow") { CupidArrow }
+        ARRSOW_DISCORD = autoRegistryObjects.getValue("arrsow_discord")
         RIOT_BULLET = autoRegistryObjects["riot_bullet"] ?: registerAmmoPerk("riot_bullet") { RiotBullet }
         PHASE_PENETRATING_BULLET = autoRegistryObjects["phase_penetrating_bullet"]
             ?: registerAmmoPerk("phase_penetrating_bullet") { PhasePenetratingBullet }
@@ -286,6 +291,8 @@ object ModPerks {
         }
         STRIVING_FOR_PERFECTION = autoRegistryObjects["striving_for_perfection"]
             ?: registerFuncPerk("striving_for_perfection") { StrivingForPerfection }
+
+        PRACTICE_MAKES_PERFECT = autoRegistryObjects.getValue("practice_makes_perfect")
 
         // Damage Perks
         KILL_CLIP = autoRegistryObjects["kill_clip"] ?: registerDamagePerk("kill_clip") { KillClip }

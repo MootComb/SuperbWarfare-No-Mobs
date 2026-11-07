@@ -287,6 +287,8 @@ data class DefaultGunData(
     @SerialName("AvailablePerks")
     val availablePerks: SingleOrList<String> = SingleOrList(
         "@Ammo",
+        "superbwarfare:practice_makes_perfect",
+        "!superbwarfare:chain_lightning",
         "superbwarfare:field_doctor",
         "superbwarfare:powerful_attraction",
         "superbwarfare:intelligent_chip",
@@ -294,7 +296,8 @@ data class DefaultGunData(
         "superbwarfare:vorpal_weapon",
         "!superbwarfare:micro_missile",
         "!superbwarfare:longer_wire",
-        "!superbwarfare:cupid_arrow"
+        "!superbwarfare:cupid_arrow",
+        "!superbwarfare:arrsow_discord"
     ),
     @SerialName("AvailableAttachments")
     val availableAttachments: Map<String, List<StringOrObject<AttachmentOption>>> = emptyMap(),

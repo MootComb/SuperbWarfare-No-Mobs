@@ -25,8 +25,9 @@
   "AmmoType": "@ShotgunAmmo",
   "Icon": "superbwarfare:textures/gun_icon/homemade_shotgun_icon.png",
   "AvailablePerks": [
-    "superbwarfare:striving_for_perfection",
     "@Ammo",
+    "superbwarfare:practice_makes_perfect",
+    "superbwarfare:striving_for_perfection",
     "superbwarfare:field_doctor",
     "superbwarfare:heal_clip",
     "superbwarfare:subsistence",
@@ -38,18 +39,20 @@
     "superbwarfare:vorpal_weapon",
     "superbwarfare:brain_storm",
     "superbwarfare:target_lock",
-    "!superbwarfare:micro_missile",
-    "!superbwarfare:longer_wire",
-    "!superbwarfare:cupid_arrow",
-    "!superbwarfare:shatter_caps",
-    "!superbwarfare:cluster_bomb",
-    "!superbwarfare:fourth_times_charm",
     "superbwarfare:quickdraw",
     "superbwarfare:adrenaline_rush",
     "superbwarfare:snapshot_sights",
     "superbwarfare:triple_tap",
     "superbwarfare:soul_reaver",
-    "superbwarfare:steady_resolve"
+    "superbwarfare:steady_resolve",
+    "!superbwarfare:arrsow_discord",
+    "!superbwarfare:chain_lightning",
+    "!superbwarfare:micro_missile",
+    "!superbwarfare:longer_wire",
+    "!superbwarfare:cupid_arrow",
+    "!superbwarfare:shatter_caps",
+    "!superbwarfare:cluster_bomb",
+    "!superbwarfare:fourth_times_charm"
   ],
   "AvailableAttachments": {
     "Charm": [

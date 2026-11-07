@@ -175,23 +175,26 @@
   },
   "Icon": "superbwarfare:textures/gun_icon/reforging_icon.png",
   "AvailablePerks": [
+    "@Ammo",
+    "superbwarfare:practice_makes_perfect",
     "superbwarfare:crushing_force",
     "superbwarfare:striving_for_perfection",
-    "@Ammo",
     "superbwarfare:field_doctor",
     "superbwarfare:powerful_attraction",
     "superbwarfare:intelligent_chip",
     "superbwarfare:monster_hunter",
     "superbwarfare:vorpal_weapon",
-    "!superbwarfare:micro_missile",
-    "!superbwarfare:longer_wire",
-    "!superbwarfare:cupid_arrow",
-    "!superbwarfare:cluster_bomb",
     "superbwarfare:quickdraw",
     "superbwarfare:adrenaline_rush",
     "superbwarfare:snapshot_sights",
     "superbwarfare:triple_tap",
     "superbwarfare:soul_reaver",
-    "superbwarfare:steady_resolve"
+    "superbwarfare:steady_resolve",
+    "superbwarfare:volt_overload",
+    "!superbwarfare:arrsow_discord",
+    "!superbwarfare:micro_missile",
+    "!superbwarfare:longer_wire",
+    "!superbwarfare:cupid_arrow",
+    "!superbwarfare:cluster_bomb"
   ]
 }
