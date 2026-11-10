@@ -219,11 +219,13 @@ object ModItems {
     @JvmField val RGO_GRENADE = registerAmmo<RgoGrenadeItem>()
     @JvmField val M18_SMOKE_GRENADE = registerAmmo<M18SmokeGrenadeItem>()
     @JvmField val M84_STUN_GRENADE = registerAmmo<M84StunGrenadeItem>()
+    @JvmField val DECOY_GRENADE = registerAmmo<DecoyGrenadeItem>()
     @JvmField val CLAYMORE_MINE = registerAmmo<ClaymoreMineItem>()
     @JvmField val TM_62 = registerAmmo<Tm62Item>()
     @JvmField val PTKM_1R = registerAmmo<Ptkm1rItem>()
     @JvmField val C4_BOMB = registerAmmo<C4BombItem>()
     @JvmField val BLU_43_MINE = registerAmmo<Blu43MineItem>()
+    @JvmField val SEA_MINE = registerAmmo<SeaMineItem>()
     @JvmField val EDD = registerAmmo<EDDItem>()
     @JvmField val SMALL_ROCKET = registerAmmo("small_rocket") { Item(Properties().stacksTo(16)) }
     @JvmField val MEDIUM_ROCKET_AP =
