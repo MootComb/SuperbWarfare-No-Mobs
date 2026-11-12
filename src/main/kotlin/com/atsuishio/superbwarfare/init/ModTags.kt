@@ -112,6 +112,30 @@ object ModTags {
         // 这里、datagen 与"可研究配件"的汇总都会自动跟上。
         @JvmField val ATTACHMENT = modItemTag("attachment")
 
+        /**
+         * 皮卡汀尼标准瞄准镜：所有标准导轨枪械（步枪/冲锋枪/霰弹枪/机枪）目前都能装的通用镜。
+         *
+         * 枪械的 `AvailableAttachments.Scope` 里写 `"#superbwarfare:attachment/scope/picatinny"`
+         * 就等于把这一整组通用镜一次性列上，不用再逐个抄 id；枪专用的镜
+         * （莫辛纳甘 PU、PSO-1、手枪红点等）仍然单独列。
+         */
+        @JvmField val ATTACHMENT_SCOPE_PICATINNY = modItemTag("attachment/scope/picatinny")
+
+        // 其余槽位的"通用配件"tag：内容取自所有标准枪械（手枪/异形枪除外）都声明的那一批配件，
+        // 枪械列表里写 `"#superbwarfare:attachment/<槽位>/standard"` 即可整组引用。
+        // 注意：枪械专属件（如 AK 系 `stock_zenit_pt_1`、刺刀、手枪消音器）不在这些 tag 里。
+        @JvmField val ATTACHMENT_GRIP_STANDARD = modItemTag("attachment/grip/standard")
+        @JvmField val ATTACHMENT_LOWER_RAIL_STANDARD = modItemTag("attachment/lower_rail/standard")
+        @JvmField val ATTACHMENT_UPPER_RAIL_STANDARD = modItemTag("attachment/upper_rail/standard")
+        @JvmField val ATTACHMENT_LEFT_RAIL_STANDARD = modItemTag("attachment/left_rail/standard")
+        @JvmField val ATTACHMENT_RIGHT_RAIL_STANDARD = modItemTag("attachment/right_rail/standard")
+        @JvmField val ATTACHMENT_STOCK_STANDARD = modItemTag("attachment/stock/standard")
+        @JvmField val ATTACHMENT_SUBWEAPON_STANDARD = modItemTag("attachment/subweapon/standard")
+        @JvmField val ATTACHMENT_MUZZLE_STANDARD = modItemTag("attachment/muzzle/standard")
+
+        /** 苏系/AR 系步枪的枪口装置（制退器、消焰器、AR 消音器），只在带对应枪口螺纹的枪上可装 */
+        @JvmField val ATTACHMENT_MUZZLE_RIFLE = modItemTag("attachment/muzzle/rifle")
+
         /** 槽位 → 该槽位的 tag（`superbwarfare:attachment/<AttachmentSlot.tagBucket>`） */
         @JvmField
         val ATTACHMENT_BY_SLOT: Map<AttachmentType, TagKey<Item>> = AttachmentSlots.ALL
