@@ -1,5 +1,6 @@
 package com.atsuishio.superbwarfare.mixins;
 
+import com.atsuishio.superbwarfare.client.lighting.GunMuzzleLightRenderer;
 import com.atsuishio.superbwarfare.client.renderer.scope.ScopeThermalRenderer;
 import com.atsuishio.superbwarfare.event.ClientEventHandler;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -37,6 +38,7 @@ public class LevelRendererMixin {
     private void onStartRenderLevel(DeltaTracker deltaTracker, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
         ClientEventHandler.modelViewMatrix = RenderSystem.getModelViewMatrix();
         ClientEventHandler.projectionMatrix = RenderSystem.getProjectionMatrix();
+        GunMuzzleLightRenderer.captureWorld(ClientEventHandler.modelViewMatrix, ClientEventHandler.projectionMatrix);
     }
 
     // TODO 找到真正把实体渲染在世界中的位置进行mixin

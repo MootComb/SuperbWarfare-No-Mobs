@@ -5,15 +5,18 @@ import com.atsuishio.superbwarfare.init.ModEntities
 import com.atsuishio.superbwarfare.init.ModParticleTypes
 import com.atsuishio.superbwarfare.init.ModSounds
 import com.atsuishio.superbwarfare.tools.ParticleTool
+import net.minecraft.core.BlockPos
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.syncher.SynchedEntityData
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.util.Mth
+import net.minecraft.world.entity.AreaEffectCloud
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.MoverType
 import net.minecraft.world.level.Level
+import net.minecraft.world.level.block.BaseFireBlock
 import net.minecraft.world.phys.Vec3
 
 open class SmokeDecoyEntity : Entity {
@@ -76,6 +79,7 @@ open class SmokeDecoyEntity : Entity {
 
     override fun tick() {
         super.tick()
+        this.clearFire()
         this.move(MoverType.SELF, this.deltaMovement)
         if (tickCount == this.igniteTime) {
             if (releaseSmoke) {
@@ -126,6 +130,47 @@ open class SmokeDecoyEntity : Entity {
 
         if (this.tickCount > this.life) {
             this.discard()
+            return
+        }
+
+        val level = this.level()
+        if (level is ServerLevel && tickCount >= igniteTime && (tickCount - igniteTime) % 5 == 0) {
+            extinguishFire(level)
+            shrinkBurnClouds(level)
+        }
+    }
+
+    private fun shrinkBurnClouds(level: ServerLevel) {
+        // Smoke is spawned slightly above the ground; include the fire cloud below its feet.
+        val box = boundingBox.expandTowards(0.0, -1.0, 0.0)
+        for (cloud in level.getEntitiesOfClass(AreaEffectCloud::class.java, box) {
+            MolotovEntity.BURN_CLOUD_TAG in it.tags
+        }) {
+            // Check the circular cloud against the smoke's footprint, not just its bounding box.
+            val dx = cloud.x - cloud.x.coerceIn(box.minX, box.maxX)
+            val dz = cloud.z - cloud.z.coerceIn(box.minZ, box.maxZ)
+            if (dx * dx + dz * dz > cloud.radius * cloud.radius) continue
+            // Several smoke entities can cover the same cloud; shrink it at most once every five ticks.
+            if (cloud.persistentData.getLong(TAG_SMOKE_SHRINK_AFTER) > level.gameTime) continue
+            cloud.persistentData.putLong(TAG_SMOKE_SHRINK_AFTER, level.gameTime + 5)
+            val radius = cloud.radius - 0.25f
+            if (radius <= 0.5f) {
+                cloud.discard()
+            } else {
+                cloud.radius = radius
+            }
+        }
+    }
+
+    private fun extinguishFire(level: ServerLevel) {
+        val box = boundingBox
+        for (pos in BlockPos.betweenClosed(
+            Mth.floor(box.minX), Mth.floor(box.minY), Mth.floor(box.minZ),
+            Mth.floor(box.maxX), Mth.floor(box.maxY), Mth.floor(box.maxZ)
+        )) {
+            if (level.hasChunkAt(pos) && level.getBlockState(pos).block is BaseFireBlock) {
+                level.removeBlock(pos, false)
+            }
         }
     }
 
@@ -141,5 +186,9 @@ open class SmokeDecoyEntity : Entity {
         this.xRot = (Mth.atan2(vec3.y, d0) * 57.2957763671875).toFloat()
         this.yRotO = this.yRot
         this.xRotO = this.xRot
+    }
+
+    companion object {
+        private const val TAG_SMOKE_SHRINK_AFTER = "superbwarfare:smoke_shrink_after"
     }
 }
