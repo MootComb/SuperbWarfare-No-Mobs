@@ -776,6 +776,11 @@ class ModItemTagProvider(
             ModTags.Items.ATTACHMENT_STOCK_VIRTUAL,
             ModTags.Items.ATTACHMENT_MAGAZINE_VIRTUAL
         )
+
+        this.tag(ModTags.Items.FOOD_RAIN_FOODS).add(
+            Items.BREAD, Items.COOKED_BEEF, Items.COOKED_CHICKEN, Items.BAKED_POTATO,
+            Items.APPLE, Items.CARROT, Items.COOKIE, Items.PUMPKIN_PIE, Items.MELON_SLICE
+        )
     }
 
     private fun addAttachmentTypeTags(
