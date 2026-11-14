@@ -2,6 +2,8 @@ package com.atsuishio.superbwarfare.client.animation.gun
 
 import com.atsuishio.superbwarfare.Mod
 import com.atsuishio.superbwarfare.client.animation.AnimationPlayType
+import com.atsuishio.superbwarfare.client.animation.gun.GeoGunAnimationInstance.Companion.ACTION_HANDOVER_TICKS
+import com.atsuishio.superbwarfare.client.animation.gun.GeoGunAnimationInstance.Companion.CHARGE_CANCEL_FADE_TICKS
 import com.atsuishio.superbwarfare.client.gun.GunChargeHandler
 import com.atsuishio.superbwarfare.client.gun.MeleeClientHandler
 import com.atsuishio.superbwarfare.config.client.DisplayConfig
@@ -699,6 +701,14 @@ open class GeoGunAnimationInstance(
         }
     }
 
+    private fun boltPlaybackSpeed(animation: BedrockAnimation): Float {
+        val data = GunData.from(stack)
+        val ticks = data.bolt.totalTicks.get().takeIf { it > 0 }?.minus(1)
+            ?: data.get(GunProp.BOLT_ACTION_TIME)
+        val targetSeconds = ticks.coerceAtLeast(1) / 20.0f
+        return if (animation.specifiedEndTimeS > 0f) animation.specifiedEndTimeS / targetSeconds else 1f
+    }
+
     /**
      * 是否新开了一段挥击（每段只返回一次 `true`）
      */
@@ -789,6 +799,8 @@ open class GeoGunAnimationInstance(
         val playState = state.playType.state()
         if (state.isReload) {
             setAnimationSpeed(playState, reloadPlaybackSpeed(state, animation))
+        } else if (state == GunAnimationState.BOLT) {
+            setAnimationSpeed(playState, boltPlaybackSpeed(animation))
         } else if (state == GunAnimationState.MELEE) {
             setAnimationSpeed(playState, meleePlaybackSpeed(animation))
         }
@@ -1821,6 +1833,12 @@ open class GeoGunAnimationInstance(
             val runnerAnimation = runner?.animation as? BedrockAnimation
             if (runnerAnimation != null) {
                 setAnimationSpeed(runner?.state, reloadPlaybackSpeed(currentState!!, runnerAnimation))
+            }
+        }
+        if (currentState == GunAnimationState.BOLT) {
+            val runnerAnimation = runner?.animation as? BedrockAnimation
+            if (runnerAnimation != null) {
+                setAnimationSpeed(runner?.state, boltPlaybackSpeed(runnerAnimation))
             }
         }
         // Melee duration can be changed by properties such as ammo type or perks.
