@@ -82,6 +82,9 @@ fun DefaultGunData.withOverrides(diff: Map<out Prop<*, *, *, *, *>, Any?>): Defa
         ammoCostPerShoot = int(GunProp.AMMO_COST_PER_SHOOT, ammoCostPerShoot),
         fuelPerAmmo = int(GunProp.FUEL_PER_AMMO, fuelPerAmmo),
         projectileAmount = int(GunProp.PROJECTILE_AMOUNT, projectileAmount),
+        projectilePenetrating = (diff[GunProp.PROJECTILE_PENETRATING] as? Boolean) ?: projectilePenetrating,
+        aimAssist = int(GunProp.AIM_ASSIST, aimAssist),
+        allyHealRatio = num(GunProp.ALLY_HEAL_RATIO, allyHealRatio),
         projectileSplitCount = int(GunProp.PROJECTILE_SPLIT_COUNT, projectileSplitCount),
         projectileSplitAmount = int(GunProp.PROJECTILE_SPLIT_AMOUNT, projectileSplitAmount),
         spreadPattern = if (diff.containsKey(GunProp.SPREAD_PATTERN)) {
@@ -110,6 +113,9 @@ fun DefaultGunData.withOverrides(diff: Map<out Prop<*, *, *, *, *>, Any?>): Defa
         drawTime = int(GunProp.DRAW_TIME, drawTime),
         zoomTime = int(GunProp.ZOOM_TIME, zoomTime),
         underwaterMotionScale = flt(GunProp.UNDERWATER_MOTION_SCALE, underwaterMotionScale),
+        underwaterLaunchSpeedMultiplier = (
+            diff.getOrDefault(GunProp.UNDERWATER_LAUNCH_SPEED_MULTIPLIER, underwaterLaunchSpeedMultiplier) as? Number
+        )?.toFloat(),
         soundInfo = if (diff.containsKey(GunProp.SOUND_INFO)) {
             diff[GunProp.SOUND_INFO] as? SoundInfo ?: soundInfo
         } else {

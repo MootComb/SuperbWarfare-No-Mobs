@@ -147,6 +147,8 @@
       "owner": "@sbw:owner"
     }
   },
+  "ProjectilePenetrating": false,
+  "AimAssist": 0,
   /*
    * Model bones that draw the default round, hidden together with every "ProjectileBone" declared
    * by AmmoType except the ones of the selected ammo type.

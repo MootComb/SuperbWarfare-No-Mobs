@@ -1,9 +1,6 @@
 package com.atsuishio.superbwarfare.perk.js
 
-import com.atsuishio.superbwarfare.entity.projectile.IBulletProperties
-import com.atsuishio.superbwarfare.entity.projectile.ProjectileEntity
-import com.atsuishio.superbwarfare.entity.projectile.ReforgingLightningBallEntity
-import com.atsuishio.superbwarfare.entity.projectile.TaserBulletEntity
+import com.atsuishio.superbwarfare.entity.projectile.*
 import net.minecraft.world.entity.Entity
 
 class ProjectileProxy(private val entity: Entity) {
@@ -40,6 +37,8 @@ class ProjectileProxy(private val entity: Entity) {
         projectile?.setPenetrating(penetrating)
     }
 
+    fun isPenetrating(): Boolean = projectile?.isPenetrating() ?: false
+
     fun setNoGravity(noGravity: Boolean) {
         entity.isNoGravity = noGravity
     }
@@ -53,12 +52,19 @@ class ProjectileProxy(private val entity: Entity) {
         (entity as? ReforgingLightningBallEntity)?.volt = volt.toInt()
     }
 
-    fun getDamage(): Float = (entity as? ReforgingLightningBallEntity)?.currentHitDamage
+    fun getDamage(): Float = (entity as? PerkAwareProjectile)?.currentHitDamage
         ?: taser?.damage ?: projectile?.getDamage() ?: 0f
 
     fun setDamage(damage: Number) {
         projectile?.setDamage(damage.toFloat())
     }
+
+    fun getAllyHealRatio(): Float = projectile?.getAllyHealRatio() ?: 0f
+
+    fun setAllyHealRatio(ratio: Number) {
+        projectile?.setAllyHealRatio(ratio.toFloat())
+    }
+
     fun getVolt(): Int = taser?.volt ?: (entity as? ReforgingLightningBallEntity)?.volt ?: 0
     fun getOwner(): EntityProxy = EntityProxy((entity as? net.minecraft.world.entity.projectile.Projectile)?.owner)
 

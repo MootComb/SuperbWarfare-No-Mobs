@@ -510,6 +510,15 @@ class GunProp<T, R>(
         val PROJECTILE_LIFE = plainProp(DefaultGunData::projectileLife)
 
         @JvmField
+        val PROJECTILE_PENETRATING = plainProp(DefaultGunData::projectilePenetrating)
+
+        @JvmField
+        val AIM_ASSIST = plainProp(DefaultGunData::aimAssist)
+
+        @JvmField
+        val ALLY_HEAL_RATIO = plainProp(DefaultGunData::allyHealRatio)
+
+        @JvmField
         val PROJECTILE_SPLIT_COUNT = plainProp(DefaultGunData::projectileSplitCount)
 
         @JvmField
@@ -520,6 +529,9 @@ class GunProp<T, R>(
 
         @JvmField
         val UNDERWATER_MOTION_SCALE = plainProp(DefaultGunData::underwaterMotionScale)
+
+        @JvmField
+        val UNDERWATER_LAUNCH_SPEED_MULTIPLIER = plainProp(DefaultGunData::underwaterLaunchSpeedMultiplier)
 
         @JvmField
         val EXPLOSION_DESTROY = plainProp(DefaultGunData::explosionDestroy)
@@ -553,6 +565,8 @@ class GunProp<T, R>(
             modify(AMMO_COST_PER_SHOOT) { it.coerceAtLeast(0) }
             modify(FUEL_PER_AMMO) { it.coerceAtLeast(0) }
             modify(PROJECTILE_AMOUNT) { it.coerceAtLeast(0) }
+            modify(AIM_ASSIST) { it.coerceIn(-100, 100) }
+            modify(ALLY_HEAL_RATIO) { if (it.isFinite()) it.coerceAtLeast(0.0) else 0.0 }
             modify(PROJECTILE_SPLIT_COUNT) { it.coerceAtLeast(0) }
             modify(PROJECTILE_SPLIT_AMOUNT) { it.coerceAtLeast(0) }
             modify(WEIGHT) { it.coerceAtLeast(1.0) }
