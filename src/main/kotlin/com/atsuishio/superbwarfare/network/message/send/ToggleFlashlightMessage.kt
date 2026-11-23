@@ -1,6 +1,7 @@
 package com.atsuishio.superbwarfare.network.message.send
 
 import com.atsuishio.superbwarfare.data.attachment.AttachmentDefinition
+import com.atsuishio.superbwarfare.data.attachment.FlashlightState
 import com.atsuishio.superbwarfare.data.gun.toGunData
 import com.atsuishio.superbwarfare.item.gun.GunItem
 import com.atsuishio.superbwarfare.ksp.annotation.RegisterPacket
@@ -15,10 +16,10 @@ object ToggleFlashlightMessage : ServerPacketPayload() {
         if (!GunItem.isHeldWeapon(stack)) return
 
         val gun = stack.toGunData() ?: return
-        if (AttachmentDefinition.findFlashlights(gun).isEmpty()) return
+        if (AttachmentDefinition.findFlashlights(gun).isEmpty() &&
+            AttachmentDefinition.findLaserEmitters(gun).isEmpty()
+        ) return
 
-        val data = gun.data()
-        data.putBoolean("FlashlightOn", !data.getBoolean("FlashlightOn"))
-        gun.save()
+        FlashlightState.cycle(gun)
     }
 }

@@ -1,6 +1,9 @@
 package com.atsuishio.superbwarfare.client.lighting
 
 import com.atsuishio.superbwarfare.data.attachment.AttachmentDefinition
+import com.atsuishio.superbwarfare.data.attachment.FlashlightInfo
+import com.atsuishio.superbwarfare.data.attachment.FlashlightMode
+import com.atsuishio.superbwarfare.data.attachment.FlashlightState
 import com.atsuishio.superbwarfare.data.gun.GunData
 import com.atsuishio.superbwarfare.item.gun.GunItem
 import com.atsuishio.superbwarfare.network.message.send.ToggleFlashlightMessage
@@ -18,16 +21,55 @@ import net.minecraftforge.api.distmarker.OnlyIn
 @OnlyIn(Dist.CLIENT)
 object FlashlightHandler {
 
-    const val NBT_KEY = "FlashlightOn"
-    private const val MAX_LIGHTS = 4
+    private const val MAX_LIGHTS = 8
 
     /** 超过该距离的其他玩家手电不渲染（格）。 */
-    private const val MAX_DISTANCE = 96.0
+    private const val MAX_DISTANCE = 128.0
     private const val WALL_CLEARANCE = 0.15
     private const val MIN_FROM_EYE = 0.05
 
     private data class Sample(val origin: Vec3, val direction: Vec3, val time: Double)
     private val samples = mutableMapOf<String, Sample>()
+
+    /** 每个玩家上一帧的手电档位，用于检测档位切换（开灯眩光 / 爆闪相位起点）。 */
+    private val lastModes = mutableMapOf<String, FlashlightMode>()
+
+    /** 每个玩家本次开灯的起始时间（tick），用于计算眩光高亮包络。 */
+    private val flashStartedAt = mutableMapOf<String, Double>()
+
+    /** 每个玩家最近一次档位切换的时间（tick），爆闪相位从这里开始。 */
+    private val modeStartedAt = mutableMapOf<String, Double>()
+
+    private const val TICKS_PER_SECOND = 20.0
+
+    /**
+     * 开灯瞬间的眩光包络：开启立刻达到 [FlashlightInfo.safeFlashPeak] 倍，
+     * 然后在 [FlashlightInfo.safeFlashTime] 秒内立方缓出，精确回落到 1（正常亮度）。
+     */
+    private fun flashBoost(info: FlashlightInfo, start: Double, now: Double): Float {
+        val duration = info.safeFlashTime * TICKS_PER_SECOND
+        val age = now - start
+        if (age < 0.0) return info.safeFlashPeak
+        if (age >= duration) return 1f
+        val remaining = (1.0 - age / duration).toFloat()
+        return 1f + (info.safeFlashPeak - 1f) * remaining * remaining * remaining
+    }
+
+    /**
+     * 爆闪波形：短促方波（40% 占空比、前后各有软边），返回 0~1 的亮度系数。
+     * 相位从切到爆闪档的时刻开始算，保证按下去第一下就开始闪。
+     */
+    private fun strobeFactor(info: FlashlightInfo, elapsedTicks: Double): Float {
+        val period = TICKS_PER_SECOND / info.safeStrobeHz
+        if (period <= 0.0) return 1f
+        val phase = ((elapsedTicks % period) / period).toFloat().coerceIn(0f, 0.999f)
+        val duty = 0.4f
+        val edge = 0.1f
+        val rise = (phase / edge).coerceIn(0f, 1f)
+        val fall = ((duty + edge - phase) / edge).coerceIn(0f, 1f)
+        val pulse = minOf(rise, fall)
+        return pulse * pulse * (3f - 2f * pulse)
+    }
 
     private fun time(): Double {
         val mc = Minecraft.getInstance()
@@ -41,23 +83,43 @@ object FlashlightHandler {
         val gun = gunOf(stack) ?: return false
         return AttachmentDefinition.findFlashlights(gun).isNotEmpty()
     }
+
+    @JvmStatic
+    fun hasAnyEmitter(stack: ItemStack): Boolean {
+        val gun = gunOf(stack) ?: return false
+        return AttachmentDefinition.findFlashlights(gun).isNotEmpty() ||
+            AttachmentDefinition.findLaserEmitters(gun).isNotEmpty()
+    }
+
+    @JvmStatic
+    fun modeOf(stack: ItemStack): FlashlightMode {
+        val gun = gunOf(stack) ?: return FlashlightMode.OFF
+        if (AttachmentDefinition.findFlashlights(gun).isEmpty() &&
+            AttachmentDefinition.findLaserEmitters(gun).isEmpty()
+        ) return FlashlightMode.OFF
+        return FlashlightState.modeOf(gun)
+    }
+
     @JvmStatic
     fun isOn(stack: ItemStack): Boolean {
-        val gun = gunOf(stack) ?: return false
-        return AttachmentDefinition.findFlashlights(gun).isNotEmpty() && gun.data().getBoolean(NBT_KEY)
+        val mode = modeOf(stack)
+        return mode == FlashlightMode.ON || mode == FlashlightMode.STROBE
     }
+
     @JvmStatic
-    fun toggleLocal(): Boolean? {
+    fun toggleLocal(): FlashlightMode? {
         val player = localPlayer ?: return null
         val stack = player.mainHandItem
-        if (!hasFlashlight(stack)) return null
-        val expected = !isOn(stack)
+        val gun = gunOf(stack) ?: return null
+        if (!hasAnyEmitter(stack)) return null
+        val expected = FlashlightState.next(gun)
         sendPacketToServer(ToggleFlashlightMessage)
         return expected
     }
     @JvmStatic
     fun sample(holder: LivingEntity, stack: ItemStack, origin: Vec3, direction: Vec3) {
-        if (!isOn(stack)) return
+        val mode = modeOf(stack)
+        if (mode != FlashlightMode.ON && mode != FlashlightMode.STROBE) return
         val dir = direction.normalize()
         if (dir.lengthSqr() < 1e-6) return
         samples[holder.stringUUID] = Sample(origin, dir, time())
@@ -66,6 +128,9 @@ object FlashlightHandler {
     @JvmStatic
     fun clear() {
         samples.clear()
+        lastModes.clear()
+        flashStartedAt.clear()
+        modeStartedAt.clear()
     }
 
     private fun colorVec(rgb: Int): Vec3 = Vec3(
@@ -110,11 +175,33 @@ object FlashlightHandler {
         for (player in level.players()) {
             if (player.position().distanceToSqr(camera) > MAX_DISTANCE * MAX_DISTANCE) continue
 
+            val uuid = player.stringUUID
             val stack = player.mainHandItem
-            if (!isOn(stack)) continue
+            val mode = modeOf(stack)
+            val lightOn = mode == FlashlightMode.ON || mode == FlashlightMode.STROBE
+            val previous = lastModes.put(uuid, mode) ?: mode
+            val previousLightOn = previous == FlashlightMode.ON || previous == FlashlightMode.STROBE
+            if (previous != mode) modeStartedAt[uuid] = now
+            if (lightOn && !previousLightOn) flashStartedAt[uuid] = now
+            if (!lightOn) {
+                flashStartedAt.remove(uuid)
+                continue
+            }
             val emitter = AttachmentDefinition.findFlashlights(GunData.from(stack)).firstOrNull() ?: continue
             val info = emitter.info
             if (info.safeIntensity <= 0f) continue
+
+            val flashStart = flashStartedAt[uuid]
+            val boost = if (flashStart == null) 1f else {
+                val value = flashBoost(info, flashStart, now)
+                if (value <= 1.0001f) flashStartedAt.remove(uuid)
+                value
+            }
+            val strobe = if (mode == FlashlightMode.STROBE) {
+                strobeFactor(info, now - (modeStartedAt[uuid] ?: now))
+            } else 1f
+            // 爆闪的"灭"相位直接不生成光源（省掉一次全屏 pass）。
+            if (strobe <= 0.001f) continue
 
             val sample = samples[player.stringUUID]?.takeIf { now - it.time in 0.0..1.0 }
             val rawOrigin = sample?.origin ?: player.eyePosition.add(player.lookAngle.scale(0.6))
@@ -131,7 +218,7 @@ object FlashlightHandler {
                 player,
                 0.0,
                 1.0,
-                info.safeIntensity,
+                info.safeIntensity * boost * strobe,
                 info.safeRange,
                 origin,
                 direction,
