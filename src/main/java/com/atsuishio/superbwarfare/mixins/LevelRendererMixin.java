@@ -31,6 +31,13 @@ public class LevelRendererMixin {
     @Final
     private EntityRenderDispatcher entityRenderDispatcher;
 
+    @Inject(method = "renderLevel", at = @At("HEAD"))
+    private void superbWarfare$captureLightingView(PoseStack poses, float partialTick, long finishTime,
+                                                  boolean renderOutline, Camera camera, GameRenderer renderer,
+                                                  LightTexture lightTexture, Matrix4f projection, CallbackInfo ci) {
+        GunMuzzleLightRenderer.captureWorld(poses.last().pose(), projection);
+    }
+
     // 感谢 Minecraft-Ping-Wheel 开源
     // https://github.com/LukenSkyne/Minecraft-Ping-Wheel/blob/ede72b18f57bd9dfe55ef44afe61190421fbc084/common/src/main/java/nx/pingwheel/common/mixin/LevelRendererMixin.java
 
@@ -38,7 +45,6 @@ public class LevelRendererMixin {
     private void onStartRenderLevel(DeltaTracker deltaTracker, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
         ClientEventHandler.modelViewMatrix = RenderSystem.getModelViewMatrix();
         ClientEventHandler.projectionMatrix = RenderSystem.getProjectionMatrix();
-        GunMuzzleLightRenderer.captureWorld(ClientEventHandler.modelViewMatrix, ClientEventHandler.projectionMatrix);
     }
 
     // TODO 找到真正把实体渲染在世界中的位置进行mixin
