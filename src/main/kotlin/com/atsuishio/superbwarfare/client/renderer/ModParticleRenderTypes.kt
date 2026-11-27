@@ -19,6 +19,9 @@ object ModParticleRenderTypes {
 
     private var softParticleShader: ShaderInstance? = null
 
+    @JvmStatic
+    fun softShader(): ShaderInstance? = softParticleShader
+
     /**
      * Called from Mod.kt via RegisterShadersEvent on MOD_BUS.
      * Registers a custom particle shader that does NOT use alpha cutoff (discard),
