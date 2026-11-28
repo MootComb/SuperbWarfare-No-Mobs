@@ -4,5 +4,12 @@
     "test": {
       "Rarity": "common"
     }
+  },
+  "Vehicles": {
+    "tom_7": {
+      "Width": 1.05,
+      "Height": 1.0,
+      "CreativeContainer": true
+    }
   }
 }
